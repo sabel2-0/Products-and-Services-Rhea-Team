@@ -1,0 +1,249 @@
+@{
+    ViewData["Title"] = "Shop";
+}
+
+<!-- Shop Page -->
+<main class="shop-page">
+    <div class="container">
+        <!-- Shop Header -->
+        <div class="shop-page-header">
+            <h1>Shop All Products</h1>
+            <p>Discover our premium collection of running gear</p>
+        </div>
+
+        <!-- Category Tabs -->
+        <div class="category-tabs">
+            <button class="category-tab active" data-category="all">All</button>
+            <button class="category-tab" data-category="Men">Men</button>
+            <button class="category-tab" data-category="Women">Women</button>
+        </div>
+
+        <div class="shop-layout">
+            <!-- Filters Sidebar -->
+            <aside class="filters-sidebar">
+                <div class="filters-header">
+                    <h3>Filters</h3>
+                    <button class="clear-filters-btn" onclick="clearAllFilters()">Clear All</button>
+                </div>
+
+                <!-- Category Filter -->
+                <div class="filter-section">
+                    <h4>Category</h4>
+                    <label class="filter-checkbox">
+                        <input type="checkbox" name="subcategory" value="Running Shoes" onchange="applyFilters()">
+                        <span>Running Shoes</span>
+                    </label>
+                    <label class="filter-checkbox">
+                        <input type="checkbox" name="subcategory" value="Apparel" onchange="applyFilters()">
+                        <span>Apparel</span>
+                    </label>
+                    <label class="filter-checkbox">
+                        <input type="checkbox" name="subcategory" value="Accessories" onchange="applyFilters()">
+                        <span>Accessories</span>
+                    </label>
+                </div>
+
+                <!-- Price Range Filter -->
+                <div class="filter-section">
+                    <h4>Price Range</h4>
+                    <div class="price-range-slider">
+                        <input type="range" id="price-slider" min="0" max="20000" step="500" value="20000" oninput="updatePriceRange(this.value)">
+                        <div class="price-range-display">Up to ₱<span id="price-display">20,000</span></div>
+                    </div>
+                </div>
+
+                <!-- Brand Filter -->
+                <div class="filter-section">
+                    <h4>Brand</h4>
+                    <label class="filter-checkbox">
+                        <input type="checkbox" name="brand" value="Nike" onchange="applyFilters()">
+                        <span>Nike</span>
+                        <span class="count" id="nike-count">0</span>
+                    </label>
+                    <label class="filter-checkbox">
+                        <input type="checkbox" name="brand" value="Adidas" onchange="applyFilters()">
+                        <span>Adidas</span>
+                        <span class="count" id="adidas-count">0</span>
+                    </label>
+                </div>
+
+                <!-- Size Filter -->
+                <div class="filter-section">
+                    <h4>Size</h4>
+                    <div class="size-filter-grid">
+                        <button class="size-filter-btn" data-size="XS" onclick="toggleSizeFilter('XS')">XS</button>
+                        <button class="size-filter-btn" data-size="S" onclick="toggleSizeFilter('S')">S</button>
+                        <button class="size-filter-btn" data-size="M" onclick="toggleSizeFilter('M')">M</button>
+                        <button class="size-filter-btn" data-size="L" onclick="toggleSizeFilter('L')">L</button>
+                        <button class="size-filter-btn" data-size="XL" onclick="toggleSizeFilter('XL')">XL</button>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Products Section -->
+            <section class="products-section">
+                <div class="products-header">
+                    <h2>Running Gear <span id="product-count">(0 products)</span></h2>
+                    <div class="sort-control">
+                        <label for="sort-select">Sort by:</label>
+                        <select id="sort-select" onchange="sortProducts(this.value)">
+                            <option value="relevance">Relevance</option>
+                            <option value="price-low">Price: Low to High</option>
+                            <option value="price-high">Price: High to Low</option>
+                            <option value="rating">Rating</option>
+                            <option value="newest">Newest</option>
+                        </select>
+                    </div>
+                </div>
+                <div id="products-grid" class="products-grid"></div>
+            </section>
+        </div>
+    </div>
+</main>
+
+@section Scripts {
+<script>
+// Use globals from app.js: allProducts, currentCategory
+let selectedSizes = [];
+
+document.addEventListener('DOMContentLoaded', function() {
+    loadProducts();
+    initCategoryTabs();
+});
+
+async function loadProducts() {
+    try {
+        const response = await fetch('/api/products');
+        allProducts = await response.json();
+        renderProducts(allProducts);
+        updateProductCount(allProducts.length);
+    } catch (error) {
+        console.error('Error loading products:', error);
+    }
+}
+
+function initCategoryTabs() {
+    const tabs = document.querySelectorAll('.category-tab');
+    tabs.forEach(tab => {
+        tab.addEventListener('click', function() {
+            tabs.forEach(t => t.classList.remove('active'));
+            this.classList.add('active');
+            currentCategory = this.dataset.category;
+            applyFilters();
+        });
+    });
+}
+
+function applyFilters() {
+    let filtered = [...allProducts];
+    
+    // Category filter
+    if (currentCategory !== 'all') {
+        filtered = filtered.filter(p => p.category === currentCategory);
+    }
+    
+    // Price filter
+    const maxPrice = document.getElementById('price-slider')?.value || 20000;
+    filtered = filtered.filter(p => p.price <= maxPrice);
+    
+    // Subcategory filter
+    const subcategories = Array.from(document.querySelectorAll('input[name="subcategory"]:checked')).map(cb => cb.value);
+    if (subcategories.length > 0) {
+        filtered = filtered.filter(p => subcategories.includes(p.subcategory));
+    }
+    
+    // Brand filter
+    const brands = Array.from(document.querySelectorAll('input[name="brand"]:checked')).map(cb => cb.value);
+    if (brands.length > 0) {
+        filtered = filtered.filter(p => brands.includes(p.brand));
+    }
+    
+    // Size filter
+    if (selectedSizes.length > 0) {
+        filtered = filtered.filter(p => p.sizes && p.sizes.some(s => selectedSizes.includes(s)));
+    }
+    
+    renderProducts(filtered);
+    updateProductCount(filtered.length);
+}
+
+function updatePriceRange(value) {
+    document.getElementById('price-display').textContent = parseInt(value).toLocaleString();
+    applyFilters();
+}
+
+function toggleSizeFilter(size) {
+    const btn = document.querySelector(`.size-filter-btn[data-size="${size}"]`);
+    if (selectedSizes.includes(size)) {
+        selectedSizes = selectedSizes.filter(s => s !== size);
+        btn.classList.remove('active');
+    } else {
+        selectedSizes.push(size);
+        btn.classList.add('active');
+    }
+    applyFilters();
+}
+
+function clearAllFilters() {
+    document.querySelectorAll('.filter-checkbox input').forEach(cb => cb.checked = false);
+    document.querySelectorAll('.size-filter-btn').forEach(btn => btn.classList.remove('active'));
+    selectedSizes = [];
+    document.getElementById('price-slider').value = 20000;
+    document.getElementById('price-display').textContent = '20,000';
+    applyFilters();
+}
+
+function sortProducts(sortBy) {
+    let sorted = [...allProducts];
+    
+    switch(sortBy) {
+        case 'price-low':
+            sorted.sort((a, b) => a.price - b.price);
+            break;
+        case 'price-high':
+            sorted.sort((a, b) => b.price - a.price);
+            break;
+        case 'rating':
+            sorted.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+            break;
+        case 'newest':
+            sorted.sort((a, b) => b.id - a.id);
+            break;
+    }
+    
+    renderProducts(sorted);
+}
+
+function updateProductCount(count) {
+    document.getElementById('product-count').textContent = `(${count} product${count !== 1 ? 's' : ''})`;
+}
+
+function renderProducts(products) {
+    const grid = document.getElementById('products-grid');
+    if (!grid) return;
+
+    if (products.length === 0) {
+        grid.innerHTML = '<p style="grid-column:1/-1;text-align:center;opacity:.5;padding:4rem;">No products found.</p>';
+        return;
+    }
+
+    grid.innerHTML = products.map(product => `
+        <article class="product-card" onclick="window.location.href='/Home/Product?id=${product.id}'">
+            <div class="product-image">
+                <img src="${product.image}" alt="${product.name}" loading="lazy"
+                    onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%27400%27 height=%27400%27%3E%3Crect width=%27400%27 height=%27400%27 fill=%27%23fafafa%27/%3E%3C/svg%3E'">
+                <div class="product-overlay"><span>View Details</span></div>
+            </div>
+            <div class="product-card-body">
+                <span class="product-category-tag">${product.category || ''}</span>
+                <h3 class="product-card-name">${product.name}</h3>
+                <div class="product-card-footer">
+                    <span class="product-card-price">${formatPeso(product.price)}</span>
+                    <div class="product-card-stars">${getStars(product.rating)}</div>
+                </div>
+            </div>
+        </article>
+    `).join('');
+}
+</script>
+}

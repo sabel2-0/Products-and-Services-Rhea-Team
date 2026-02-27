@@ -14,6 +14,12 @@ public static class ProductData
             Description = "Premium carbon-plated running shoes engineered for speed and endurance. Features advanced cushioning technology and breathable mesh upper for maximum performance.",
             Price = 8999.00m,
             Image = "https://images.pexels.com/photos/2529148/pexels-photo-2529148.jpeg?auto=compress&cs=tinysrgb&w=600",
+            Images = new List<string> {
+                "https://images.pexels.com/photos/2529148/pexels-photo-2529148.jpeg?auto=compress&cs=tinysrgb&w=600",
+                "https://images.pexels.com/photos/1598508/pexels-photo-1598508.jpeg?auto=compress&cs=tinysrgb&w=600",
+                "https://images.pexels.com/photos/2385477/pexels-photo-2385477.jpeg?auto=compress&cs=tinysrgb&w=600",
+                "https://images.pexels.com/photos/1456706/pexels-photo-1456706.jpeg?auto=compress&cs=tinysrgb&w=600"
+            },
             Sizes = new List<string> { "US 7", "US 8", "US 9", "US 10", "US 11", "US 12" },
             Category = "Men",
             SubCategory = "Running Shoes",
@@ -39,6 +45,12 @@ public static class ProductData
             Description = "Versatile training shoes with responsive cushioning perfect for speed work and interval training. Durable outsole for all-terrain running.",
             Price = 6499.00m,
             Image = "https://images.pexels.com/photos/1598505/pexels-photo-1598505.jpeg?auto=compress&cs=tinysrgb&w=600",
+            Images = new List<string> {
+                "https://images.pexels.com/photos/1598505/pexels-photo-1598505.jpeg?auto=compress&cs=tinysrgb&w=600",
+                "https://images.pexels.com/photos/2529147/pexels-photo-2529147.jpeg?auto=compress&cs=tinysrgb&w=600",
+                "https://images.pexels.com/photos/1464625/pexels-photo-1464625.jpeg?auto=compress&cs=tinysrgb&w=600",
+                "https://images.pexels.com/photos/1102776/pexels-photo-1102776.jpeg?auto=compress&cs=tinysrgb&w=600"
+            },
             Sizes = new List<string> { "US 7", "US 8", "US 9", "US 10", "US 11", "US 12" },
             Category = "Men",
             SubCategory = "Running Shoes",

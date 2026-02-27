@@ -7,6 +7,7 @@ public class Product
     public string Description { get; set; } = string.Empty;
     public decimal Price { get; set; }
     public string Image { get; set; } = string.Empty;
+    public List<string> Images { get; set; } = new(); // Multiple product images
     public List<string> Sizes { get; set; } = new();
     public string Category { get; set; } = string.Empty; // "Men" or "Women"
     public string SubCategory { get; set; } = string.Empty; // "Running Shoes", "Apparel", "Accessories"
@@ -15,6 +16,7 @@ public class Product
     public double Rating { get; set; }
     public int ReviewCount { get; set; }
     public List<Review> Reviews { get; set; } = new();
+    public int Stock { get; set; } = 50;
 }
 
 public class Review

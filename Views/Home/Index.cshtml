@@ -1,0 +1,96 @@
+@{
+    ViewData["Title"] = "Home";
+}
+
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="hero-content">
+        <span class="hero-badge">Premium Collection</span>
+        <h1 class="hero-title">Discover Your<br>Perfect Style</h1>
+        <p class="hero-subtitle">Curated footwear for the modern individual. Quality meets design.</p>
+        <a href="/Home/Shop" class="hero-btn">Shop Now</a>
+    </div>
+    <div class="hero-visual">
+        <div class="hero-shoe-display">
+            <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600" alt="Featured Shoe" class="hero-shoe-img">
+        </div>
+    </div>
+</section>
+
+<!-- Best Sellers Section -->
+<section class="featured-section" id="best-sellers">
+    <div class="section-header">
+        <h2 class="section-title">Best Sellers</h2>
+        <p class="section-subtitle">Our most loved styles</p>
+    </div>
+    <div class="featured-grid" id="best-sellers-grid">
+        <!-- Products loaded via JavaScript -->
+    </div>
+    <div class="section-cta">
+        <a href="/Home/Shop" class="view-all-btn">View All Products</a>
+    </div>
+</section>
+
+<!-- New Arrivals Section -->
+<section class="featured-section" id="new-arrivals">
+    <div class="section-header">
+        <h2 class="section-title">New Arrivals</h2>
+        <p class="section-subtitle">Fresh styles just dropped</p>
+    </div>
+    <div class="featured-grid" id="new-arrivals-grid">
+        <!-- Products loaded via JavaScript -->
+    </div>
+    <div class="section-cta">
+        <a href="/Home/Shop" class="view-all-btn">Explore New Arrivals</a>
+    </div>
+</section>
+
+@section Scripts {
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    loadBestSellers();
+    loadNewArrivals();
+});
+
+async function loadBestSellers() {
+    try {
+        const response = await fetch('/api/products');
+        const products = await response.json();
+        const bestSellers = products.slice(0, 4);
+        renderFeaturedProducts('best-sellers-grid', bestSellers);
+    } catch (error) {
+        console.error('Error loading best sellers:', error);
+    }
+}
+
+async function loadNewArrivals() {
+    try {
+        const response = await fetch('/api/products');
+        const products = await response.json();
+        const newArrivals = products.slice(4, 8);
+        renderFeaturedProducts('new-arrivals-grid', newArrivals);
+    } catch (error) {
+        console.error('Error loading new arrivals:', error);
+    }
+}
+
+function renderFeaturedProducts(gridId, products) {
+    const grid = document.getElementById(gridId);
+    if (!grid) return;
+    
+    grid.innerHTML = products.map(product => `
+        <div class="featured-card" onclick="openProductModal(${product.id})">
+            <div class="featured-image">
+                <img src="${product.image}" alt="${product.name}"
+                    onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%27400%27 height=%27400%27%3E%3Crect width=%27400%27 height=%27400%27 fill=%27%23fafafa%27/%3E%3C/svg%3E'">
+                <button class="quick-view-btn">View Details</button>
+            </div>
+            <div class="featured-info">
+                <h3 class="featured-name">${product.name}</h3>
+                <p class="featured-price">${formatPeso(product.price)}</p>
+            </div>
+        </div>
+    `).join('');
+}
+</script>
+}
