@@ -9,6 +9,9 @@ public class Product
     public string Image { get; set; } = string.Empty;
     public List<string> Sizes { get; set; } = new();
     public string Category { get; set; } = string.Empty; // "Men" or "Women"
+    public string SubCategory { get; set; } = string.Empty; // "Running Shoes", "Apparel", "Accessories"
+    public string Brand { get; set; } = string.Empty; // "Nike", "Adidas", etc.
+    public List<string> AvailableColors { get; set; } = new(); // Color options
     public double Rating { get; set; }
     public int ReviewCount { get; set; }
     public List<Review> Reviews { get; set; } = new();

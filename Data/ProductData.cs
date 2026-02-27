@@ -16,6 +16,9 @@ public static class ProductData
             Image = "https://images.pexels.com/photos/2529148/pexels-photo-2529148.jpeg?auto=compress&cs=tinysrgb&w=600",
             Sizes = new List<string> { "US 7", "US 8", "US 9", "US 10", "US 11", "US 12" },
             Category = "Men",
+            SubCategory = "Running Shoes",
+            Brand = "Nike",
+            AvailableColors = new List<string> { "Red", "Black", "Blue" },
             Rating = 4.8,
             ReviewCount = 245,
             Reviews = new List<Review>
@@ -38,6 +41,9 @@ public static class ProductData
             Image = "https://images.pexels.com/photos/1598505/pexels-photo-1598505.jpeg?auto=compress&cs=tinysrgb&w=600",
             Sizes = new List<string> { "US 7", "US 8", "US 9", "US 10", "US 11", "US 12" },
             Category = "Men",
+            SubCategory = "Running Shoes",
+            Brand = "Adidas",
+            AvailableColors = new List<string> { "White", "Grey", "Black" },
             Rating = 4.6,
             ReviewCount = 198,
             Reviews = new List<Review>
@@ -54,6 +60,9 @@ public static class ProductData
             Image = "https://images.pexels.com/photos/5067731/pexels-photo-5067731.jpeg?auto=compress&cs=tinysrgb&w=600",
             Sizes = new List<string> { "S", "M", "L", "XL", "XXL" },
             Category = "Men",
+            SubCategory = "Apparel",
+            Brand = "Nike",
+            AvailableColors = new List<string> { "Black", "Navy", "Charcoal" },
             Rating = 4.7,
             ReviewCount = 156,
             Reviews = new List<Review>()
@@ -67,6 +76,9 @@ public static class ProductData
             Image = "https://images.pexels.com/photos/1456705/pexels-photo-1456705.jpeg?auto=compress&cs=tinysrgb&w=600",
             Sizes = new List<string> { "US 7", "US 8", "US 9", "US 10", "US 11", "US 12" },
             Category = "Men",
+            SubCategory = "Running Shoes",
+            Brand = "Adidas",
+            AvailableColors = new List<string> { "Brown", "Green", "Black" },
             Rating = 4.9,
             ReviewCount = 203,
             Reviews = new List<Review>()
@@ -80,6 +92,9 @@ public static class ProductData
             Image = "https://images.pexels.com/photos/8612988/pexels-photo-8612988.jpeg?auto=compress&cs=tinysrgb&w=600",
             Sizes = new List<string> { "S", "M", "L", "XL", "XXL" },
             Category = "Men",
+            SubCategory = "Apparel",
+            Brand = "Nike",
+            AvailableColors = new List<string> { "White", "Black", "Red" },
             Rating = 4.5,
             ReviewCount = 134,
             Reviews = new List<Review>()
@@ -95,6 +110,9 @@ public static class ProductData
             Image = "https://images.pexels.com/photos/2529147/pexels-photo-2529147.jpeg?auto=compress&cs=tinysrgb&w=600",
             Sizes = new List<string> { "US 5", "US 6", "US 7", "US 8", "US 9", "US 10" },
             Category = "Women",
+            SubCategory = "Running Shoes",
+            Brand = "Nike",
+            AvailableColors = new List<string> { "Pink", "White", "Purple" },
             Rating = 4.9,
             ReviewCount = 287,
             Reviews = new List<Review>
@@ -116,6 +134,9 @@ public static class ProductData
             Image = "https://images.pexels.com/photos/2385477/pexels-photo-2385477.jpeg?auto=compress&cs=tinysrgb&w=600",
             Sizes = new List<string> { "US 5", "US 6", "US 7", "US 8", "US 9", "US 10" },
             Category = "Women",
+            SubCategory = "Running Shoes",
+            Brand = "Adidas",
+            AvailableColors = new List<string> { "Yellow", "Black", "White" },
             Rating = 4.7,
             ReviewCount = 167,
             Reviews = new List<Review>
@@ -132,6 +153,9 @@ public static class ProductData
             Image = "https://images.pexels.com/photos/6454243/pexels-photo-6454243.jpeg?auto=compress&cs=tinysrgb&w=600",
             Sizes = new List<string> { "XS", "S", "M", "L", "XL" },
             Category = "Women",
+            SubCategory = "Apparel",
+            Brand = "Nike",
+            AvailableColors = new List<string> { "Black", "Grey", "Navy" },
             Rating = 4.8,
             ReviewCount = 234,
             Reviews = new List<Review>()
@@ -145,6 +169,9 @@ public static class ProductData
             Image = "https://images.pexels.com/photos/4056535/pexels-photo-4056535.jpeg?auto=compress&cs=tinysrgb&w=600",
             Sizes = new List<string> { "XS", "S", "M", "L", "XL" },
             Category = "Women",
+            SubCategory = "Apparel",
+            Brand = "Adidas",
+            AvailableColors = new List<string> { "Black", "Purple", "Teal" },
             Rating = 4.6,
             ReviewCount = 192,
             Reviews = new List<Review>()
@@ -158,6 +185,9 @@ public static class ProductData
             Image = "https://images.pexels.com/photos/5069432/pexels-photo-5069432.jpeg?auto=compress&cs=tinysrgb&w=600",
             Sizes = new List<string> { "XS", "S", "M", "L", "XL" },
             Category = "Women",
+            SubCategory = "Apparel",
+            Brand = "Nike",
+            AvailableColors = new List<string> { "White", "Pink", "Light Blue" },
             Rating = 4.5,
             ReviewCount = 145,
             Reviews = new List<Review>()

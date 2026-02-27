@@ -2,8 +2,19 @@ const API_URL = 'http://localhost:5296/api';
 
 let currentProduct = null;
 let selectedSize = null;
+let selectedColor = null;
 let currentCategory = 'all';
 let allProducts = [];
+let filteredProducts = [];
+
+// Filter state
+let filters = {
+    subcategories: [],
+    brands: [],
+    sizes: [],
+    minPrice: 0,
+    maxPrice: 10000
+};
 
 // Load products on page load
 document.addEventListener('DOMContentLoaded', () => {
@@ -38,8 +49,10 @@ async function loadProducts(category = 'all') {
         const response = await fetch(url);
         const products = await response.json();
         allProducts = products;
+        filteredProducts = products;
         
-        displayProducts(products);
+        updateBrandCounts();
+        applyFilters();
     } catch (error) {
         console.error('Error loading products:', error);
     }
@@ -48,6 +61,10 @@ async function loadProducts(category = 'all') {
 // Display Products
 function displayProducts(products) {
     const grid = document.getElementById('products-grid');
+    const productCount = document.getElementById('product-count');
+    
+    productCount.textContent = `(${products.length} product${products.length !== 1 ? 's' : ''})`;
+    
     grid.innerHTML = products.map(product => `
         <div class="product-card" onclick="showProductDetails(${product.id})">
             <img src="${product.image}" alt="${product.name}" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%27400%27 height=%27400%27%3E%3Crect width=%27400%27 height=%27400%27 fill=%27%23f5f5f5%27/%3E%3Ctext x=%2750%25%27 y=%2750%25%27 dominant-baseline=%27middle%27 text-anchor=%27middle%27 font-family=%27Inter%27 font-size=%2716%27 fill=%27%23a3a3a3%27%3EImage Not Available%3C/text%3E%3C/svg%3E'">
@@ -71,6 +88,120 @@ function displayProducts(products) {
             </div>
         </div>
     `).join('');
+}
+
+// Filter Functions
+function applyFilters() {
+    // Update filter state from checkboxes
+    filters.subcategories = Array.from(document.querySelectorAll('input[name="subcategory"]:checked')).map(cb => cb.value);
+    filters.brands = Array.from(document.querySelectorAll('input[name="brand"]:checked')).map(cb => cb.value);
+    
+    // Get price from inputs
+    const minPriceInput = document.getElementById('min-price');
+    const maxPriceInput = document.getElementById('max-price');
+    if (minPriceInput.value) filters.minPrice = parseFloat(minPriceInput.value);
+    if (maxPriceInput.value) filters.maxPrice = parseFloat(maxPriceInput.value);
+    
+    let filtered = [...allProducts];
+    
+    // Filter by subcategory
+    if (filters.subcategories.length > 0) {
+        filtered = filtered.filter(p => filters.subcategories.includes(p.subCategory));
+    }
+    
+    // Filter by brand
+    if (filters.brands.length > 0) {
+        filtered = filtered.filter(p => filters.brands.includes(p.brand));
+    }
+    
+    // Filter by size
+    if (filters.sizes.length > 0) {
+        filtered = filtered.filter(p => p.sizes.some(size => filters.sizes.includes(size)));
+    }
+    
+    // Filter by price
+    filtered = filtered.filter(p => p.price >= filters.minPrice && p.price <= filters.maxPrice);
+    
+    filteredProducts = filtered;
+    displayProducts(filtered);
+}
+
+function clearAllFilters() {
+    filters = {
+        subcategories: [],
+        brands: [],
+        sizes: [],
+        minPrice: 0,
+        maxPrice: 10000
+    };
+    
+    // Clear checkboxes
+    document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+    
+    // Clear size filters
+    document.querySelectorAll('.size-filter-btn').forEach(btn => btn.classList.remove('active'));
+   
+    // Reset price inputs
+    document.getElementById('min-price').value = '';
+    document.getElementById('max-price').value = '';
+    document.getElementById('price-slider').value = 10000;
+    document.getElementById('price-display').textContent = '10,000';
+    
+    applyFilters();
+}
+
+function toggleSizeFilter(size) {
+    const btn = event.target;
+    btn.classList.toggle('active');
+    
+    if (btn.classList.contains('active')) {
+        filters.sizes.push(size);
+    } else {
+        filters.sizes = filters.sizes.filter(s => s !== size);
+    }
+    
+    applyFilters();
+}
+
+function updatePriceRange(maxValue) {
+    filters.maxPrice = parseInt(maxValue);
+    document.getElementById('price-display').textContent = formatPeso(filters.maxPrice).replace('₱', '').replace('.00', '');
+    applyFilters();
+}
+
+function updateBrandCounts() {
+    const nikeCount = allProducts.filter(p => p.brand === 'Nike').length;
+    const adidasCount = allProducts.filter(p => p.brand === 'Adidas').length;
+    
+    const nikeCountEl = document.getElementById('nike-count');
+    const adidasCountEl = document.getElementById('adidas-count');
+    
+    if (nikeCountEl) nikeCountEl.textContent = nikeCount;
+    if (adidasCountEl) adidasCountEl.textContent = adidasCount;
+}
+
+function sortProducts(sortBy) {
+    let sorted = [...filteredProducts];
+    
+    switch(sortBy) {
+        case 'price-low':
+            sorted.sort((a, b) => a.price - b.price);
+            break;
+        case 'price-high':
+            sorted.sort((a, b) => b.price - a.price);
+            break;
+        case 'rating':
+            sorted.sort((a, b) => b.rating - a.rating);
+            break;
+        case 'newest':
+            sorted.sort((a, b) => b.id - a.id);
+            break;
+        default:
+            // relevance - keep default order
+            break;
+    }
+    
+    displayProducts(sorted);
 }
 
 // Get related products
@@ -103,6 +234,18 @@ async function showProductDetails(productId) {
         sizeOptions.innerHTML = currentProduct.sizes.map(size => `
             <div class="size-option" onclick="selectSize('${size}')">${size}</div>
         `).join('');
+        
+        // Display colors
+        const colorSection = document.getElementById('color-selector-section');
+        if (currentProduct.availableColors && currentProduct.availableColors.length > 0) {
+            colorSection.style.display = 'flex';
+            const colorOptions = document.getElementById('color-options');
+            colorOptions.innerHTML = currentProduct.availableColors.map(color => `
+                <div class="color-option" onclick="selectColor('${color}')">${color}</div>
+            `).join('');
+        } else {
+            colorSection.style.display = 'none';
+        }
         
         // Display reviews preview (first 3)
         const reviewsPreview = document.getElementById('product-reviews-preview');
@@ -157,6 +300,7 @@ async function showProductDetails(productId) {
         
         document.getElementById('product-modal').classList.add('active');
         selectedSize = null;
+        selectedColor = null;
     } catch (error) {
         console.error('Error loading product details:', error);
     }
@@ -166,6 +310,35 @@ function closeProductDetails() {
     document.getElementById('product-modal').classList.remove('active');
     currentProduct = null;
     selectedSize = null;
+    selectedColor = null;
+}
+
+function selectSize(size) {
+    selectedSize = size;
+    document.querySelectorAll('.size-option').forEach(opt => opt.classList.remove('selected'));
+    event.target.classList.add('selected');
+}
+
+function selectColor(color) {
+    selectedColor = color;
+    document.querySelectorAll('.color-option').forEach(opt => opt.classList.remove('selected'));
+    event.target.classList.add('selected');
+}
+
+function buyNow() {
+    if (!selectedSize) {
+        alert('Please select a size');
+        return;
+    }
+    
+    // Add to cart then go to checkout
+    addToCartFromModal();
+    
+    // Close product modal and open cart
+    closeProductDetails();
+    setTimeout(() => {
+        toggleCart();
+    }, 300);
 }
 
 // Open Reviews Modal
@@ -193,12 +366,6 @@ function openReviewsModal() {
 
 function closeReviewsModal() {
     document.getElementById('reviews-modal').classList.remove('active');
-}
-
-function selectSize(size) {
-    selectedSize = size;
-    document.querySelectorAll('.size-option').forEach(opt => opt.classList.remove('selected'));
-    event.target.classList.add('selected');
 }
 
 // Add to Cart
