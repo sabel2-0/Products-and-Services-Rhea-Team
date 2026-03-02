@@ -13,10 +13,18 @@ public class Product
     public string SubCategory { get; set; } = string.Empty; // "Running Shoes", "Apparel", "Accessories"
     public string Brand { get; set; } = string.Empty; // "Nike", "Adidas", etc.
     public List<string> AvailableColors { get; set; } = new(); // Color options
+    public Dictionary<string, List<string>> ColorImages { get; set; } = new(); // color name → image gallery
     public double Rating { get; set; }
     public int ReviewCount { get; set; }
     public List<Review> Reviews { get; set; } = new();
     public int Stock { get; set; } = 50;
+    public bool IsPreOrder { get; set; } = false;
+    public string ExpectedReleaseDate { get; set; } = string.Empty; // e.g. "March 2026"
+    public string PreOrderNote { get; set; } = string.Empty; // e.g. "Ships in 4–6 weeks"
+    // Existing product sold out but available for pre-order restock
+    public bool IsRestockPreOrder { get; set; } = false;
+    public string RestockDate { get; set; } = string.Empty; // e.g. "Mid-March 2026"
+    public string RestockNote { get; set; } = string.Empty; // e.g. "Limited restock — reserve yours now"
 }
 
 public class Review
@@ -27,6 +35,7 @@ public class Review
     public string Comment { get; set; } = string.Empty;
     public DateTime Date { get; set; }
     public bool VerifiedPurchase { get; set; } = true;
+    public List<string> Images { get; set; } = new(); // Optional customer photos
 }
 
 public class CartItem

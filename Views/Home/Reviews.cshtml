@@ -1,0 +1,193 @@
+@{
+    ViewData["Title"] = "Reviews";
+    var productId = ViewData["ProductId"];
+}
+
+<div class="reviews-page">
+    <!-- Breadcrumb -->
+    <div class="product-page-breadcrumb">
+        <div class="container">
+            <a href="/Home/Shop" class="back-link">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="15 18 9 12 15 6"></polyline>
+                </svg>
+                Back to Shop
+            </a>
+            <span class="breadcrumb-sep">/</span>
+            <a id="rv-product-link" href="#" class="breadcrumb-current-link"></a>
+            <span class="breadcrumb-sep">/</span>
+            <span class="breadcrumb-current">Reviews</span>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Loading -->
+        <div class="rv-loading" id="rv-loading">
+            <div class="loading-spinner"></div>
+            <p>Loading reviews…</p>
+        </div>
+
+        <!-- Content -->
+        <div id="rv-content" style="display:none;">
+
+            <!-- Product Snapshot -->
+            <div class="rv-product-snap" id="rv-product-snap"></div>
+
+            <!-- Rating Summary Bar -->
+            <div class="rv-summary-bar" id="rv-summary-bar"></div>
+
+            <!-- All Reviews Grid -->
+            <div class="rv-section-title">
+                <h2>All Reviews</h2>
+                <span class="rv-total-count" id="rv-total-count"></span>
+            </div>
+            <div class="rv-all-grid" id="rv-all-grid"></div>
+
+        </div>
+
+        <!-- You May Also Like -->
+        <div class="bag-ymal rv-ymal" id="rv-ymal" style="display:none;">
+            <h2 class="ymal-title">You May Also Like</h2>
+            <div class="related-grid related-grid-row" id="rv-ymal-grid"></div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+const RV_PRODUCT_ID = @productId;
+let rvProduct = null;
+
+document.addEventListener('DOMContentLoaded', () => loadReviewsPage(RV_PRODUCT_ID));
+
+async function loadReviewsPage(id) {
+    try {
+        const res = await fetch(`/api/products/${id}`);
+        if (!res.ok) throw new Error('Not found');
+        rvProduct = await res.json();
+        renderReviewsPage();
+        loadRvYmal();
+    } catch(e) {
+        document.getElementById('rv-loading').innerHTML =
+            '<p style="text-align:center;opacity:.5;padding:4rem;">Product not found. <a href="/Home/Shop">Back to Shop</a></p>';
+    }
+}
+
+function renderReviewsPage() {
+    document.getElementById('rv-loading').style.display = 'none';
+    document.getElementById('rv-content').style.display = 'block';
+    document.title = `Reviews — ${rvProduct.name} · NEXT HORIZON`;
+
+    // Breadcrumb link
+    const link = document.getElementById('rv-product-link');
+    link.textContent = rvProduct.name;
+    link.href = `/Home/Product?id=${rvProduct.id}`;
+
+    // Product snapshot
+    document.getElementById('rv-product-snap').innerHTML = `
+        <div class="rv-snap-image">
+            <img src="${rvProduct.image}" alt="${rvProduct.name}"
+                onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%27200%27 height=%27200%27%3E%3Crect width=%27200%27 height=%27200%27 fill=%27%23fafafa%27/%3E%3C/svg%3E'">
+        </div>
+        <div class="rv-snap-info">
+            <span class="rv-snap-brand">${rvProduct.brand || ''}</span>
+            <h1 class="rv-snap-name">${rvProduct.name}</h1>
+            <div class="rv-snap-meta">
+                <span class="stars">${getStars(rvProduct.rating)}</span>
+                <span class="rv-snap-score">${rvProduct.rating.toFixed(1)} / 5.0</span>
+                <span class="rv-snap-sep">·</span>
+                <span>${rvProduct.reviewCount} reviews</span>
+            </div>
+            <a href="/Home/Product?id=${rvProduct.id}" class="rv-snap-link">View Product →</a>
+        </div>
+    `;
+
+    const reviews = rvProduct.reviews || [];
+
+    // Rating distribution
+    const dist = {5:0, 4:0, 3:0, 2:0, 1:0};
+    reviews.forEach(r => { if (dist[r.rating] !== undefined) dist[r.rating]++; });
+    const total = reviews.length || 1;
+    document.getElementById('rv-summary-bar').innerHTML = `
+        <div class="rv-big-score">
+            <div class="rv-big-num">${rvProduct.rating.toFixed(1)}</div>
+            <div class="rv-big-stars">${getStars(rvProduct.rating)}</div>
+            <div class="rv-big-label">Based on ${reviews.length} review${reviews.length !== 1 ? 's' : ''}</div>
+        </div>
+        <div class="rv-dist">
+            ${[5,4,3,2,1].map(star => `
+                <div class="rv-dist-row">
+                    <span class="rv-dist-label">${star} ★</span>
+                    <div class="rv-dist-bar-wrap">
+                        <div class="rv-dist-bar-fill" style="width:${Math.round((dist[star]/total)*100)}%"></div>
+                    </div>
+                    <span class="rv-dist-pct">${dist[star]}</span>
+                </div>
+            `).join('')}
+        </div>
+    `;
+
+    // All reviews
+    document.getElementById('rv-total-count').textContent = `${reviews.length} review${reviews.length !== 1 ? 's' : ''}`;
+
+    if (reviews.length === 0) {
+        document.getElementById('rv-all-grid').innerHTML = `
+            <div class="rv-empty">
+                <p>No reviews yet. Be the first to review this product!</p>
+                <a href="/Home/Product?id=${rvProduct.id}" class="rv-snap-link">View Product →</a>
+            </div>
+        `;
+        return;
+    }
+
+    document.getElementById('rv-all-grid').innerHTML = reviews.map(r => `
+        <div class="rv-card">
+            <div class="rv-card-top">
+                <div class="rv-card-user">
+                    <div class="rv-avatar">${r.userName.charAt(0).toUpperCase()}</div>
+                    <div>
+                        <div class="rv-card-name">${r.userName}</div>
+                        <div class="rv-card-date">${new Date(r.date).toLocaleDateString('en-PH', {year:'numeric',month:'long',day:'numeric'})}</div>
+                    </div>
+                </div>
+                <div class="rv-card-right">
+                    <span class="stars">${getStars(r.rating)}</span>
+                    ${r.verifiedPurchase ? '<span class="pd-verified">✓ Verified Purchase</span>' : ''}
+                </div>
+            </div>
+            <p class="rv-card-comment">${r.comment}</p>
+            ${r.images && r.images.length ? `
+            <button class="rv-view-photos-btn" onclick='openReviewSlideshow(${JSON.stringify(r.images)}, 0)'>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                View ${r.images.length} Photo${r.images.length !== 1 ? 's' : ''}
+            </button>` : ''}
+        </div>
+    `).join('');
+}
+
+async function loadRvYmal() {
+    try {
+        const res = await fetch('/api/products');
+        const all = await res.json();
+        const related = all.filter(p => p.id !== rvProduct.id && p.category === rvProduct.category).slice(0, 4);
+        if (related.length === 0) return;
+        const ymalSection = document.getElementById('rv-ymal');
+        const grid = document.getElementById('rv-ymal-grid');
+        grid.innerHTML = related.map(p => `
+            <div class="related-card" onclick="window.location.href='/Home/Product?id=${p.id}'">
+                <div class="related-card-image">
+                    <img src="${p.image}" alt="${p.name}" loading="lazy"
+                        onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%27300%27 height=%27300%27%3E%3Crect width=%27300%27 height=%27300%27 fill=%27%23fafafa%27/%3E%3C/svg%3E'">
+                    <div class="related-card-overlay">View</div>
+                </div>
+                <div class="related-card-info">
+                    <div class="related-card-name">${p.name}</div>
+                    <div class="related-card-price">${formatPeso(p.price)}</div>
+                </div>
+            </div>
+        `).join('');
+        ymalSection.style.display = 'block';
+    } catch(e) {}
+}
+</script>
+}

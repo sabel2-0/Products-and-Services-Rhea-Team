@@ -30,8 +30,20 @@
             <!-- Gallery Column -->
             <div class="product-page-gallery">
                 <div class="page-gallery-thumbs" id="page-gallery-thumbs"></div>
-                <div class="page-gallery-main">
-                    <img id="page-product-image" src="" alt="" />
+                <div class="page-gallery-main" id="page-gallery-main">
+                    <div class="pg-zoom-wrap" id="pg-zoom-wrap">
+                        <img id="page-product-image" src="" alt="" />
+                        <div class="pg-zoom-hint" aria-hidden="true">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/>
+                                <line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/>
+                            </svg>
+                            <span>Hover to zoom</span>
+                        </div>
+                    </div>
+                    <div class="pd-img-soldout-overlay" id="pd-img-soldout-overlay" style="display:none;">
+                        <span class="pd-img-soldout-label">Sold Out</span>
+                    </div>
                 </div>
             </div>
 
@@ -45,13 +57,19 @@
 
                 <!-- Colors -->
                 <div class="pd-option-section" id="pd-color-section" style="display:none;">
-                    <label class="pd-option-label">Color</label>
+                    <label class="pd-option-label">COLOR: <span id="pd-color-name">—</span></label>
                     <div class="pd-color-options" id="pd-color-options"></div>
                 </div>
 
                 <!-- Sizes -->
                 <div class="pd-option-section">
-                    <label class="pd-option-label">Size</label>
+                    <div class="pd-size-label-row">
+                        <label class="pd-option-label">Size</label>
+                        <button class="pd-size-guide-btn" onclick="openSizeGuide()" type="button">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M3 12h18M3 18h12"/></svg>
+                            Size Guide
+                        </button>
+                    </div>
                     <div class="pd-size-options" id="pd-size-options"></div>
                 </div>
 
@@ -68,8 +86,34 @@
                 <!-- Stock -->
                 <div class="pd-stock-display" id="pd-stock-display"></div>
 
+                <!-- Pre-Order Block (shown when out of stock & isPreOrder) -->
+                <div class="pd-preorder-block" id="pd-preorder-block" style="display:none;">
+                    <div class="pd-preorder-info">
+                        <div class="pd-preorder-badge">
+                            <span class="preorder-dot-pulse"></span>
+                            Pre-Order Available
+                        </div>
+                        <p class="pd-preorder-release" id="pd-preorder-release"></p>
+                        <p class="pd-preorder-note" id="pd-preorder-note"></p>
+                    </div>
+                    <div class="pd-preorder-form" id="pd-preorder-form">
+                        <div class="pd-preorder-input-row">
+                            <input type="email" id="pd-preorder-email" class="pd-preorder-email-input"
+                                   placeholder="Enter your email to pre-order" autocomplete="email">
+                            <button class="pd-btn-preorder" onclick="pdSubmitPreOrder()">
+                                Pre-Order Now
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                                    <polyline points="12 5 19 12 12 19"></polyline>
+                                </svg>
+                            </button>
+                        </div>
+                        <p class="pd-preorder-terms">By pre-ordering you agree to be charged when the product ships. Cancel anytime before the ship date.</p>
+                    </div>
+                </div>
+
                 <!-- Action Buttons -->
-                <div class="pd-actions">
+                <div class="pd-actions" id="pd-normal-actions">
                     <button class="pd-btn-cart" onclick="pdAddToCart()">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <circle cx="9" cy="21" r="1"></circle>
@@ -79,11 +123,6 @@
                         Add to Cart
                     </button>
                     <button class="pd-btn-buy" onclick="pdBuyNow()">Buy Now</button>
-                    <button class="pd-btn-wishlist" onclick="pdToggleWishlist()" id="pd-wishlist-btn" title="Add to Wishlist">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
-                        </svg>
-                    </button>
                     <button class="pd-btn-share" onclick="pdShare()" title="Share">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <circle cx="18" cy="5" r="3"></circle>
@@ -107,7 +146,7 @@
                     <h2>Customer Reviews</h2>
                     <span class="pd-reviews-summary" id="pd-reviews-summary"></span>
                 </div>
-                <button class="pd-view-all-btn" onclick="openReviewsModal()" id="pd-view-all-btn" style="display:none;">View All Reviews</button>
+                <a class="pd-view-all-btn" href="/Home/Reviews?id=@productId" id="pd-view-all-btn" style="display:none;">View All Reviews</a>
             </div>
             <div class="pd-reviews-grid" id="pd-reviews-grid"></div>
         </div>
@@ -119,20 +158,242 @@
         </div>
 
     </div>
+</div>
 
-    <!-- Reviews Full Modal -->
-    <div id="reviews-modal" class="modal" role="dialog" aria-modal="true">
-        <div class="modal-content reviews-modal-content">
-            <div class="modal-header">
-                <h2>All Reviews</h2>
-                <button class="close-btn" onclick="closeReviewsModal()">&times;</button>
+<!-- ===== SIZE GUIDE PANEL ===== -->
+<div class="sg-backdrop" id="sg-backdrop" onclick="closeSizeGuide()"></div>
+<aside class="sg-panel" id="sg-panel" role="dialog" aria-modal="true" aria-label="Size Guide">
+    <div class="sg-panel-inner">
+        <!-- Header -->
+        <div class="sg-header">
+            <span class="sg-header-label">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M3 12h18M3 18h12"/></svg>
+                Size Guide
+            </span>
+            <button class="sg-close-btn" onclick="closeSizeGuide()" aria-label="Close">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+        </div>
+
+        <!-- Tabs -->
+        <div class="sg-tabs">
+            <button class="sg-tab active" onclick="sgSwitchTab('chart', this)">Size Chart</button>
+            <button class="sg-tab" onclick="sgSwitchTab('measure', this)">How to Measure</button>
+            <button class="sg-tab" onclick="sgSwitchTab('tips', this)">Fit Tips</button>
+        </div>
+
+        <!-- ── TAB: SIZE CHART ── -->
+        <div class="sg-tab-panel active" id="sg-tab-chart">
+            <!-- Unit toggle -->
+            <div class="sg-unit-toggle">
+                <button class="sg-unit-btn active" id="sg-btn-in" onclick="sgSetUnit('in')">in.</button>
+                <button class="sg-unit-btn" id="sg-btn-cm" onclick="sgSetUnit('cm')">cm</button>
             </div>
-            <div class="reviews-modal-body">
-                <div class="reviews-grid" id="all-reviews-grid"></div>
+
+            <!-- CLOTHING -->
+            <p class="sg-table-heading">Clothing</p>
+            <div class="sg-table-wrap">
+                <table class="sg-table">
+                    <thead>
+                        <tr>
+                            <th>Size</th>
+                            <th>XS</th><th>S</th><th>M</th><th>L</th><th>XL</th><th>XXL</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="sg-row-label">Chest <span class="sg-unit-label">(in.)</span></td>
+                            <td>31–33</td><td>34–36</td><td>37–39</td><td>40–42</td><td>43–45</td><td>46–48</td>
+                        </tr>
+                        <tr class="sg-alt">
+                            <td class="sg-row-label">Waist <span class="sg-unit-label">(in.)</span></td>
+                            <td>24–26</td><td>27–29</td><td>30–32</td><td>33–35</td><td>36–38</td><td>39–42</td>
+                        </tr>
+                        <tr>
+                            <td class="sg-row-label">Hips <span class="sg-unit-label">(in.)</span></td>
+                            <td>33–35</td><td>36–38</td><td>39–41</td><td>42–44</td><td>45–47</td><td>48–51</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- FOOTWEAR -->
+            <p class="sg-table-heading" style="margin-top:24px;">Footwear</p>
+            <div class="sg-table-wrap">
+                <table class="sg-table">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>3.5</th><th>4</th><th>4.5</th><th>5</th><th>5.5</th><th>6</th><th>6.5</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="sg-row-label">US Men's</td>
+                            <td>3.5</td><td>4</td><td>4.5</td><td>5</td><td>5.5</td><td>6</td><td>6.5</td>
+                        </tr>
+                        <tr class="sg-alt">
+                            <td class="sg-row-label">US Women's</td>
+                            <td>5</td><td>5.5</td><td>6</td><td>6.5</td><td>7</td><td>7.5</td><td>8</td>
+                        </tr>
+                        <tr>
+                            <td class="sg-row-label">UK</td>
+                            <td>3</td><td>3.5</td><td>4</td><td>4.5</td><td>5</td><td>5.5</td><td>6</td>
+                        </tr>
+                        <tr class="sg-alt">
+                            <td class="sg-row-label">EU</td>
+                            <td>35.5</td><td>36</td><td>36.5</td><td>37.5</td><td>38</td><td>38.5</td><td>39</td>
+                        </tr>
+                        <tr>
+                            <td class="sg-row-label">CM/JP</td>
+                            <td>22.5</td><td>23</td><td>23.5</td><td>23.5</td><td>24</td><td>24</td><td>24.5</td>
+                        </tr>
+                        <tr class="sg-alt">
+                            <td class="sg-row-label">Foot Length <span class="sg-unit-label">(in.)</span></td>
+                            <td>8½</td><td>8¹¹⁄₁₆</td><td>8¹³⁄₁₆</td><td>9</td><td>9³⁄₁₆</td><td>9⁵⁄₁₆</td><td>9½</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <p class="sg-note">Scroll the table horizontally to see all sizes →</p>
+        </div>
+
+        <!-- ── TAB: HOW TO MEASURE ── -->
+        <div class="sg-tab-panel" id="sg-tab-measure">
+            <p class="sg-measure-intro">Use a soft measuring tape. Keep it snug but not tight. Measure in inches or centimetres — both are shown in the chart above.</p>
+
+            <div class="sg-measure-item">
+                <div class="sg-measure-icon">
+                    <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <ellipse cx="20" cy="20" rx="14" ry="10" stroke="currentColor" stroke-width="2" stroke-dasharray="4 2"/>
+                        <line x1="6" y1="20" x2="10" y2="17" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        <line x1="6" y1="20" x2="10" y2="23" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        <line x1="34" y1="20" x2="30" y2="17" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        <line x1="34" y1="20" x2="30" y2="23" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                </div>
+                <div class="sg-measure-content">
+                    <h4>Chest</h4>
+                    <p>Measure around the fullest part of your chest, keeping the tape measure horizontal.</p>
+                    <div class="sg-measure-values">
+                        <span>Typical range: <strong>31–48 in.</strong></span>
+                        <span>/ <strong>79–122 cm</strong></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sg-measure-item">
+                <div class="sg-measure-icon">
+                    <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <ellipse cx="20" cy="20" rx="9" ry="7" stroke="currentColor" stroke-width="2" stroke-dasharray="4 2"/>
+                        <line x1="11" y1="20" x2="15" y2="17" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        <line x1="11" y1="20" x2="15" y2="23" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        <line x1="29" y1="20" x2="25" y2="17" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        <line x1="29" y1="20" x2="25" y2="23" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                </div>
+                <div class="sg-measure-content">
+                    <h4>Waist</h4>
+                    <p>Measure around the narrowest part of your torso — typically where your body bends side to side — keeping the tape horizontal.</p>
+                    <div class="sg-measure-values">
+                        <span>Typical range: <strong>24–42 in.</strong></span>
+                        <span>/ <strong>61–107 cm</strong></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sg-measure-item">
+                <div class="sg-measure-icon">
+                    <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <ellipse cx="20" cy="20" rx="16" ry="11" stroke="currentColor" stroke-width="2" stroke-dasharray="4 2"/>
+                        <line x1="4" y1="20" x2="8" y2="17" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        <line x1="4" y1="20" x2="8" y2="23" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        <line x1="36" y1="20" x2="32" y2="17" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                        <line x1="36" y1="20" x2="32" y2="23" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                </div>
+                <div class="sg-measure-content">
+                    <h4>Hips</h4>
+                    <p>Measure around the fullest part of your hips, keeping the tape horizontal.</p>
+                    <div class="sg-measure-values">
+                        <span>Typical range: <strong>33–51 in.</strong></span>
+                        <span>/ <strong>84–130 cm</strong></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="sg-measure-item">
+                <div class="sg-measure-icon">
+                    <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="4" y="16" width="32" height="8" rx="2" stroke="currentColor" stroke-width="2"/>
+                        <line x1="4" y1="20" x2="36" y2="20" stroke="currentColor" stroke-width="1" opacity=".4"/>
+                        <line x1="10" y1="16" x2="10" y2="24" stroke="currentColor" stroke-width="1.5"/>
+                        <line x1="16" y1="16" x2="16" y2="21" stroke="currentColor" stroke-width="1.5"/>
+                        <line x1="22" y1="16" x2="22" y2="24" stroke="currentColor" stroke-width="1.5"/>
+                        <line x1="28" y1="16" x2="28" y2="21" stroke="currentColor" stroke-width="1.5"/>
+                        <line x1="4" y1="27" x2="36" y2="27" stroke="currentColor" stroke-width="1.5" stroke-dasharray="3 2"/>
+                        <line x1="4" y1="25" x2="4" y2="29" stroke="currentColor" stroke-width="1.5"/>
+                        <line x1="36" y1="25" x2="36" y2="29" stroke="currentColor" stroke-width="1.5"/>
+                    </svg>
+                </div>
+                <div class="sg-measure-content">
+                    <h4>Foot Length</h4>
+                    <p>Tape a piece of paper to a hard, flat surface. Stand on it and mark the tip of your big toe and the outermost part of your heel. Measure between the two marks.</p>
+                    <p class="sg-measure-sub">Repeat for the other foot. Use the <strong>longer</strong> measurement. If you are between sizes, size up.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── TAB: FIT TIPS ── -->
+        <div class="sg-tab-panel" id="sg-tab-tips">
+            <div class="sg-tips-hero">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+                <p>A few tips to help you find your perfect fit.</p>
+            </div>
+
+            <div class="sg-tip-card sg-tip-primary">
+                <span class="sg-tip-num">01</span>
+                <div>
+                    <h4>On the borderline?</h4>
+                    <p>If one of your measurements falls between two sizes, order the <strong>smaller size</strong> for a tighter fit or the <strong>larger size</strong> for a looser fit.</p>
+                </div>
+            </div>
+
+            <div class="sg-tip-card">
+                <span class="sg-tip-num">02</span>
+                <div>
+                    <h4>Chest vs. Waist?</h4>
+                    <p>If your chest and waist correspond to two different suggested sizes, go with the size indicated by your <strong>chest measurement</strong>.</p>
+                </div>
+            </div>
+
+            <div class="sg-tip-card">
+                <span class="sg-tip-num">03</span>
+                <div>
+                    <h4>Running &amp; Performance Fit</h4>
+                    <p>For running gear and performance apparel, a <strong>snug but comfortable</strong> fit reduces wind resistance and prevents chafing. When in doubt, size down one.</p>
+                </div>
+            </div>
+
+            <div class="sg-tip-card">
+                <span class="sg-tip-num">04</span>
+                <div>
+                    <h4>Layering</h4>
+                    <p>If you plan to layer with a base layer underneath, consider sizing up once to allow comfortable movement without restricting your stride.</p>
+                </div>
+            </div>
+
+            <div class="sg-tip-card">
+                <span class="sg-tip-num">05</span>
+                <div>
+                    <h4>Footwear Half Sizes</h4>
+                    <p>If you are between shoe sizes, we recommend sizing <strong>up</strong> — especially for running shoes, where your foot will swell slightly during exercise.</p>
+                </div>
             </div>
         </div>
     </div>
-</div>
+</aside>
+<!-- ===== END SIZE GUIDE PANEL ===== -->
 
 @section Scripts {
 <script>
@@ -177,10 +438,13 @@ function renderProductPage() {
     // Thumbnails
     const images = (pdProduct.images && pdProduct.images.length) ? pdProduct.images : [pdProduct.image];
     document.getElementById('page-gallery-thumbs').innerHTML = images.map((src, i) => `
-        <div class="page-thumb ${i === 0 ? 'active' : ''}" onclick="changePageImage('${src}', this)">
+        <div class="page-thumb ${i === 0 ? 'active' : ''}" data-src="${src.replace(/"/g,'&quot;')}">
             <img src="${src}" alt="View ${i+1}" onerror="this.parentElement.style.display='none'">
         </div>
     `).join('');
+    wireThumbClicks();
+    // init zoom after image is in DOM
+    setTimeout(initProductZoom, 50);
 
     document.getElementById('pd-brand').textContent = pdProduct.brand || '';
     document.getElementById('pd-name').textContent = pdProduct.name;
@@ -195,9 +459,18 @@ function renderProductPage() {
     // Colors
     if (pdProduct.availableColors && pdProduct.availableColors.length > 0) {
         document.getElementById('pd-color-section').style.display = 'block';
-        document.getElementById('pd-color-options').innerHTML = pdProduct.availableColors.map(c => `
-            <div class="pd-color-opt" onclick="pdSelectColor('${c}', this)">${c}</div>
-        `).join('');
+        const colorImages = pdProduct.colorImages || {};
+        document.getElementById('pd-color-options').innerHTML = pdProduct.availableColors.map(c => {
+            const imgs = colorImages[c];
+            const swatchSrc = imgs && imgs.length ? imgs[0] : null;
+            if (swatchSrc) {
+                return `<button class="pd-color-swatch" onclick="pdSelectColor('${c}', this)" title="${c}"><img src="${swatchSrc}" alt="${c}"></button>`;
+            }
+            return `<div class="pd-color-opt" onclick="pdSelectColor('${c}', this)">${c}</div>`;
+        }).join('');
+        // Auto-select the first color
+        const firstBtn = document.querySelector('#pd-color-options .pd-color-swatch, #pd-color-options .pd-color-opt');
+        if (firstBtn) firstBtn.click();
     }
 
     // Sizes
@@ -214,10 +487,81 @@ function renderProductPage() {
     // Stock
     pdMaxStock = pdProduct.stock || 0;
     const stockEl = document.getElementById('pd-stock-display');
+    const preorderBlock = document.getElementById('pd-preorder-block');
+    const normalActions = document.getElementById('pd-normal-actions');
+
+    const soldOutOverlay = document.getElementById('pd-img-soldout-overlay');
     if (pdMaxStock === 0) {
-        stockEl.innerHTML = '<span class="pd-stock-badge out">Out of Stock</span>';
-        document.querySelector('.pd-btn-cart').disabled = true;
-        document.querySelector('.pd-btn-buy').disabled = true;
+        if (pdProduct.isRestockPreOrder) {
+            // Existing product — sold out but restock pre-order is open
+            stockEl.innerHTML = '<span class="pd-stock-badge restock">Sold Out — Restock Pre-Order Open</span>';
+            // Show RESTOCKING overlay on image
+            if (soldOutOverlay) {
+                soldOutOverlay.classList.remove('overlay-soldout', 'overlay-preorder');
+                soldOutOverlay.classList.add('overlay-restock');
+                soldOutOverlay.querySelector('.pd-img-soldout-label').textContent = 'Restocking';
+                soldOutOverlay.style.display = 'flex';
+            }
+            preorderBlock.style.display = 'block';
+            normalActions.style.display = 'none';
+            if (pdProduct.restockDate) {
+                document.getElementById('pd-preorder-release').innerHTML =
+                    `<strong>Restock Expected:</strong> ${pdProduct.restockDate}`;
+            }
+            if (pdProduct.restockNote) {
+                document.getElementById('pd-preorder-note').textContent = pdProduct.restockNote;
+            }
+            // Badge
+            const restockBadge = document.querySelector('.pd-preorder-badge');
+            if (restockBadge) restockBadge.innerHTML = '<span style="width:8px;height:8px;border-radius:50%;background:#f59e0b;display:inline-block;margin-right:8px;"></span> Restock Pre-Order';
+            // Button
+            const restockBtn = document.querySelector('.pd-btn-preorder');
+            if (restockBtn) restockBtn.innerHTML = 'Reserve My Pair <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>';
+            const restockInput = document.getElementById('pd-preorder-email');
+            if (restockInput) restockInput.placeholder = 'Enter your email to reserve';
+        } else if (pdProduct.isPreOrder) {
+            // Pre-order mode — product announced but not yet released
+            stockEl.innerHTML = '<span class="pd-stock-badge preorder">Pre-Order — Not Yet Released</span>';
+            preorderBlock.style.display = 'block';
+            normalActions.style.display = 'none';
+            // Show PRE-ORDER overlay on image
+            if (soldOutOverlay) {
+                soldOutOverlay.classList.remove('overlay-soldout');
+                soldOutOverlay.classList.add('overlay-preorder');
+                soldOutOverlay.querySelector('.pd-img-soldout-label').textContent = 'Pre-Order';
+                soldOutOverlay.style.display = 'flex';
+            }
+            // Populate pre-order meta
+            if (pdProduct.expectedReleaseDate) {
+                document.getElementById('pd-preorder-release').innerHTML =
+                    `<strong>Expected Release:</strong> ${pdProduct.expectedReleaseDate}`;
+            }
+            if (pdProduct.preOrderNote) {
+                document.getElementById('pd-preorder-note').textContent = pdProduct.preOrderNote;
+            }
+        } else {
+            // Out of stock — existing product that sold out
+            stockEl.innerHTML = '<span class="pd-stock-badge out">Sold Out</span>';
+            // Show SOLD OUT overlay on image
+            if (soldOutOverlay) {
+                soldOutOverlay.classList.remove('overlay-preorder');
+                soldOutOverlay.classList.add('overlay-soldout');
+                soldOutOverlay.querySelector('.pd-img-soldout-label').textContent = 'Sold Out';
+                soldOutOverlay.style.display = 'flex';
+            }
+            preorderBlock.style.display = 'block';
+            normalActions.style.display = 'none';
+            document.getElementById('pd-preorder-release').textContent = '';
+            document.getElementById('pd-preorder-note').textContent = 'This product is currently out of stock. Enter your email and we\'ll notify you the moment it\'s back.';
+            // Swap button label to Notify Me
+            const preorderBtn = document.querySelector('.pd-btn-preorder');
+            if (preorderBtn) preorderBtn.innerHTML = 'Notify Me When Back <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>';
+            const preorderInput = document.getElementById('pd-preorder-email');
+            if (preorderInput) preorderInput.placeholder = 'Enter your email to get notified';
+            // Change badge to reflect restock notification theme
+            const preorderBadge = document.querySelector('.pd-preorder-badge');
+            if (preorderBadge) preorderBadge.innerHTML = '<span style="width:8px;height:8px;border-radius:50%;background:#ef4444;display:inline-block;margin-right:8px;"></span> Currently Sold Out';
+        }
     } else if (pdMaxStock <= 5) {
         stockEl.innerHTML = `<span class="pd-stock-badge low">Low Stock — Only ${pdMaxStock} left</span>`;
     } else {
@@ -230,12 +574,24 @@ function renderProductPage() {
         document.getElementById('pd-reviews-grid').innerHTML = pdProduct.reviews.slice(0, 3).map(r => `
             <div class="pd-review-card">
                 <div class="pd-review-top">
-                    <span class="pd-review-name">${r.userName}</span>
-                    <span class="stars">${getStars(r.rating)}</span>
-                    ${r.verifiedPurchase ? '<span class="pd-verified">✓ Verified</span>' : ''}
+                    <div class="pd-review-user">
+                        <div class="pd-review-avatar">${r.userName.charAt(0).toUpperCase()}</div>
+                        <div>
+                            <span class="pd-review-name">${r.userName}</span>
+                            <span class="pd-review-date">${new Date(r.date).toLocaleDateString('en-PH')}</span>
+                        </div>
+                    </div>
+                    <div class="pd-review-meta">
+                        <span class="stars">${getStars(r.rating)}</span>
+                        ${r.verifiedPurchase ? '<span class="pd-verified">✓ Verified</span>' : ''}
+                    </div>
                 </div>
                 <p class="pd-review-comment">${r.comment}</p>
-                <span class="pd-review-date">${new Date(r.date).toLocaleDateString('en-PH')}</span>
+                ${r.images && r.images.length ? `
+                <button class="rv-view-photos-btn" onclick='openReviewSlideshow(${JSON.stringify(r.images)}, 0)'>
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                    View ${r.images.length} Photo${r.images.length !== 1 ? 's' : ''}
+                </button>` : ''}
             </div>
         `).join('');
         if (pdProduct.reviews.length > 3) {
@@ -252,6 +608,64 @@ function changePageImage(src, el) {
     el.classList.add('active');
 }
 
+function wireThumbClicks() {
+    document.querySelectorAll('#page-gallery-thumbs .page-thumb').forEach(thumb => {
+        thumb.addEventListener('click', function() {
+            const src = this.dataset.src;
+            if (src) changePageImage(src, this);
+        });
+    });
+}
+
+// ── Product image zoom (in-place cursor-tracked) ─────────────
+(function() {
+    const ZOOM = 2.5;
+    let zooming = false;
+
+    function initZoom() {
+        const wrap = document.getElementById('pg-zoom-wrap');
+        const img  = document.getElementById('page-product-image');
+        if (!wrap || !img) return;
+
+        // Remove any previously attached listeners by cloning
+        const newWrap = wrap.cloneNode(true);
+        wrap.parentNode.replaceChild(newWrap, wrap);
+        // Re-grab after clone
+        const w = document.getElementById('pg-zoom-wrap');
+        const i = document.getElementById('page-product-image');
+        if (!w || !i) return;
+
+        w.addEventListener('mouseenter', function() {
+            zooming = true;
+            i.style.transition     = 'transform 0.15s ease';
+            i.style.transform      = `scale(${ZOOM})`;
+            i.style.transformOrigin = '50% 50%';
+            w.style.cursor = 'crosshair';
+        });
+
+        w.addEventListener('mousemove', function(e) {
+            if (!zooming) return;
+            const rect = w.getBoundingClientRect();
+            const xPct = ((e.clientX - rect.left) / rect.width)  * 100;
+            const yPct = ((e.clientY - rect.top)  / rect.height) * 100;
+            i.style.transition     = 'none';
+            i.style.transformOrigin = `${xPct}% ${yPct}%`;
+        });
+
+        w.addEventListener('mouseleave', function() {
+            zooming = false;
+            i.style.transition      = 'transform 0.25s ease, transform-origin 0s';
+            i.style.transform       = 'scale(1)';
+            i.style.transformOrigin = '50% 50%';
+            w.style.cursor = '';
+        });
+    }
+
+    window.initProductZoom = initZoom;
+})();
+
+
+
 function pdSelectSize(size, el) {
     pdSelectedSize = size;
     document.querySelectorAll('.pd-size-opt').forEach(o => o.classList.remove('selected'));
@@ -260,8 +674,29 @@ function pdSelectSize(size, el) {
 
 function pdSelectColor(color, el) {
     pdSelectedColor = color;
-    document.querySelectorAll('.pd-color-opt').forEach(o => o.classList.remove('selected'));
+    document.querySelectorAll('.pd-color-opt, .pd-color-swatch').forEach(o => o.classList.remove('selected'));
     el.classList.add('selected');
+    // Update color name label
+    const nameEl = document.getElementById('pd-color-name');
+    if (nameEl) nameEl.textContent = color;
+    // Swap gallery if this color has its own images
+    const colorImages = pdProduct.colorImages || {};
+    const imgs = colorImages[color];
+    if (imgs && imgs.length) {
+        // Update main image
+        const mainImg = document.getElementById('page-product-image');
+        if (mainImg) {
+            mainImg.src = imgs[0];
+            mainImg.alt = color;
+        }
+        // Update thumbnails
+        document.getElementById('page-gallery-thumbs').innerHTML = imgs.map((src, i) => `
+            <div class="page-thumb ${i === 0 ? 'active' : ''}" data-src="${src.replace(/"/g,'&quot;')}">
+                <img src="${src}" alt="View ${i+1}" onerror="this.parentElement.style.display='none'">
+            </div>
+        `).join('');
+        wireThumbClicks();
+    }
 }
 
 function changeQty(delta) {
@@ -303,6 +738,38 @@ function pdBuyNow() {
     pdAddToCart().then(() => { window.location.href = '/Home/Shop'; });
 }
 
+function pdSubmitPreOrder() {
+    const emailInput = document.getElementById('pd-preorder-email');
+    const email = emailInput?.value?.trim();
+    if (!email || !/^[^\s@@]+@@[^\s@@]+\.[^\s@@]+$/.test(email)) {
+        toast.info('Please enter a valid email address.');
+        emailInput?.focus();
+        return;
+    }
+    const isPreOrderProduct = pdProduct && pdProduct.isPreOrder;
+    const btn = document.querySelector('.pd-btn-preorder');
+    if (btn) { btn.disabled = true; btn.textContent = 'Submitting…'; }
+    // Simulate API call (in-memory demo)
+    setTimeout(() => {
+        const form = document.getElementById('pd-preorder-form');
+        if (form) {
+            form.innerHTML = `
+                <div class="pd-preorder-success">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"></path></svg>
+                    <div>
+                        <p class="pd-preorder-success-title">${isPreOrderProduct ? 'Pre-Order Confirmed!' : 'You\'re on the list!'}</p>
+                        <p class="pd-preorder-success-sub">We'll send updates to <strong>${email}</strong></p>
+                    </div>
+                </div>`;
+        }
+        if (isPreOrderProduct) {
+            toast.success(`Pre-order registered for ${pdProduct.name}!`);
+        } else {
+            toast.success(`We'll notify you at ${email} when it's back in stock!`);
+        }
+    }, 800);
+}
+
 async function pdToggleWishlist() {
     const btn = document.getElementById('pd-wishlist-btn');
     const isActive = btn.classList.contains('active');
@@ -339,6 +806,70 @@ function pdShare() {
     }
 }
 
+/* ─── SIZE GUIDE ─── */
+function openSizeGuide() {
+    document.getElementById('sg-panel').classList.add('open');
+    document.getElementById('sg-backdrop').classList.add('open');
+    document.body.classList.add('sg-lock');
+}
+function closeSizeGuide() {
+    document.getElementById('sg-panel').classList.remove('open');
+    document.getElementById('sg-backdrop').classList.remove('open');
+    document.body.classList.remove('sg-lock');
+}
+function sgSwitchTab(name, btn) {
+    document.querySelectorAll('.sg-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.sg-tab-panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('sg-tab-' + name).classList.add('active');
+}
+
+let sgUnit = 'in';
+const SG_CLOTHING_IN = {
+    chest: ['31–33','34–36','37–39','40–42','43–45','46–48'],
+    waist: ['24–26','27–29','30–32','33–35','36–38','39–42'],
+    hips:  ['33–35','36–38','39–41','42–44','45–47','48–51']
+};
+const SG_CLOTHING_CM = {
+    chest: ['79–84','86–91','94–99','102–107','109–114','117–122'],
+    waist: ['61–66','69–74','76–81','84–89','91–97','99–107'],
+    hips:  ['84–89','91–97','99–104','107–112','114–119','122–130']
+};
+const SG_FOOT_IN = ['8½','8¹¹⁄₁₆','8¹³⁄₁₆','9','9³⁄₁₆','9⁵⁄₁₆','9½'];
+const SG_FOOT_CM = ['21.6','22','22.4','22.9','23.3','23.7','24.1'];
+
+function sgSetUnit(unit) {
+    sgUnit = unit;
+    document.getElementById('sg-btn-in').classList.toggle('active', unit === 'in');
+    document.getElementById('sg-btn-cm').classList.toggle('active', unit === 'cm');
+
+    const clothingData = unit === 'in' ? SG_CLOTHING_IN : SG_CLOTHING_CM;
+    const footData = unit === 'in' ? SG_FOOT_IN : SG_FOOT_CM;
+    const unitLabel = unit === 'in' ? '(in.)' : '(cm)';
+
+    // Update clothing table (first table in chart panel)
+    const clothingRows = document.querySelectorAll('#sg-tab-chart table:first-of-type tbody tr');
+    const keys = ['chest','waist','hips'];
+    clothingRows.forEach((row, idx) => {
+        row.querySelector('.sg-unit-label').textContent = unitLabel;
+        const cells = row.querySelectorAll('td:not(.sg-row-label)');
+        cells.forEach((cell, ci) => { cell.textContent = clothingData[keys[idx]][ci]; });
+    });
+
+    // Update foot length row (last row of footwear table)
+    const footRows = document.querySelectorAll('#sg-tab-chart table:last-of-type tbody tr');
+    const footLenRow = footRows[footRows.length - 1];
+    if (footLenRow) {
+        footLenRow.querySelector('.sg-unit-label').textContent = unitLabel;
+        const cells = footLenRow.querySelectorAll('td:not(.sg-row-label)');
+        cells.forEach((cell, ci) => { cell.textContent = footData[ci]; });
+    }
+}
+
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeSizeGuide();
+});
+
 async function loadRelated() {
     try {
         const res = await fetch('/api/products');
@@ -363,29 +894,6 @@ async function loadRelated() {
             </div>
         `).join('');
     } catch(e) {}
-}
-
-function openReviewsModal() {
-    if (!pdProduct || !pdProduct.reviews || pdProduct.reviews.length === 0) return;
-    document.getElementById('all-reviews-grid').innerHTML = pdProduct.reviews.map(r => `
-        <div class="review-item">
-            <div class="review-header">
-                <span class="review-name">${r.userName}</span>
-                <span class="review-date">${new Date(r.date).toLocaleDateString('en-PH')}</span>
-            </div>
-            <div class="review-stars"><span class="stars">${getStars(r.rating)}</span>
-                ${r.verifiedPurchase ? '<span class="pd-verified">✓ Verified</span>' : ''}
-            </div>
-            <p class="review-comment-text">${r.comment}</p>
-        </div>
-    `).join('');
-    document.getElementById('reviews-modal').classList.add('active');
-    document.body.classList.add('modal-open');
-}
-
-function closeReviewsModal() {
-    document.getElementById('reviews-modal').classList.remove('active');
-    document.body.classList.remove('modal-open');
 }
 </script>
 }

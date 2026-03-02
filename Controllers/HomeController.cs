@@ -35,6 +35,13 @@ namespace MyAspNetApp.Controllers
             return View();
         }
 
+        // GET: /Home/Reviews?id=5
+        public IActionResult Reviews(int id)
+        {
+            ViewData["ProductId"] = id;
+            return View();
+        }
+
         // GET: /Home/Cart
         public IActionResult Cart()
         {

@@ -268,11 +268,6 @@ function displayProducts(products) {
                 </div>
                 <div class="product-actions" onclick="event.stopPropagation()">
                     <button class="btn-primary" onclick="quickAddToCart(${product.id})">Add</button>
-                    <button class="btn-secondary" onclick="toggleWishlistProduct(${product.id})" aria-label="Add to wishlist">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
-                        </svg>
-                    </button>
                 </div>
             </div>
         </article>
@@ -659,3 +654,98 @@ function getStars(rating) {
     
     return '★'.repeat(fullStars) + (halfStar ? '½' : '') + '☆'.repeat(emptyStars);
 }
+// =====================================================
+// NOTIFICATION BELL
+// =====================================================
+(function initNotifDot() {
+    document.addEventListener('DOMContentLoaded', () => {
+        const dot = document.getElementById('notif-dot');
+        if (dot && document.querySelectorAll('.notif-item.unread').length > 0) {
+            dot.classList.add('active');
+        }
+        // Close dropdown when clicking outside
+        document.addEventListener('click', e => {
+            const wrap = document.getElementById('notif-wrap');
+            if (wrap && !wrap.contains(e.target)) {
+                document.getElementById('notif-dropdown')?.classList.remove('open');
+            }
+        });
+    });
+})();
+
+function toggleNotifDropdown() {
+    const dd = document.getElementById('notif-dropdown');
+    if (!dd) return;
+    dd.classList.toggle('open');
+    // Mark as read when opened
+    if (dd.classList.contains('open')) {
+        document.querySelectorAll('.notif-item.unread').forEach(i => i.classList.remove('unread'));
+        const dot = document.getElementById('notif-dot');
+        if (dot) dot.classList.remove('active');
+    }
+}
+
+function clearNotifications() {
+    const list = document.getElementById('notif-list');
+    if (list) {
+        list.innerHTML = '<li style="padding:20px 16px;text-align:center;color:#9ca3af;font-size:13px;">No notifications</li>';
+    }
+    const dot = document.getElementById('notif-dot');
+    if (dot) dot.classList.remove('active');
+}
+// =====================================================
+// REVIEW IMAGE SLIDESHOW
+// =====================================================
+let rvSlideImages = [];
+let rvSlideIndex  = 0;
+
+function openReviewSlideshow(images, startIndex) {
+    rvSlideImages = images;
+    rvSlideIndex  = startIndex || 0;
+    document.getElementById('rv-lightbox').classList.add('open');
+    document.body.classList.add('sg-lock');
+    _updateSlide();
+}
+
+function _updateSlide() {
+    const img     = document.getElementById('rv-lightbox-img');
+    const counter = document.getElementById('rv-slide-counter');
+    if (!img) return;
+
+    // Fade out → swap src → fade in
+    img.style.opacity = '0';
+    setTimeout(() => {
+        img.src = rvSlideImages[rvSlideIndex];
+        img.style.opacity = '1';
+    }, 150);
+
+    if (counter) counter.textContent = rvSlideImages.length > 1
+        ? `${rvSlideIndex + 1} / ${rvSlideImages.length}`
+        : '';
+
+    // Show arrows only when multiple images
+    document.querySelectorAll('.rv-slide-arrow').forEach(btn => {
+        btn.style.visibility = rvSlideImages.length > 1 ? 'visible' : 'hidden';
+    });
+}
+
+function slideshowNav(dir) {
+    rvSlideIndex = (rvSlideIndex + dir + rvSlideImages.length) % rvSlideImages.length;
+    _updateSlide();
+}
+
+function closeReviewSlideshow() {
+    document.getElementById('rv-lightbox').classList.remove('open');
+    document.body.classList.remove('sg-lock');
+    setTimeout(() => {
+        const img = document.getElementById('rv-lightbox-img');
+        if (img) img.src = '';
+    }, 320);
+}
+
+document.addEventListener('keydown', function(e) {
+    if (!document.getElementById('rv-lightbox')?.classList.contains('open')) return;
+    if (e.key === 'Escape')      closeReviewSlideshow();
+    if (e.key === 'ArrowRight')  slideshowNav(1);
+    if (e.key === 'ArrowLeft')   slideshowNav(-1);
+});

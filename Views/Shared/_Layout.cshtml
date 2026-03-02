@@ -15,7 +15,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
     <!-- Styles -->
-    <link rel="stylesheet" href="~/css/style.css">
+    <link rel="stylesheet" href="~/css/style.css" asp-append-version="true">
 </head>
 <body>
     <!-- Unified Header -->
@@ -23,15 +23,15 @@
         <div class="container">
             <div class="header-content">
                 <div class="logo">
-                    <h1>NEXT HORIZON</h1>
+                    <a href="/"><img src="/logo.png" alt="NEXT HORIZON" class="header-logo-img"></a>
                 </div>
-                
-                <nav class="main-nav">
-                    <a href="/" class="nav-link active">Home</a>
-                    <a href="/Home/Shop" class="nav-link">Shop</a>
-                    <a href="/Home/About" class="nav-link">About</a>
-                    <a href="/Home/Contact" class="nav-link">Contact</a>
-                </nav>
+
+                <form class="header-search-form" action="/Home/Shop" method="get" role="search">
+                    <div class="header-search-wrap">
+                        <svg class="header-search-icon" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                        <input type="search" name="q" id="header-search-input" placeholder="Search products…" autocomplete="off" class="header-search-input">
+                    </div>
+                </form>
                 
                 <div class="header-actions">
                     <a href="/Home/Cart" class="cart-btn" aria-label="Shopping Cart">
@@ -42,12 +42,53 @@
                         </svg>
                         <span id="cart-count">0</span>
                     </a>
-                    <a href="/Home/Wishlist" class="wishlist-btn" aria-label="Wishlist">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
-                        </svg>
-                        <span id="wishlist-count">0</span>
-                    </a>
+
+                    <!-- Notification Bell -->
+                    <div class="notif-wrap" id="notif-wrap">
+                        <button class="notif-btn" id="notif-btn" onclick="toggleNotifDropdown()" aria-label="Notifications">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                                <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                            </svg>
+                            <span class="notif-dot" id="notif-dot"></span>
+                        </button>
+                        <div class="notif-dropdown" id="notif-dropdown">
+                            <div class="notif-header">
+                                <span>Notifications</span>
+                                <button class="notif-clear-btn" onclick="clearNotifications()">Clear all</button>
+                            </div>
+                            <ul class="notif-list" id="notif-list">
+                                <li class="notif-item unread">
+                                    <div class="notif-icon notif-icon-order">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 01-8 0"></path></svg>
+                                    </div>
+                                    <div class="notif-body">
+                                        <p class="notif-text">Your order has been confirmed!</p>
+                                        <span class="notif-time">Just now</span>
+                                    </div>
+                                </li>
+                                <li class="notif-item unread">
+                                    <div class="notif-icon notif-icon-preorder">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                                    </div>
+                                    <div class="notif-body">
+                                        <p class="notif-text">Apex Carbon Racer 2026 pre-order opens March 2026.</p>
+                                        <span class="notif-time">2 hours ago</span>
+                                    </div>
+                                </li>
+                                <li class="notif-item">
+                                    <div class="notif-icon notif-icon-promo">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg>
+                                    </div>
+                                    <div class="notif-body">
+                                        <p class="notif-text">New arrivals just dropped — check them out!</p>
+                                        <span class="notif-time">1 day ago</span>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
                     <button class="login-btn" onclick="openLoginModal()">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
@@ -108,7 +149,7 @@
         <div class="container">
             <div class="footer-grid">
                 <div class="footer-brand">
-                    <div class="footer-logo">NEXT HORIZON</div>
+                    <div class="footer-logo"><img src="/logo.png" alt="NEXT HORIZON" class="footer-logo-img"></div>
                     <p>Engineered for Performance.<br>Built for Runners.</p>
                 </div>
                 <div class="footer-links">
@@ -135,7 +176,25 @@
         </div>
     </footer>
 
-    <script src="~/js/app.js"></script>
+    <script src="~/js/app.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
+
+    <!-- Review Image Slideshow Lightbox -->
+    <div class="rv-lightbox" id="rv-lightbox">
+        <div class="rv-lightbox-backdrop" onclick="closeReviewSlideshow()"></div>
+        <button class="rv-lightbox-close" onclick="closeReviewSlideshow()" aria-label="Close">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+        <button class="rv-slide-arrow rv-slide-prev" onclick="slideshowNav(-1)" aria-label="Previous">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <div class="rv-lightbox-stage">
+            <img class="rv-lightbox-img" id="rv-lightbox-img" src="" alt="Review photo">
+        </div>
+        <button class="rv-slide-arrow rv-slide-next" onclick="slideshowNav(1)" aria-label="Next">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+        <div class="rv-slide-counter" id="rv-slide-counter"></div>
+    </div>
 </body>
 </html>
