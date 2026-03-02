@@ -36,6 +36,11 @@ public class Review
     public DateTime Date { get; set; }
     public bool VerifiedPurchase { get; set; } = true;
     public List<string> Images { get; set; } = new(); // Optional customer photos
+    // Metric ratings
+    public int? Comfort { get; set; }    // 1–5: 1=Uncomfortable, 5=Comfortable
+    public int? Quality { get; set; }    // 1–5: 1=Poor, 5=Perfect
+    public int? SizeFit { get; set; }    // 1=Too small, 2=Perfect, 3=Too large
+    public int? WidthFit { get; set; }   // 1=Too narrow, 2=Perfect, 3=Too wide
 }
 
 public class CartItem

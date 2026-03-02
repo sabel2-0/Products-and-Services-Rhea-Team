@@ -146,9 +146,14 @@
                     <h2>Customer Reviews</h2>
                     <span class="pd-reviews-summary" id="pd-reviews-summary"></span>
                 </div>
-                <a class="pd-view-all-btn" href="/Home/Reviews?id=@productId" id="pd-view-all-btn" style="display:none;">View All Reviews</a>
+                <div class="pd-reviews-header-actions">
+                    <a class="pd-write-review-btn" href="/Home/WriteReview?id=@productId">Write a Review</a>
+                </div>
             </div>
             <div class="pd-reviews-grid" id="pd-reviews-grid"></div>
+            <div class="pd-view-all-wrap" id="pd-view-all-wrap" style="display:none;">
+                <a class="pd-view-all-btn" href="/Home/Reviews?id=@productId" id="pd-view-all-btn">View All Reviews</a>
+            </div>
         </div>
 
         <!-- You May Also Like — clearly a separate full-width section -->
@@ -595,7 +600,7 @@ function renderProductPage() {
             </div>
         `).join('');
         if (pdProduct.reviews.length > 3) {
-            document.getElementById('pd-view-all-btn').style.display = 'inline-flex';
+            document.getElementById('pd-view-all-wrap').style.display = 'flex';
         }
     } else {
         document.getElementById('pd-reviews-grid').innerHTML = '<p class="pd-no-reviews">No reviews yet.</p>';

@@ -51,28 +51,28 @@ public static class ProductData
             ReviewCount = 245,
             Reviews = new List<Review>
             {
-                new Review { Id = 1, UserName = "Carlos M.", Rating = 5, Comment = "Best running shoes for marathon training! Worth every peso. The carbon plate gives incredible propulsion — used these for my last 42K and felt zero fatigue.", Date = DateTime.Now.AddDays(-5),
+                new Review { Id = 1, UserName = "Carlos M.", Rating = 5, Comment = "Best running shoes for marathon training! Worth every peso. The carbon plate gives incredible propulsion — used these for my last 42K and felt zero fatigue.", Date = DateTime.Now.AddDays(-5), Comfort = 5, Quality = 5, SizeFit = 2, WidthFit = 2,
                     Images = new List<string> {
                         "https://images.pexels.com/photos/2404843/pexels-photo-2404843.jpeg?auto=compress&cs=tinysrgb&w=400",
                         "https://images.pexels.com/photos/2529148/pexels-photo-2529148.jpeg?auto=compress&cs=tinysrgb&w=400"
                     }
                 },
-                new Review { Id = 2, UserName = "Rafael S.", Rating = 5, Comment = "Lightweight and responsive. Perfect for long runs. Took them straight out of the box to a 20K without any break-in issues.", Date = DateTime.Now.AddDays(-10),
+                new Review { Id = 2, UserName = "Rafael S.", Rating = 5, Comment = "Lightweight and responsive. Perfect for long runs. Took them straight out of the box to a 20K without any break-in issues.", Date = DateTime.Now.AddDays(-10), Comfort = 5, Quality = 5, SizeFit = 2, WidthFit = 2,
                     Images = new List<string> {
                         "https://images.pexels.com/photos/1598508/pexels-photo-1598508.jpeg?auto=compress&cs=tinysrgb&w=400"
                     }
                 },
-                new Review { Id = 3, UserName = "Jose P.", Rating = 5, Comment = "Excellent cushioning! My knees feel great after long runs.", Date = DateTime.Now.AddDays(-15) },
-                new Review { Id = 4, UserName = "Mark T.", Rating = 4, Comment = "Great shoes, slight break-in period but worth it.", Date = DateTime.Now.AddDays(-20),
+                new Review { Id = 3, UserName = "Jose P.", Rating = 5, Comment = "Excellent cushioning! My knees feel great after long runs.", Date = DateTime.Now.AddDays(-15), Comfort = 5, Quality = 5, SizeFit = 2, WidthFit = 2 },
+                new Review { Id = 4, UserName = "Mark T.", Rating = 4, Comment = "Great shoes, slight break-in period but worth it.", Date = DateTime.Now.AddDays(-20), Comfort = 4, Quality = 4, SizeFit = 2, WidthFit = 2,
                     Images = new List<string> {
                         "https://images.pexels.com/photos/1456706/pexels-photo-1456706.jpeg?auto=compress&cs=tinysrgb&w=400",
                         "https://images.pexels.com/photos/2385477/pexels-photo-2385477.jpeg?auto=compress&cs=tinysrgb&w=400",
                         "https://images.pexels.com/photos/1464625/pexels-photo-1464625.jpeg?auto=compress&cs=tinysrgb&w=400"
                     }
                 },
-                new Review { Id = 5, UserName = "David L.", Rating = 5, Comment = "Perfect for road running. Very durable and comfortable.", Date = DateTime.Now.AddDays(-25) },
-                new Review { Id = 6, UserName = "Rico G.", Rating = 5, Comment = "These shoes helped me achieve my personal best in a half marathon!", Date = DateTime.Now.AddDays(-30) },
-                new Review { Id = 7, UserName = "Anthony V.", Rating = 4, Comment = "Good quality, runs true to size. Highly recommend.", Date = DateTime.Now.AddDays(-35) }
+                new Review { Id = 5, UserName = "David L.", Rating = 5, Comment = "Perfect for road running. Very durable and comfortable.", Date = DateTime.Now.AddDays(-25), Comfort = 5, Quality = 5, SizeFit = 2, WidthFit = 2 },
+                new Review { Id = 6, UserName = "Rico G.", Rating = 5, Comment = "These shoes helped me achieve my personal best in a half marathon!", Date = DateTime.Now.AddDays(-30), Comfort = 5, Quality = 5, SizeFit = 2, WidthFit = 2 },
+                new Review { Id = 7, UserName = "Anthony V.", Rating = 4, Comment = "Good quality, runs true to size. Highly recommend.", Date = DateTime.Now.AddDays(-35), Comfort = 4, Quality = 4, SizeFit = 2, WidthFit = 2 }
             }
         },
         new Product
@@ -97,7 +97,7 @@ public static class ProductData
             ReviewCount = 198,
             Reviews = new List<Review>
             {
-                new Review { Id = 3, UserName = "Miguel P.", Rating = 5, Comment = "Great for tempo runs and track workouts!", Date = DateTime.Now.AddDays(-3) }
+                new Review { Id = 3, UserName = "Miguel P.", Rating = 5, Comment = "Great for tempo runs and track workouts!", Date = DateTime.Now.AddDays(-3), Comfort = 5, Quality = 5, SizeFit = 2, WidthFit = 2 }
             }
         },
         new Product
@@ -170,26 +170,26 @@ public static class ProductData
             ReviewCount = 287,
             Reviews = new List<Review>
             {
-                new Review { Id = 4, UserName = "Maria C.", Rating = 5, Comment = "Perfect for my marathon training! Super comfortable even on 30km runs. These are hands-down the best shoes I've ever run in.", Date = DateTime.Now.AddDays(-2),
+                new Review { Id = 4, UserName = "Maria C.", Rating = 5, Comment = "Perfect for my marathon training! Super comfortable even on 30km runs. These are hands-down the best shoes I've ever run in.", Date = DateTime.Now.AddDays(-2), Comfort = 5, Quality = 5, SizeFit = 2, WidthFit = 2,
                     Images = new List<string> {
                         "https://images.pexels.com/photos/2529147/pexels-photo-2529147.jpeg?auto=compress&cs=tinysrgb&w=400",
                         "https://images.pexels.com/photos/3621186/pexels-photo-3621186.jpeg?auto=compress&cs=tinysrgb&w=400"
                     }
                 },
-                new Review { Id = 5, UserName = "Anna S.", Rating = 5, Comment = "Love the fit and cushioning. Best investment for serious runners.", Date = DateTime.Now.AddDays(-7),
+                new Review { Id = 5, UserName = "Anna S.", Rating = 5, Comment = "Love the fit and cushioning. Best investment for serious runners.", Date = DateTime.Now.AddDays(-7), Comfort = 5, Quality = 5, SizeFit = 2, WidthFit = 2,
                     Images = new List<string> {
                         "https://images.pexels.com/photos/2385477/pexels-photo-2385477.jpeg?auto=compress&cs=tinysrgb&w=400"
                     }
                 },
-                new Review { Id = 6, UserName = "Gina R.", Rating = 5, Comment = "Amazing support and stability. My go-to running shoes now!", Date = DateTime.Now.AddDays(-12) },
-                new Review { Id = 7, UserName = "Patricia L.", Rating = 4, Comment = "Very comfortable, great for long distance. Slight sizing issue but overall excellent.", Date = DateTime.Now.AddDays(-18) },
-                new Review { Id = 8, UserName = "Michelle A.", Rating = 5, Comment = "These shoes are a game changer! No more foot fatigue.", Date = DateTime.Now.AddDays(-22),
+                new Review { Id = 6, UserName = "Gina R.", Rating = 5, Comment = "Amazing support and stability. My go-to running shoes now!", Date = DateTime.Now.AddDays(-12), Comfort = 5, Quality = 5, SizeFit = 2, WidthFit = 2 },
+                new Review { Id = 7, UserName = "Patricia L.", Rating = 4, Comment = "Very comfortable, great for long distance. Slight sizing issue but overall excellent.", Date = DateTime.Now.AddDays(-18), Comfort = 4, Quality = 4, SizeFit = 1, WidthFit = 2 },
+                new Review { Id = 8, UserName = "Michelle A.", Rating = 5, Comment = "These shoes are a game changer! No more foot fatigue.", Date = DateTime.Now.AddDays(-22), Comfort = 5, Quality = 5, SizeFit = 2, WidthFit = 2,
                     Images = new List<string> {
                         "https://images.pexels.com/photos/5067731/pexels-photo-5067731.jpeg?auto=compress&cs=tinysrgb&w=400",
                         "https://images.pexels.com/photos/4056535/pexels-photo-4056535.jpeg?auto=compress&cs=tinysrgb&w=400"
                     }
                 },
-                new Review { Id = 9, UserName = "Sarah D.", Rating = 5, Comment = "Worth every peso! Best running shoes I've ever owned.", Date = DateTime.Now.AddDays(-28) }
+                new Review { Id = 9, UserName = "Sarah D.", Rating = 5, Comment = "Worth every peso! Best running shoes I've ever owned.", Date = DateTime.Now.AddDays(-28), Comfort = 5, Quality = 5, SizeFit = 2, WidthFit = 2 }
             }
         },
         new Product
@@ -208,7 +208,7 @@ public static class ProductData
             ReviewCount = 167,
             Reviews = new List<Review>
             {
-                new Review { Id = 6, UserName = "Sofia R.", Rating = 5, Comment = "Shaved 2 minutes off my 10K time! Highly recommend.", Date = DateTime.Now.AddDays(-1) }
+                new Review { Id = 6, UserName = "Sofia R.", Rating = 5, Comment = "Shaved 2 minutes off my 10K time! Highly recommend.", Date = DateTime.Now.AddDays(-1), Comfort = 5, Quality = 5, SizeFit = 2, WidthFit = 2 }
             }
         },
         new Product
@@ -287,20 +287,20 @@ public static class ProductData
             RestockNote = "Limited restock — only 200 pairs available. Reserve yours now and pay at shipment.",
             Reviews = new List<Review>
             {
-                new Review { Id = 1, UserName = "Carlo R.", Rating = 5, Comment = "This shoe is an absolute beast on race day. Sold out so fast — glad I got a pair first time around.", Date = DateTime.Now.AddDays(-14), VerifiedPurchase = true,
+                new Review { Id = 1, UserName = "Carlo R.", Rating = 5, Comment = "This shoe is an absolute beast on race day. Sold out so fast — glad I got a pair first time around.", Date = DateTime.Now.AddDays(-14), VerifiedPurchase = true, Comfort = 5, Quality = 5, SizeFit = 2, WidthFit = 2,
                     Images = new List<string> {
                         "https://images.pexels.com/photos/2404843/pexels-photo-2404843.jpeg?auto=compress&cs=tinysrgb&w=400",
                         "https://images.pexels.com/photos/2529148/pexels-photo-2529148.jpeg?auto=compress&cs=tinysrgb&w=400"
                     }
                 },
-                new Review { Id = 2, UserName = "James M.", Rating = 5, Comment = "PR'd my half marathon in these. Need a second pair for training!", Date = DateTime.Now.AddDays(-21), VerifiedPurchase = true,
+                new Review { Id = 2, UserName = "James M.", Rating = 5, Comment = "PR'd my half marathon in these. Need a second pair for training!", Date = DateTime.Now.AddDays(-21), VerifiedPurchase = true, Comfort = 5, Quality = 5, SizeFit = 2, WidthFit = 2,
                     Images = new List<string> {
                         "https://images.pexels.com/photos/1598508/pexels-photo-1598508.jpeg?auto=compress&cs=tinysrgb&w=400"
                     }
                 },
-                new Review { Id = 3, UserName = "Allan T.", Rating = 5, Comment = "Incredibly responsive. The carbon plate really does make a difference.", Date = DateTime.Now.AddDays(-30), VerifiedPurchase = true },
-                new Review { Id = 4, UserName = "Ben V.", Rating = 4, Comment = "Runs slightly narrow — go half a size up. Otherwise perfect.", Date = DateTime.Now.AddDays(-45), VerifiedPurchase = true },
-                new Review { Id = 5, UserName = "Mark S.", Rating = 5, Comment = "Worth every peso. My go-to for race day and tempo runs.", Date = DateTime.Now.AddDays(-60), VerifiedPurchase = true }
+                new Review { Id = 3, UserName = "Allan T.", Rating = 5, Comment = "Incredibly responsive. The carbon plate really does make a difference.", Date = DateTime.Now.AddDays(-30), VerifiedPurchase = true, Comfort = 5, Quality = 5, SizeFit = 2, WidthFit = 2 },
+                new Review { Id = 4, UserName = "Ben V.", Rating = 4, Comment = "Runs slightly narrow — go half a size up. Otherwise perfect.", Date = DateTime.Now.AddDays(-45), VerifiedPurchase = true, Comfort = 4, Quality = 4, SizeFit = 2, WidthFit = 1 },
+                new Review { Id = 5, UserName = "Mark S.", Rating = 5, Comment = "Worth every peso. My go-to for race day and tempo runs.", Date = DateTime.Now.AddDays(-60), VerifiedPurchase = true, Comfort = 5, Quality = 5, SizeFit = 2, WidthFit = 2 }
             }
         },
 
