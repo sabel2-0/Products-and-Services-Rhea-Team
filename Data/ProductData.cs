@@ -4,6 +4,59 @@ namespace MyAspNetApp.Data;
 
 public static class ProductData
 {
+    // ── Sellers ──
+    public static List<Seller> Sellers { get; } = new()
+    {
+        new Seller
+        {
+            Id = 1,
+            ShopName = "RunVault Official",
+            Avatar = "https://ui-avatars.com/api/?name=RunVault&background=1a1a2e&color=fff&size=128&bold=true",
+            CoverImage = "/images/cover-photo/Skinny_1920x420__35_.jpg",
+            Description = "Your #1 destination for premium running shoes. We carry authentic products from the world's top brands. Fast shipping and hassle-free returns!",
+            Location = "Manila, Philippines",
+            Rating = 4.9,
+            TotalRatings = 12540,
+            TotalProducts = 86,
+            Followers = 34200,
+            ResponseRate = 98,
+            ResponseTime = "within hours",
+            JoinedDate = DateTime.Now.AddYears(-5)
+        },
+        new Seller
+        {
+            Id = 2,
+            ShopName = "SportZone PH",
+            Avatar = "https://ui-avatars.com/api/?name=SportZone&background=0f3460&color=fff&size=128&bold=true",
+            CoverImage = "/images/cover-photo/Skinny_1920x420__35_.jpg",
+            Description = "Premium athletic wear & footwear. Authorized dealer of Nike, Adidas, and more. Serving Filipino athletes since 2019.",
+            Location = "Cebu City, Philippines",
+            Rating = 4.7,
+            TotalRatings = 8320,
+            TotalProducts = 124,
+            Followers = 21500,
+            ResponseRate = 95,
+            ResponseTime = "within minutes",
+            JoinedDate = DateTime.Now.AddYears(-3)
+        },
+        new Seller
+        {
+            Id = 3,
+            ShopName = "Kicks & Beyond",
+            Avatar = "https://ui-avatars.com/api/?name=Kicks+Beyond&background=533483&color=fff&size=128&bold=true",
+            CoverImage = "/images/cover-photo/Skinny_1920x420__35_.jpg",
+            Description = "Curated sneaker boutique featuring the latest drops and exclusive colorways. Authenticity guaranteed on every pair.",
+            Location = "Davao City, Philippines",
+            Rating = 4.8,
+            TotalRatings = 5670,
+            TotalProducts = 52,
+            Followers = 15800,
+            ResponseRate = 92,
+            ResponseTime = "within a day",
+            JoinedDate = DateTime.Now.AddMonths(-18)
+        }
+    };
+
     public static List<Product> Products { get; } = new()
     {
         // Men's Running Products
@@ -92,6 +145,7 @@ public static class ProductData
             Category = "Men",
             SubCategory = "Running Shoes",
             Brand = "Adidas",
+            SellerId = 2,
             AvailableColors = new List<string> { "White", "Grey", "Black" },
             Rating = 4.6,
             ReviewCount = 198,
@@ -127,6 +181,7 @@ public static class ProductData
             Category = "Men",
             SubCategory = "Running Shoes",
             Brand = "Adidas",
+            SellerId = 2,
             AvailableColors = new List<string> { "Brown", "Green", "Black" },
             Rating = 4.9,
             ReviewCount = 203,
@@ -203,6 +258,7 @@ public static class ProductData
             Category = "Women",
             SubCategory = "Running Shoes",
             Brand = "Adidas",
+            SellerId = 3,
             AvailableColors = new List<string> { "Yellow", "Black", "White" },
             Rating = 4.7,
             ReviewCount = 167,
@@ -238,6 +294,7 @@ public static class ProductData
             Category = "Women",
             SubCategory = "Apparel",
             Brand = "Adidas",
+            SellerId = 2,
             AvailableColors = new List<string> { "Black", "Purple", "Teal" },
             Rating = 4.6,
             ReviewCount = 192,
@@ -352,6 +409,7 @@ public static class ProductData
             Category = "Men",
             SubCategory = "Running Shoes",
             Brand = "Adidas",
+            SellerId = 3,
             AvailableColors = new List<string> { "Green Lux-Lime Shimmer" },
             ColorImages = new Dictionary<string, List<string>> {
                 ["Green Lux-Lime Shimmer"] = new List<string> {

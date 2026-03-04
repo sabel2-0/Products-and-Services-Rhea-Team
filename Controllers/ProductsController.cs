@@ -38,5 +38,33 @@ namespace MyAspNetApp.Controllers
             var product = ProductData.Products.FirstOrDefault(p => p.Id == id);
             return product != null ? Ok(product) : NotFound();
         }
+
+        // GET: api/products/seller/{sellerId}
+        [HttpGet("seller/{sellerId}")]
+        public IActionResult GetProductsBySeller(int sellerId)
+        {
+            var products = ProductData.Products.Where(p => p.SellerId == sellerId).ToList();
+            return Ok(products);
+        }
+    }
+
+    [ApiController]
+    [Route("api/[controller]")]
+    public class SellersController : ControllerBase
+    {
+        // GET: api/sellers/{id}
+        [HttpGet("{id}")]
+        public IActionResult GetSellerById(int id)
+        {
+            var seller = ProductData.Sellers.FirstOrDefault(s => s.Id == id);
+            return seller != null ? Ok(seller) : NotFound();
+        }
+
+        // GET: api/sellers
+        [HttpGet]
+        public IActionResult GetAllSellers()
+        {
+            return Ok(ProductData.Sellers);
+        }
     }
 }

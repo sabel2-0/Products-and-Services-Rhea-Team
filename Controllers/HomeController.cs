@@ -199,6 +199,13 @@ namespace MyAspNetApp.Controllers
             return View();
         }
 
+        // GET: /Home/SellerShop?id=1
+        public IActionResult SellerShop(int id)
+        {
+            ViewData["SellerId"] = id;
+            return View();
+        }
+
         // GET: /Home/Error
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()

@@ -157,6 +157,66 @@
             </div>
         </div>
 
+        <!-- Seller Profile Section -->
+        <div class="pd-seller-section" id="pd-seller-section" style="display:none;">
+            <div class="pd-seller-card">
+                <div class="pd-seller-main">
+                    <a href="#" class="pd-seller-avatar-link" id="pd-seller-avatar-link">
+                        <img class="pd-seller-avatar" id="pd-seller-avatar" src="" alt="Seller" />
+                    </a>
+                    <div class="pd-seller-info">
+                        <a href="#" class="pd-seller-name-link" id="pd-seller-name-link">
+                            <h3 class="pd-seller-name" id="pd-seller-name"></h3>
+                        </a>
+                        <p class="pd-seller-location" id="pd-seller-location">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+                            <span id="pd-seller-loc-text"></span>
+                        </p>
+                        <p class="pd-seller-active" id="pd-seller-active">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                            <span>Active <span id="pd-seller-response-time"></span></span>
+                        </p>
+                    </div>
+                    <div class="pd-seller-actions">
+                        <button class="pd-seller-btn pd-seller-btn-chat" onclick="sellerChat()">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                            Chat Now
+                        </button>
+                        <a href="#" class="pd-seller-btn pd-seller-btn-shop" id="pd-seller-shop-link">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+                            View Shop
+                        </a>
+                    </div>
+                </div>
+                <div class="pd-seller-stats">
+                    <div class="pd-seller-stat">
+                        <span class="pd-seller-stat-value" id="pd-seller-rating"></span>
+                        <span class="pd-seller-stat-label">Rating</span>
+                    </div>
+                    <div class="pd-seller-stat-divider"></div>
+                    <div class="pd-seller-stat">
+                        <span class="pd-seller-stat-value" id="pd-seller-total-ratings"></span>
+                        <span class="pd-seller-stat-label">Ratings</span>
+                    </div>
+                    <div class="pd-seller-stat-divider"></div>
+                    <div class="pd-seller-stat">
+                        <span class="pd-seller-stat-value" id="pd-seller-products"></span>
+                        <span class="pd-seller-stat-label">Products</span>
+                    </div>
+                    <div class="pd-seller-stat-divider"></div>
+                    <div class="pd-seller-stat">
+                        <span class="pd-seller-stat-value" id="pd-seller-response-rate"></span>
+                        <span class="pd-seller-stat-label">Response Rate</span>
+                    </div>
+                    <div class="pd-seller-stat-divider"></div>
+                    <div class="pd-seller-stat">
+                        <span class="pd-seller-stat-value" id="pd-seller-joined"></span>
+                        <span class="pd-seller-stat-label">Joined</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Customer Reviews — directly beneath product info, clearly belongs to this product -->
         <div class="pd-reviews-section">
             <div class="pd-reviews-header">
@@ -439,6 +499,7 @@ async function loadProductPage(id) {
         renderProductPage();
         loadRelated();
         checkWishlistState();
+        loadSellerProfile(pdProduct.sellerId);
     } catch (e) {
         document.getElementById('product-loading').innerHTML = '<p style="color:#888;text-align:center;padding:4rem;">Product not found. <a href="/Home/Shop">Back to Shop</a></p>';
     }
@@ -1002,6 +1063,49 @@ async function loadRelated() {
             </div>
         `).join('');
     } catch(e) {}
+}
+
+/* ─── SELLER PROFILE ─── */
+async function loadSellerProfile(sellerId) {
+    if (!sellerId) return;
+    try {
+        const res = await fetch(`/api/sellers/${sellerId}`);
+        if (!res.ok) return;
+        const seller = await res.json();
+        renderSellerProfile(seller);
+    } catch(e) { console.error('Could not load seller:', e); }
+}
+
+function renderSellerProfile(seller) {
+    const section = document.getElementById('pd-seller-section');
+    section.style.display = 'block';
+
+    const shopUrl = `/Home/SellerShop?id=${seller.id}`;
+
+    document.getElementById('pd-seller-avatar').src = seller.avatar;
+    document.getElementById('pd-seller-avatar').alt = seller.shopName;
+    document.getElementById('pd-seller-avatar-link').href = shopUrl;
+    document.getElementById('pd-seller-name').textContent = seller.shopName;
+    document.getElementById('pd-seller-name-link').href = shopUrl;
+    document.getElementById('pd-seller-loc-text').textContent = seller.location;
+    document.getElementById('pd-seller-response-time').textContent = seller.responseTime;
+    document.getElementById('pd-seller-shop-link').href = shopUrl;
+
+    // Stats
+    document.getElementById('pd-seller-rating').textContent = seller.rating.toFixed(1);
+    document.getElementById('pd-seller-total-ratings').textContent = formatCount(seller.totalRatings);
+    document.getElementById('pd-seller-products').textContent = seller.totalProducts;
+    document.getElementById('pd-seller-response-rate').textContent = seller.responseRate + '%';
+    document.getElementById('pd-seller-joined').textContent = seller.joinedAgo;
+}
+
+function formatCount(n) {
+    if (n >= 1000) return (n / 1000).toFixed(1).replace(/\.0$/, '') + 'k';
+    return n.toString();
+}
+
+function sellerChat() {
+    toast.info('Chat feature coming soon!');
 }
 </script>
 }

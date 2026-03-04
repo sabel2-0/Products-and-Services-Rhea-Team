@@ -28,6 +28,34 @@ public class Product
     public bool IsRestockPreOrder { get; set; } = false;
     public string RestockDate { get; set; } = string.Empty; // e.g. "Mid-March 2026"
     public string RestockNote { get; set; } = string.Empty; // e.g. "Limited restock — reserve yours now"
+    public int SellerId { get; set; } = 1; // FK to seller
+}
+
+public class Seller
+{
+    public int Id { get; set; }
+    public string ShopName { get; set; } = string.Empty;
+    public string Avatar { get; set; } = string.Empty; // URL or path to seller avatar
+    public string CoverImage { get; set; } = string.Empty;
+    public string Description { get; set; } = string.Empty;
+    public string Location { get; set; } = string.Empty;
+    public double Rating { get; set; }
+    public int TotalRatings { get; set; }
+    public int TotalProducts { get; set; }
+    public int Followers { get; set; }
+    public double ResponseRate { get; set; } // percentage
+    public string ResponseTime { get; set; } = string.Empty; // e.g. "within hours"
+    public DateTime JoinedDate { get; set; }
+    public string JoinedAgo => GetTimeAgo(JoinedDate);
+
+    private static string GetTimeAgo(DateTime date)
+    {
+        var span = DateTime.Now - date;
+        if (span.TotalDays >= 365) return $"{(int)(span.TotalDays / 365)} year{((int)(span.TotalDays / 365) != 1 ? "s" : "")} ago";
+        if (span.TotalDays >= 30) return $"{(int)(span.TotalDays / 30)} month{((int)(span.TotalDays / 30) != 1 ? "s" : "")} ago";
+        if (span.TotalDays >= 1) return $"{(int)span.TotalDays} day{((int)span.TotalDays != 1 ? "s" : "")} ago";
+        return "today";
+    }
 }
 
 public class Review
