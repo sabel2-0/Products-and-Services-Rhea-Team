@@ -1,7 +1,15 @@
+using Microsoft.EntityFrameworkCore;
+using MyAspNetApp.Data;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add MVC services
 builder.Services.AddControllersWithViews();
+
+// Add database context
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
