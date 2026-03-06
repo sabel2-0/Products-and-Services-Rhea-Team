@@ -20,11 +20,14 @@ namespace MyAspNetApp.Controllers
         [HttpGet]
         public IActionResult GetCart()
         {
-            var cartWithProducts = ProductData.Cart.Select(ci => new
-            {
-                CartItem = ci,
-                Product = ProductData.Products.FirstOrDefault(p => p.Id == ci.ProductId)
-            }).ToList();
+            var cartWithProducts = ProductData.Cart
+                .Select(ci => new
+                {
+                    CartItem = ci,
+                    Product = ProductData.Products.FirstOrDefault(p => p.Id == ci.ProductId)
+                })
+                .Where(x => x.Product != null)
+                .ToList();
             return Ok(cartWithProducts);
         }
 

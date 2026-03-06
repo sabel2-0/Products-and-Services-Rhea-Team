@@ -105,42 +105,7 @@ function initHeaderScroll() {
 // =====================================================
 // PROMO BAR
 // =====================================================
-const PROMO_MESSAGES = [
-    '\uD83C\uDFC3 Free shipping on orders over \u20B13,000 &nbsp;&middot;&nbsp; New Carbon Racer 2026 dropping <strong>March 15</strong> \u2014 be ready.',
-    '\uD83D\uDD25 Sale on select running shoes \u2014 up to <strong>40% off</strong> this week only.',
-    '\u2606 Best Sellers restocked \u2014 grab yours before they\u2019re gone.',
-    '\uD83D\uDCE6 Orders placed before <strong>5PM</strong> ship same day.',
-    '\uD83E\uDD4E New Arrivals just dropped \u2014 <strong>Spring 2026 Collection</strong> is here.',
-    'Earn rewards on every purchase \u2014 Join <strong>NEXT HORIZON Members</strong> today.'
-];
-let _promoIdx = 0;
 
-function initPromoBar() {
-    const bar = document.getElementById('promo-bar');
-    const header = document.getElementById('main-header');
-    // If no promo bar on this page, header sticks at top: 0
-    if (!bar) {
-        if (header) header.style.top = '0';
-        return;
-    }
-    // Set initial message
-    const msgEl = document.getElementById('promo-bar-msg');
-    if (msgEl) {
-        msgEl.innerHTML = PROMO_MESSAGES[0];
-        startPromoRotation(msgEl);
-    }
-}
-
-function startPromoRotation(msgEl) {
-    setInterval(() => {
-        msgEl.classList.add('fade-out');
-        setTimeout(() => {
-            _promoIdx = (_promoIdx + 1) % PROMO_MESSAGES.length;
-            msgEl.innerHTML = PROMO_MESSAGES[_promoIdx];
-            msgEl.classList.remove('fade-out');
-        }, 360);
-    }, 5000);
-}
 
 // =====================================================
 // SEARCH DROPDOWN (Adidas-style)
@@ -156,15 +121,14 @@ async function openSearchOverlay() {
     // Position dropdown container flush below the header
     const header = document.getElementById('main-header');
     function _positionSearchPanel() {
-        const headerRect = header.getBoundingClientRect();
         const wrapRect = wrap.getBoundingClientRect();
-        dropdown.style.top = headerRect.bottom + 'px';
+        // Align dropdown flush with the bottom of the search bar (covers nav bar)
+        dropdown.style.top = wrapRect.bottom + 'px';
         panel.style.top = '0';
-        // Right-align panel with the right edge of the search bar
-        // Adjust the offset value (currently 20px) to shift the panel left or right
-        const PANEL_OFFSET = 20; // increase = more left, decrease = more right, 0 = flush
-        panel.style.right = (window.innerWidth - wrapRect.right - PANEL_OFFSET) + 'px';
-        panel.style.left = 'auto';
+        // Align panel left edge with search bar left edge, match width exactly
+        panel.style.left = wrapRect.left + 'px';
+        panel.style.right = 'auto';
+        panel.style.width = wrapRect.width + 'px';
     }
     if (panel && header) {
         _positionSearchPanel();
@@ -300,7 +264,7 @@ function handleSearchInput(val) {
 // =====================================================
 document.addEventListener('DOMContentLoaded', () => {
     initHeaderScroll();
-    initPromoBar();
+
     initTopNav();
     // Only load products if the grid exists (Shop page)
     if (document.getElementById('products-grid')) {

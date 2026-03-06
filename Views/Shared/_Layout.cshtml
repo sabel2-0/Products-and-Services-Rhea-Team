@@ -16,195 +16,38 @@
     
     <!-- Styles -->
     <link rel="stylesheet" href="~/css/style.css" asp-append-version="true">
+    <link rel="stylesheet" href="~/css/header.css" asp-append-version="true">
     @await RenderSectionAsync("Styles", required: false)
 </head>
 <body>
-    @{
-        var _isShop = ViewContext.RouteData.Values["action"]?.ToString()?.ToLower() == "shop";
-    }
-    @if (_isShop)
-    {
-    <!-- ── Promo Announcement Bar (shop only, no close) ── -->
-    <div id="promo-bar" class="promo-bar">
-        <div class="promo-bar-track">
-            <span id="promo-bar-msg" class="promo-bar-msg"></span>
-        </div>
-    </div>
-    }
-
     <!-- ── Main Header ────────────────────────────────── -->
     <header id="main-header">
+        <!-- Top Row: Logo — Search — Icons -->
         <div class="header-inner">
-            <div class="header-content">
-
-                <!-- Logo -->
+            <div class="header-top">
                 <div class="logo">
                     <a href="/"><img src="/logo.png" alt="NEXT HORIZON" class="header-logo-img"></a>
                 </div>
 
-                <!-- Mega Nav — only on Shop page -->
-                @{
-                    var isShopPage = ViewContext.RouteData.Values["action"]?.ToString()?.ToLower() == "shop";
-                }
-                @if (isShopPage)
-                {
-                <nav class="mega-nav" id="main-nav" aria-label="Shop navigation">
-
-                    <!-- Men -->
-                    <div class="mega-item">
-                        <a href="/Home/Shop?gender=men" class="mega-link">Men</a>
-                        <div class="mega-panel">
-                            <div class="mega-col">
-                                <h4 class="mega-col-title">Shoes</h4>
-                                <a href="/Home/Shop?gender=men&cat=running-shoes">Running Shoes</a>
-                                <a href="/Home/Shop?gender=men&cat=trail-shoes">Trail Shoes</a>
-                                <a href="/Home/Shop?gender=men&cat=racing-shoes">Racing Shoes</a>
-                                <a href="/Home/Shop?gender=men&cat=casual">Lifestyle</a>
-                            </div>
-                            <div class="mega-col">
-                                <h4 class="mega-col-title">Clothing</h4>
-                                <a href="/Home/Shop?gender=men&cat=tops">Tops &amp; T-Shirts</a>
-                                <a href="/Home/Shop?gender=men&cat=shorts">Shorts</a>
-                                <a href="/Home/Shop?gender=men&cat=jackets">Jackets</a>
-                                <a href="/Home/Shop?gender=men&cat=tights">Tights</a>
-                            </div>
-                            <div class="mega-col">
-                                <h4 class="mega-col-title">Accessories</h4>
-                                <a href="/Home/Shop?gender=men&cat=socks">Socks</a>
-                                <a href="/Home/Shop?gender=men&cat=caps">Caps &amp; Hats</a>
-                                <a href="/Home/Shop?gender=men&cat=bags">Bags</a>
-                                <a href="/Home/Shop?gender=men&cat=insoles">Insoles</a>
-                            </div>
-                            <div class="mega-col">
-                                <h4 class="mega-col-title">Sports</h4>
-                                <a href="/Home/Shop?gender=men&sport=road-running">Road Running</a>
-                                <a href="/Home/Shop?gender=men&sport=trail-running">Trail Running</a>
-                                <a href="/Home/Shop?gender=men&sport=gym">Gym &amp; Training</a>
-                                <a href="/Home/Shop?gender=men&sport=race-day">Race Day</a>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Women -->
-                    <div class="mega-item">
-                        <a href="/Home/Shop?gender=women" class="mega-link">Women</a>
-                        <div class="mega-panel">
-                            <div class="mega-col">
-                                <h4 class="mega-col-title">Shoes</h4>
-                                <a href="/Home/Shop?gender=women&cat=running-shoes">Running Shoes</a>
-                                <a href="/Home/Shop?gender=women&cat=trail-shoes">Trail Shoes</a>
-                                <a href="/Home/Shop?gender=women&cat=racing-shoes">Racing Shoes</a>
-                                <a href="/Home/Shop?gender=women&cat=casual">Lifestyle</a>
-                            </div>
-                            <div class="mega-col">
-                                <h4 class="mega-col-title">Clothing</h4>
-                                <a href="/Home/Shop?gender=women&cat=tops">Tops &amp; T-Shirts</a>
-                                <a href="/Home/Shop?gender=women&cat=shorts">Shorts</a>
-                                <a href="/Home/Shop?gender=women&cat=jackets">Jackets</a>
-                                <a href="/Home/Shop?gender=women&cat=tights">Tights &amp; Leggings</a>
-                            </div>
-                            <div class="mega-col">
-                                <h4 class="mega-col-title">Accessories</h4>
-                                <a href="/Home/Shop?gender=women&cat=socks">Socks</a>
-                                <a href="/Home/Shop?gender=women&cat=caps">Caps &amp; Hats</a>
-                                <a href="/Home/Shop?gender=women&cat=bags">Bags</a>
-                                <a href="/Home/Shop?gender=women&cat=insoles">Insoles</a>
-                            </div>
-                            <div class="mega-col">
-                                <h4 class="mega-col-title">Sports</h4>
-                                <a href="/Home/Shop?gender=women&sport=road-running">Road Running</a>
-                                <a href="/Home/Shop?gender=women&sport=trail-running">Trail Running</a>
-                                <a href="/Home/Shop?gender=women&sport=gym">Gym &amp; Training</a>
-                                <a href="/Home/Shop?gender=women&sport=race-day">Race Day</a>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Kids -->
-                    <div class="mega-item">
-                        <a href="/Home/Shop?gender=kids" class="mega-link">Kids</a>
-                        <div class="mega-panel">
-                            <div class="mega-col">
-                                <h4 class="mega-col-title">Shoes</h4>
-                                <a href="/Home/Shop?gender=kids&cat=running-shoes">Running Shoes</a>
-                                <a href="/Home/Shop?gender=kids&cat=trail-shoes">Trail Shoes</a>
-                                <a href="/Home/Shop?gender=kids&cat=casual">Lifestyle</a>
-                            </div>
-                            <div class="mega-col">
-                                <h4 class="mega-col-title">Clothing</h4>
-                                <a href="/Home/Shop?gender=kids&cat=tops">Tops</a>
-                                <a href="/Home/Shop?gender=kids&cat=shorts">Shorts</a>
-                                <a href="/Home/Shop?gender=kids&cat=jackets">Jackets</a>
-                            </div>
-                            <div class="mega-col">
-                                <h4 class="mega-col-title">Accessories</h4>
-                                <a href="/Home/Shop?gender=kids&cat=socks">Socks</a>
-                                <a href="/Home/Shop?gender=kids&cat=bags">Bags</a>
-                                <a href="/Home/Shop?gender=kids&cat=caps">Caps</a>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Sports -->
-                    <div class="mega-item">
-                        <a href="/Home/Shop?sport=all" class="mega-link">Sports</a>
-                        <div class="mega-panel mega-panel--slim">
-                            <div class="mega-col">
-                                <a href="/Home/Shop?sport=road-running">Road Running</a>
-                                <a href="/Home/Shop?sport=trail-running">Trail Running</a>
-                                <a href="/Home/Shop?sport=race-day">Race Day</a>
-                                <a href="/Home/Shop?sport=gym">Gym &amp; Training</a>
-                                <a href="/Home/Shop?sport=hiking">Hiking</a>
-                                <a href="/Home/Shop?sport=walking">Walking</a>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Sale -->
-                    <div class="mega-item">
-                        <a href="/Home/Shop?q=sale" class="mega-link mega-link--sale">Sale</a>
-                    </div>
-
-                    <!-- New & Trending -->
-                    <div class="mega-item">
-                        <a href="/Home/Shop?q=new+arrivals" class="mega-link">New &amp; Trending</a>
-                        <div class="mega-panel mega-panel--slim">
-                            <div class="mega-col">
-                                <a href="/Home/Shop?q=new+arrivals" class="mega-featured-link">New Arrivals</a>
-                                <a href="/Home/Shop?q=best+sellers" class="mega-featured-link">Best Sellers</a>
-                                <a href="/Home/Shop?q=trending" class="mega-featured-link">Trending Now</a>
-                            </div>
-                        </div>
-                    </div>
-
-                </nav>
-                }
-
-                <!-- Actions (right) -->
-                <div class="header-actions">
-
-                    <!-- Search -->
-                    <div class="hdr-search-wrap" id="hdr-search-wrap">
-                        <button class="hdr-search-bar" id="search-toggle-btn" onclick="openSearchOverlay()" aria-label="Search">
-                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-                            <span>Search</span>
+                <div class="hdr-search-wrap" id="hdr-search-wrap">
+                    <button class="hdr-search-bar" id="search-toggle-btn" onclick="openSearchOverlay()" aria-label="Search">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                        <span>Search</span>
+                    </button>
+                    <div class="hdr-search-active" id="hdr-search-active">
+                        <svg class="hdr-sa-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                        <input type="search" id="search-overlay-input" class="hdr-sa-input" placeholder="Search" autocomplete="off" spellcheck="false" oninput="handleSearchInput(this.value)">
+                        <button class="hdr-sa-clear" onclick="clearOrCloseSearch()" aria-label="Close search">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                         </button>
-                        <div class="hdr-search-active" id="hdr-search-active">
-                            <svg class="hdr-sa-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-                            <input type="search" id="search-overlay-input" class="hdr-sa-input" placeholder="Search" autocomplete="off" spellcheck="false" oninput="handleSearchInput(this.value)">
-                            <button class="hdr-sa-clear" onclick="clearOrCloseSearch()" aria-label="Close search">
-                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-                            </button>
-                        </div>
                     </div>
+                </div>
 
-                    <!-- Cart -->
+                <div class="header-actions">
                     <a href="/Home/Cart" class="hdr-icon-btn" aria-label="Shopping Cart">
                         <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
                         <span id="cart-count" class="hdr-badge">0</span>
                     </a>
-
-                    <!-- Notification Bell -->
                     <div class="notif-wrap" id="notif-wrap">
                         <button class="hdr-icon-btn notif-btn" id="notif-btn" onclick="toggleNotifDropdown()" aria-label="Notifications">
                             <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
@@ -246,18 +89,121 @@
                             </ul>
                         </div>
                     </div>
-
-                    <!-- Seller Dashboard -->
-                    <a href="/Seller" class="hdr-icon-btn" aria-label="Seller Dashboard" title="Seller Dashboard">
-                        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-                    </a>
-
-                    <!-- Account / Login -->
-                    <button class="hdr-icon-btn" onclick="openLoginModal()" aria-label="Account">
-                        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                    </button>
-
+                    <div class="profile-dropdown-wrap">
+                        <button class="hdr-icon-btn" aria-label="Account">
+                            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                        </button>
+                        <div class="profile-dropdown">
+                            <a href="/Home/MyOrders" class="profile-dropdown-item">View Profile</a>
+                            <a href="/" class="profile-dropdown-item" onclick="logout()">Logout</a>
+                        </div>
+                    </div>
                 </div>
+            </div>
+        </div>
+
+        <!-- Bottom Row: Navigation -->
+        <div class="header-nav-bar">
+            <div class="header-inner">
+                <nav class="mega-nav" id="main-nav" aria-label="Main navigation">
+                    <div class="mega-item">
+                        <a href="/Home/Shop?q=sale" class="mega-link mega-link--sale">Sale</a>
+                    </div>
+                    <div class="mega-item">
+                        <a href="/Home/Shop?q=challenge" class="mega-link">Join the Challenge</a>
+                    </div>
+                    <div class="mega-item">
+                        <a href="/Home/Shop?q=flash+deals" class="mega-link">Flash Deals</a>
+                    </div>
+                    <div class="mega-item">
+                        <a href="/Home/Shop?gender=men" class="mega-link">Men</a>
+                        <div class="mega-panel mega-panel--3col">
+                            <div class="mega-col">
+                                <h4 class="mega-col-title">Shoes</h4>
+                                <a href="/Home/Shop?gender=men&cat=road-running">Road Running</a>
+                                <a href="/Home/Shop?gender=men&cat=trail-running">Trail Running</a>
+                                <a href="/Home/Shop?gender=men&cat=racing">Racing</a>
+                            </div>
+                            <div class="mega-col">
+                                <h4 class="mega-col-title">Apparel</h4>
+                                <a href="/Home/Shop?gender=men&cat=shirts">Shirts</a>
+                                <a href="/Home/Shop?gender=men&cat=singlets">Singlets</a>
+                                <a href="/Home/Shop?gender=men&cat=shorts">Shorts</a>
+                                <a href="/Home/Shop?gender=men&cat=tights">Tights</a>
+                            </div>
+                            <div class="mega-col">
+                                <h4 class="mega-col-title">Accessories</h4>
+                                <a href="/Home/Shop?gender=men&cat=socks">Socks</a>
+                                <a href="/Home/Shop?gender=men&cat=caps">Caps</a>
+                                <a href="/Home/Shop?gender=men&cat=sunglasses">Sunglasses</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mega-item">
+                        <a href="/Home/Shop?gender=women" class="mega-link">Women</a>
+                        <div class="mega-panel mega-panel--3col">
+                            <div class="mega-col">
+                                <h4 class="mega-col-title">Shoes</h4>
+                                <a href="/Home/Shop?gender=women&cat=road-running">Road Running</a>
+                                <a href="/Home/Shop?gender=women&cat=trail-running">Trail Running</a>
+                                <a href="/Home/Shop?gender=women&cat=racing">Racing</a>
+                            </div>
+                            <div class="mega-col">
+                                <h4 class="mega-col-title">Apparel</h4>
+                                <a href="/Home/Shop?gender=women&cat=shirts">Shirts</a>
+                                <a href="/Home/Shop?gender=women&cat=singlets">Singlets</a>
+                                <a href="/Home/Shop?gender=women&cat=shorts">Shorts</a>
+                                <a href="/Home/Shop?gender=women&cat=tights">Tights &amp; Leggings</a>
+                                <a href="/Home/Shop?gender=women&cat=sports-bras">Sports Bras</a>
+                            </div>
+                            <div class="mega-col">
+                                <h4 class="mega-col-title">Accessories</h4>
+                                <a href="/Home/Shop?gender=women&cat=socks">Socks</a>
+                                <a href="/Home/Shop?gender=women&cat=caps">Caps</a>
+                                <a href="/Home/Shop?gender=women&cat=sunglasses">Sunglasses</a>
+                                <a href="/Home/Shop?gender=women&cat=hair-accessories">Hair Accessories</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mega-item">
+                        <a href="/Home/Shop?q=next+horizon" class="mega-link">Next Horizon Products</a>
+                        <div class="mega-panel mega-panel--3col">
+                            <div class="mega-col">
+                                <h4 class="mega-col-title">Shoes</h4>
+                                <a href="/Home/Shop?brand=nh&cat=road-running">Road Running</a>
+                                <a href="/Home/Shop?brand=nh&cat=trail-running">Trail Running</a>
+                                <a href="/Home/Shop?brand=nh&cat=racing">Racing</a>
+                            </div>
+                            <div class="mega-col">
+                                <h4 class="mega-col-title">Apparel</h4>
+                                <a href="/Home/Shop?brand=nh&cat=shirts">Shirts</a>
+                                <a href="/Home/Shop?brand=nh&cat=singlets">Singlets</a>
+                                <a href="/Home/Shop?brand=nh&cat=shorts">Shorts</a>
+                                <a href="/Home/Shop?brand=nh&cat=tights">Tights &amp; Leggings</a>
+                                <a href="/Home/Shop?brand=nh&cat=sports-bras">Sports Bras</a>
+                            </div>
+                            <div class="mega-col">
+                                <h4 class="mega-col-title">Accessories</h4>
+                                <a href="/Home/Shop?brand=nh&cat=socks">Socks</a>
+                                <a href="/Home/Shop?brand=nh&cat=caps">Caps</a>
+                                <a href="/Home/Shop?brand=nh&cat=sunglasses">Sunglasses</a>
+                                <a href="/Home/Shop?brand=nh&cat=hair-accessories">Hair Accessories</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mega-item">
+                        <a href="/Home/Shop?q=free+shipping" class="mega-link">Free Shipping</a>
+                    </div>
+                    <div class="mega-item">
+                        <a href="/Home/Shop?q=coins+rewards" class="mega-link">Coins Rewards</a>
+                    </div>
+                    <div class="mega-item">
+                        <a href="/Home/Shop?q=achievements" class="mega-link">Achievements</a>
+                    </div>
+                    <div class="mega-item">
+                        <a href="/Home/Shop?q=partner+promos" class="mega-link">Partner Promos</a>
+                    </div>
+                </nav>
             </div>
         </div>
     </header>

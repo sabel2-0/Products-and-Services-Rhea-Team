@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.FileProviders;
 using MyAspNetApp.Data;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -31,6 +32,13 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
+// Serve files from the etc-css folder at /etc-css
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(
+        Path.Combine(builder.Environment.ContentRootPath, "etc-css")),
+    RequestPath = "/etc-css"
+});
 app.UseRouting();
 app.UseCors();
 app.UseAuthorization();
