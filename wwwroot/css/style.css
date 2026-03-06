@@ -1954,22 +1954,6 @@ body.modal-open {
     outline-offset: 3px;
 }
 
-/* Scrollbar */
-::-webkit-scrollbar {
-    width: 10px;
-}
-
-::-webkit-scrollbar-track {
-    background: var(--off-white);
-}
-
-::-webkit-scrollbar-thumb {
-    background: var(--pure-black);
-}
-
-::-webkit-scrollbar-thumb:hover {
-    background: var(--pure-black);
-}
 
 /* =====================================================
    TOAST NOTIFICATIONS

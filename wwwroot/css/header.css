@@ -21,6 +21,35 @@
    Header HTML lives in: Views/Shared/_Layout.cshtml
    ============================================================================= */
 
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap');
+
+/* CSS Reset & Base */
+*, *::before, *::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    --pure-black: #000000;
+    --pure-white: #FFFFFF;
+    --border-color: #E5E5E5;
+    --radius-full: 9999px;
+    --font-primary: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-display: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+body {
+    font-family: var(--font-primary);
+    background: var(--pure-white);
+    color: var(--pure-black);
+    line-height: 1.6;
+    font-weight: 400;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+}
+
 
 /* =====================================================
    1. HEADER BASE — Sticky positioning & scroll states
