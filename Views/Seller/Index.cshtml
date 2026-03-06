@@ -91,7 +91,7 @@
         /* Layout Adjustments */
         .main-wrapper {
             flex: 1;
-            margin-left: 260px;
+            margin-left: 300px;
             display: flex;
             flex-direction: column;
         }
@@ -246,6 +246,32 @@
             display: flex;
             align-items: center;
             gap: 15px;
+        }
+
+        .filter-dropdown-select {
+            background: #8A8888;
+            color: #fff;
+            padding: 6px 30px 6px 12px;
+            border-radius: 8px;
+            border: none;
+            font-size: 0.85rem;
+            font-weight: 500;
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            cursor: pointer;
+            min-width: 130px;
+            background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 320 512%22%3E%3Cpath fill=%22%23FFFFFF%22 d=%22M137.4 374.6c12.5 12.5 32.8 12.5 45.3 0l128-128c9.2-9.2 11.9-22.9 6.9-34.9s-16.6-19.8-29.6-19.8L32 192c-12.9 0-24.6 7.8-29.6 19.8s-2.2 25.7 6.9 34.9l128 128z%22/%3E%3C/svg%3E');
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            background-size: 10px auto;
+            font-family: 'Inter', sans-serif;
+            outline: none;
+        }
+
+        .filter-dropdown-select option {
+            color: #111;
+            background: #fff;
         }
 
         /* Tab Content Logic */
@@ -442,6 +468,7 @@
                 color: #b0aba8;
                 cursor: not-allowed;
             }
+
     </style>
 </head>
 <body>
@@ -508,15 +535,15 @@
             <div class="product-box">
                 <div class="product-header">
                     <h3 id="display-title" style="font-weight: 700; font-size: 1.1rem; margin: 0;">Active Product</h3>
-                    <div class="filter-dropdown">
-                        All <i class="fa-solid fa-caret-down"></i>
-                    </div>
+                    <select class="filter-dropdown-select" id="categoryFilter" onchange="filterProducts()">
+                        <option value="All">All</option>
+                    </select>
                 </div>
 
                 <div id="active-content" class="product-group visible">
                     @foreach (var p in activeProducts)
                     {
-                    <div class="product-row">
+                    <div class="product-row" data-category="@p.Category">
                         <div class="product-detail">
                             <a href="/Seller/ViewProduct?id=@p.ProductId&state=active">
                                 <img src="@(string.IsNullOrEmpty(p.ImagePath) ? "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='90' height='90'%3E%3Crect width='90' height='90' fill='%23e0e0e0'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='Inter' font-size='11' fill='%23888'%3ENo Image%3C/text%3E%3C/svg%3E" : p.ImagePath)" class="product-img" alt="Product" onerror="this.onerror=null;this.src='data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2790%27 height=%2790%27%3E%3Crect width=%2790%27 height=%2790%27 fill=%27%23e0e0e0%27/%3E%3Ctext x=%2750%25%27 y=%2750%25%27 dominant-baseline=%27middle%27 text-anchor=%27middle%27 font-family=%27Inter%27 font-size=%2711%27 fill=%27%23888%27%3ENo Image%3C/text%3E%3C/svg%3E';">
@@ -560,7 +587,7 @@
                 <div id="renew-content" class="product-group">
                     @foreach (var p in renewProducts)
                     {
-                    <div class="product-row">
+                    <div class="product-row" data-category="@p.Category">
                         <div class="product-detail">
                             <a href="/Seller/ViewProduct?id=@p.ProductId&state=renew">
                                 <img src="@(string.IsNullOrEmpty(p.ImagePath) ? "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='90' height='90'%3E%3Crect width='90' height='90' fill='%23e0e0e0'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='Inter' font-size='11' fill='%23888'%3ENo Image%3C/text%3E%3C/svg%3E" : p.ImagePath)" class="product-img" onerror="this.onerror=null;this.src='data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2790%27 height=%2790%27%3E%3Crect width=%2790%27 height=%2790%27 fill=%27%23e0e0e0%27/%3E%3Ctext x=%2750%25%27 y=%2750%25%27 dominant-baseline=%27middle%27 text-anchor=%27middle%27 font-family=%27Inter%27 font-size=%2711%27 fill=%27%23888%27%3ENo Image%3C/text%3E%3C/svg%3E';">
@@ -595,7 +622,7 @@
                 <div id="relist-content" class="product-group">
                     @foreach (var p in relistProducts)
                     {
-                    <div class="product-row">
+                    <div class="product-row" data-category="@p.Category">
                         <div class="product-detail">
                             <a href="/Seller/ViewProduct?id=@p.ProductId&state=relist">
                                 <img src="@(string.IsNullOrEmpty(p.ImagePath) ? "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='90' height='90'%3E%3Crect width='90' height='90' fill='%23e0e0e0'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='Inter' font-size='11' fill='%23888'%3ENo Image%3C/text%3E%3C/svg%3E" : p.ImagePath)" class="product-img" style="filter:grayscale(1)" onerror="this.onerror=null;this.src='data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2790%27 height=%2790%27%3E%3Crect width=%2790%27 height=%2790%27 fill=%27%23e0e0e0%27/%3E%3Ctext x=%2750%25%27 y=%2750%25%27 dominant-baseline=%27middle%27 text-anchor=%27middle%27 font-family=%27Inter%27 font-size=%2711%27 fill=%27%23888%27%3ENo Image%3C/text%3E%3C/svg%3E';">
@@ -649,7 +676,11 @@
         }
 
         // Run count on initial page load
-        document.addEventListener("DOMContentLoaded", updateProductCounts);
+        document.addEventListener("DOMContentLoaded", function () {
+            updateProductCounts();
+            populateCategories();
+            filterProducts();
+        });
 
         // 2. Tab Changing Logic
         function changeTab(tabId, element) {
@@ -678,6 +709,10 @@
                 'relist': 'Relist Deleted Product'
             };
             document.getElementById('display-title').innerText = titles[tabId];
+
+            // Refresh category options and apply current filter for selected tab.
+            populateCategories();
+            filterProducts();
         }
 
         // 3. Dropdown Menu Toggle Logic
@@ -710,7 +745,93 @@
                 }
             }
         }
+
+        function getActiveTabId() {
+            if (document.getElementById('active-content').classList.contains('visible')) return 'active';
+            if (document.getElementById('renew-content').classList.contains('visible')) return 'renew';
+            return 'relist';
+        }
+
+        function populateCategories() {
+            var select = document.getElementById('categoryFilter');
+            var currentValue = select.value;
+            var activeTab = getActiveTabId();
+            var rows = document.querySelectorAll('#' + activeTab + '-content .product-row');
+
+            var categories = ['All'];
+            rows.forEach(function(row) {
+                var category = (row.getAttribute('data-category') || '').trim();
+                if (!category) {
+                    category = 'Uncategorized';
+                    row.setAttribute('data-category', category);
+                }
+                if (categories.indexOf(category) === -1) {
+                    categories.push(category);
+                }
+            });
+
+            select.innerHTML = categories.map(function(category) {
+                return '<option value="' + category.replace(/"/g, '&quot;') + '">' + category + '</option>';
+            }).join('');
+
+            if (categories.indexOf(currentValue) >= 0) {
+                select.value = currentValue;
+            } else {
+                select.value = 'All';
+            }
+        }
+
+        function filterProducts() {
+            var selectedCategory = document.getElementById('categoryFilter').value;
+            var activeTab = getActiveTabId();
+            var rows = document.querySelectorAll('#' + activeTab + '-content .product-row');
+
+            rows.forEach(function(row) {
+                var rowCategory = row.getAttribute('data-category');
+                if (selectedCategory === 'All' || rowCategory === selectedCategory) {
+                    row.style.display = 'flex';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
     </script>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div id="seller-toast" class="seller-toast">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            <span>@TempData["SuccessMessage"]</span>
+        </div>
+        <style>
+            .seller-toast {
+                position: fixed;
+                bottom: 32px;
+                right: 32px;
+                background: #111;
+                color: #fff;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                padding: 14px 22px;
+                border-radius: 6px;
+                font-size: 0.88rem;
+                font-weight: 500;
+                letter-spacing: 0.01em;
+                box-shadow: 0 4px 24px rgba(0,0,0,0.18);
+                z-index: 9999;
+                opacity: 0;
+                transform: translateY(12px);
+                animation: toastIn 0.3s ease forwards, toastOut 0.4s ease 3.2s forwards;
+            }
+            .seller-toast svg { flex-shrink: 0; }
+            @@keyframes toastIn  { to { opacity: 1; transform: translateY(0); } }
+            @@keyframes toastOut { to { opacity: 0; transform: translateY(12px); } }
+        </style>
+        <script>
+            setTimeout(() => { const t = document.getElementById('seller-toast'); if (t) t.remove(); }, 3800);
+        </script>
+    }
 
 </body>
 </html>

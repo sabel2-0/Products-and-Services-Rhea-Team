@@ -33,6 +33,10 @@ namespace MyAspNetApp.Models
         public string? Colors { get; set; }
 
         public string? Sizes { get; set; }
+
+        public string? ColorStocks { get; set; }
+
+        public string? ColorSizes { get; set; }
     }
 
     [Table("ProductColorImages")]

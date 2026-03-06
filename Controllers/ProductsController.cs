@@ -29,6 +29,26 @@ namespace MyAspNetApp.Controllers
             if (availColors.Count == 0 && !string.IsNullOrEmpty(p.Colors))
                 availColors = p.Colors.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToList();
 
+            // Build per-color stock dictionary
+            var colorStocksList = !string.IsNullOrEmpty(p.ColorStocks)
+                ? p.ColorStocks.Split(',').Select(s => int.TryParse(s.Trim(), out var n) ? n : 0).ToList()
+                : new List<int>();
+            var colorStockDict = new Dictionary<string, int>();
+            for (int i = 0; i < availColors.Count; i++)
+                colorStockDict[availColors[i]] = i < colorStocksList.Count ? colorStocksList[i] : p.Stock;
+
+            // Build per-color sizes dictionary
+            var colorSizesSegments = !string.IsNullOrEmpty(p.ColorSizes)
+                ? p.ColorSizes.Split('|')
+                : Array.Empty<string>();
+            var colorSizesDict = new Dictionary<string, List<string>>();
+            for (int i = 0; i < availColors.Count; i++)
+            {
+                var seg = i < colorSizesSegments.Length ? colorSizesSegments[i] : "";
+                if (!string.IsNullOrEmpty(seg))
+                    colorSizesDict[availColors[i]] = seg.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToList();
+            }
+
             return new Product
             {
                 Id = p.ProductId,
@@ -45,7 +65,9 @@ namespace MyAspNetApp.Controllers
                 Stock = p.Stock,
                 Sizes = string.IsNullOrEmpty(p.Sizes) ? new List<string>() : p.Sizes.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToList(),
                 AvailableColors = availColors,
-                ColorImages = colorImageDict
+                ColorImages = colorImageDict,
+                ColorStocks = colorStockDict,
+                ColorSizes = colorSizesDict
             };
         }
 

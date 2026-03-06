@@ -1,4 +1,4 @@
-@model MyAspNetApp.Models.DbProduct
+﻿@model MyAspNetApp.Models.DbProduct
 @{
     ViewData["Title"] = "Manage Product Listing";
     Layout = null;
@@ -13,6 +13,8 @@
     <title>NEXT HORIZON - Manage Product Listing</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
 
     <style>
         :root {
@@ -97,17 +99,15 @@
                 color: #222;
             }
 
-        /* Thumbnail Row with Lines & Horizontal Scroll */
+        /* Thumbnail Row */
         .thumbnail-row {
             display: flex;
             gap: 15px;
             margin-bottom: 40px;
             overflow-x: auto;
-            padding: 10px 0; /* Padding creates space between pictures and lines */
-            /* Removed the horizontal top and bottom borders as requested */
+            padding: 10px 0;
         }
 
-            /* Sleek scrollbar styling for the thumbnail row */
             .thumbnail-row::-webkit-scrollbar {
                 height: 6px;
             }
@@ -170,10 +170,18 @@
         }
 
         /* Form Details */
+        /* Product Details Header Layout */
+        .details-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
         h3.section-title {
             font-size: 1.4rem;
             font-weight: 700;
-            margin-bottom: 20px;
+            margin: 0; /* Reset margin since wrapper handles spacing */
         }
 
         .form-row {
@@ -218,6 +226,17 @@
                 color: #222;
             }
 
+                /* Remove up/down arrows from number inputs */
+                .split-input-box input[type="number"]::-webkit-outer-spin-button,
+                .split-input-box input[type="number"]::-webkit-inner-spin-button {
+                    -webkit-appearance: none;
+                    margin: 0;
+                }
+
+                .split-input-box input[type="number"] {
+                    -moz-appearance: textfield;
+                }
+
                 .split-input-box input::placeholder {
                     color: #444;
                 }
@@ -229,11 +248,11 @@
         }
 
             .discount-wrap input {
-                width: 100px;
+                width: 60px;
                 text-align: left;
             }
 
-        /* Variant Row (Size, Style, Qty) */
+        /* Variant Row */
         .variant-row {
             display: flex;
             align-items: center;
@@ -271,8 +290,8 @@
             font-size: 1rem;
             color: #222;
             outline: none;
-            flex: 1; /* Allows inputs to shrink/grow evenly */
-            min-width: 70px; /* Ensures they don't get too small */
+            flex: 1;
+            min-width: 70px;
         }
 
             .small-input::placeholder {
@@ -285,7 +304,7 @@
             margin-right: 5px;
         }
 
-        /* Interactive Custom Checkbox Styling */
+        /* Interactive Custom Radio Styling */
         .custom-radio {
             display: flex;
             align-items: center;
@@ -296,7 +315,6 @@
             font-size: 0.9rem;
         }
 
-            /* Hide the default checkbox */
             .custom-radio input {
                 display: none;
             }
@@ -309,7 +327,6 @@
             transition: background-color 0.2s;
         }
 
-        /* When the hidden input is checked, turn the box black */
         .custom-radio input:checked + .radio-box {
             background-color: #000;
         }
@@ -339,7 +356,7 @@
                 background-color: #a0a0a5;
             }
 
-        .size-guide {
+        .size-guide-link {
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -348,28 +365,59 @@
             font-size: 0.85rem;
             cursor: pointer;
             width: 80px;
+            text-decoration: none;
+            color: inherit;
         }
 
-            .size-guide i {
+            .size-guide-link i {
                 font-size: 1.6rem;
                 margin-top: 4px;
             }
 
-        /* Text Area */
-        textarea.custom-input {
-            height: 180px;
-            resize: none;
+        /* Bottom Row Split: Text Area & Barcode */
+        .bottom-details-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
         }
 
-        /* Action Buttons Wrapper */
+        textarea.custom-input {
+            flex: 1;
+            height: 180px;
+            resize: none;
+            margin-bottom: 0; /* Remove margin inside flex */
+        }
+
+        .barcode-preview-box {
+            width: 220px;
+            background-color: var(--input-bg);
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 20px;
+        }
+
+            .barcode-preview-box span {
+                font-weight: 700;
+                color: #111;
+                margin-bottom: 15px;
+            }
+
+            .barcode-preview-box svg {
+                width: 100%;
+                height: auto;
+            }
+
+        /* Action Buttons */
         .action-buttons {
             display: flex;
             justify-content: flex-end;
             gap: 15px;
-            margin-top: 20px;
         }
 
-        /* Submit Button */
         .btn-submit {
             background-color: #1a1a1a;
             color: #fff;
@@ -387,7 +435,6 @@
                 background-color: #000;
             }
 
-        /* Cancel Button */
         .btn-cancel {
             background-color: #fff;
             color: #111;
@@ -405,7 +452,7 @@
                 background-color: #f5f5f5;
             }
 
-        /* Image Selector Overlay Modal */
+        /* Modal */
         .overlay-modal {
             display: none;
             position: fixed;
@@ -464,121 +511,56 @@
             cursor: pointer;
         }
 
-        /* Color Entries */
-        .color-entries-section {
-            margin-bottom: 20px;
-        }
-        .color-entry {
-            background: #f5f5f5;
-            border-radius: 12px;
-            padding: 18px 20px;
-            margin-bottom: 14px;
-            position: relative;
-        }
-        .color-entry-header {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-            margin-bottom: 12px;
-        }
-        .color-entry-header input {
-            flex: 1;
-            background-color: var(--input-bg);
-            border: none;
-            padding: 14px 18px;
-            border-radius: 10px;
-            font-family: 'Inter', sans-serif;
-            font-size: 1rem;
-            color: #222;
-            outline: none;
-        }
-        .color-entry-header input::placeholder { color: #444; }
-        .btn-remove-color {
-            background: none;
-            border: none;
-            color: var(--accent-red);
-            font-size: 1.3rem;
-            cursor: pointer;
-            padding: 8px;
+        .close-modal-cancel {
+            background: #fff;
+            color: #111;
+            padding: 10px 20px;
+            border: 1px solid #111;
             border-radius: 8px;
-            transition: 0.15s;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 0.95rem;
         }
-        .btn-remove-color:hover { background: rgba(197,34,31,0.08); }
-        .color-photos-grid {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            align-items: center;
-        }
-        .color-photo-thumb {
-            width: 72px;
-            height: 72px;
+
+        .img-selectable {
+            position: relative;
+            cursor: pointer;
             border-radius: 10px;
             overflow: hidden;
-            position: relative;
-            flex-shrink: 0;
+            border: 2px solid transparent;
         }
-        .color-photo-thumb img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        .color-photo-thumb .cp-del {
+
+            .img-selectable img {
+                width: 100%;
+                aspect-ratio: 1;
+                object-fit: cover;
+                display: block;
+            }
+
+            .img-selectable:hover {
+                border-color: #999;
+            }
+
+            .img-selectable.selected {
+                border-color: #111;
+            }
+
+        .img-checkmark {
             position: absolute;
-            top: 3px;
-            right: 3px;
-            background: rgba(0,0,0,0.7);
+            top: 5px;
+            right: 5px;
+            width: 22px;
+            height: 22px;
+            background: #111;
             color: #fff;
-            border: none;
             border-radius: 50%;
-            width: 20px;
-            height: 20px;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            font-size: 11px;
-            cursor: pointer;
-        }
-        .color-photo-thumb:hover .cp-del { display: flex; }
-        .cp-del:hover { background: var(--accent-red); }
-        .color-add-photo-btn {
-            width: 72px;
-            height: 72px;
-            border-radius: 10px;
-            background: var(--input-bg);
-            border: none;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            font-size: 0.7rem;
-            color: #444;
-            gap: 3px;
-            flex-shrink: 0;
-            transition: 0.15s;
-        }
-        .color-add-photo-btn:hover { background: #a0a0a5; }
-        .color-add-photo-btn i { font-size: 1.2rem; }
-        .btn-add-color {
-            width: 100%;
-            background-color: var(--input-bg);
-            border: none;
-            padding: 18px;
-            border-radius: 12px;
-            font-family: 'Inter', sans-serif;
-            font-size: 1.05rem;
-            color: #333;
-            cursor: pointer;
-            text-align: center;
-            margin-bottom: 20px;
-            transition: 0.15s;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
+            font-size: 12px;
+            font-weight: bold;
+            pointer-events: none;
         }
-        .btn-add-color:hover { background-color: #a0a0a5; }
     </style>
 </head>
 <body>
@@ -599,9 +581,7 @@
     </header>
 
     <div class="container">
-        <h2 class="page-title" id="dynamic-page-title">
-            @(mode == "edit" ? "Edit Product Listing" : mode == "renew" ? "Renew Product Listing" : mode == "relist" ? "Relist Product Listing" : "Create Product Listing")
-        </h2>
+        <h2 class="page-title" id="dynamic-page-title">Create Product Listing</h2>
 
         <form asp-action="CreateProduct" asp-controller="Seller" method="post" enctype="multipart/form-data">
         @Html.AntiForgeryToken()
@@ -609,76 +589,102 @@
         <input type="hidden" asp-for="ProductId" />
         <input type="hidden" asp-for="Status" value="@(mode == "relist" ? "active" : (Model.Status ?? "active"))" />
 
-        <input type="file" id="imageInput" name="imageFile" accept="image/*" style="display: none;">
+        <input type="file" id="imageInput" name="imageFile" multiple accept="image/*" style="display: none;">
 
         <div class="main-upload-box" id="uploadBox">
             <i class="fa-solid fa-cloud-arrow-up"></i>
             <span>Upload Photos</span>
         </div>
 
-        @if (!string.IsNullOrEmpty(Model.ImagePath))
-        {
-        <div class="thumbnail-row" id="thumbnailRow">
-            <div class="thumbnail">
-                <img src="@Model.ImagePath" alt="Current image">
-            </div>
-        </div>
-        }
-        else
-        {
         <div class="thumbnail-row" id="thumbnailRow">
         </div>
-        }
 
-        <h3 class="section-title">Product Details</h3>
+        <h3 class="section-title" style="margin-bottom: 15px;">Product Details</h3>
 
         <div class="form-row">
             <input type="text" class="custom-input" placeholder="Product Name" asp-for="ProductName" value="@Model.ProductName">
         </div>
 
-        <div class="form-row">
+        <div class="form-row" style="margin-bottom: 5px;">
             <div class="split-input-box">
-                <input type="text" placeholder="Price" asp-for="Price" value="@(Model.Price > 0 ? Model.Price.ToString("0.##") : "")">
+                <input type="number" id="basePrice" placeholder="Price" min="0" step="any" asp-for="Price" value="@(Model.Price > 0 ? Model.Price.ToString("0.##") : "")">
                 <div class="discount-wrap">
-                    <span style="color: #444;">Discount |</span>
-                    <input type="text" placeholder="" asp-for="Discount" value="@(Model.Discount.HasValue && Model.Discount.Value > 0 ? Model.Discount.Value.ToString("0.##") : "")">
+                    <span style="color: #444;">Discount % |</span>
+                    <input type="number" id="discountPercent" placeholder="0" min="0" max="100" asp-for="Discount" value="@(Model.Discount.HasValue && Model.Discount.Value > 0 ? Model.Discount.Value.ToString("0.##") : "")">
                 </div>
+            </div>
+            <div style="text-align: right; font-size: 0.95rem; color: #555; padding-right: 10px; margin-top: 8px;">
+                Final Price: <span id="finalPriceDisplay" style="font-weight: 700; color: #111;">0.00</span>
             </div>
         </div>
 
         <div class="form-row">
-            <input type="text" class="custom-input" placeholder="Category" asp-for="Category" value="@Model.Category">
+            <input list="category-options" class="custom-input" asp-for="Category" value="@Model.Category" placeholder="Search or select a Category...">
+            <datalist id="category-options">
+                <option value="Tops"></option>
+                <option value="Bottoms"></option>
+                <option value="Outerwear"></option>
+                <option value="Dresses & Jumpsuits"></option>
+                <option value="Activewear"></option>
+                <option value="Footwear"></option>
+                <option value="Accessories"></option>
+            </datalist>
         </div>
 
         <div class="form-row">
-            <input type="text" class="custom-input" placeholder="Brand (e.g. Nike, Adidas)" asp-for="Brand" value="@Model.Brand">
+            <input type="text" class="custom-input" asp-for="Brand" value="@Model.Brand" placeholder="Brand (e.g. Nike, Adidas, Unbranded)">
         </div>
 
-        <div class="form-row">
-            <input type="number" class="custom-input" placeholder="Quantity" asp-for="Stock" value="@(Model.Stock > 0 ? Model.Stock.ToString() : "")" min="0">
+        <input type="hidden" id="hiddenProductUpc" name="UPC" value="">
+
+        <div id="variants-container">
+            <div class="variant-row">
+                <button type="button" class="btn-plus-square"><i class="fa-solid fa-plus" style="font-weight: 300;"></i></button>
+                <input type="text" class="small-input sku-field" id="primarySkuField" placeholder="SKU |">
+                <input type="text" class="small-input" id="sizesInput" name="colorSizes" placeholder="Size |" value="@Model.Sizes">
+                <input type="text" class="small-input" name="colorNames" placeholder="Style |">
+                <input type="text" class="small-input qty-input" id="quantityInput" placeholder="Quantity |" value="@(Model.Stock > 0 ? Model.Stock.ToString() : "")">
+
+                <span class="availability-label">Availability</span>
+
+                <label class="custom-radio">
+                    <input type="radio" name="availability-0" checked>
+                    <div class="radio-box"></div>
+                    In Stock
+                </label>
+                <label class="custom-radio">
+                    <input type="radio" name="availability-0">
+                    <div class="radio-box"></div>
+                    Pre Order
+                </label>
+            </div>
         </div>
 
-        <div class="form-row">
-            <input type="text" class="custom-input" placeholder="Sizes (comma separated, e.g. US 7, US 8, US 9, S, M, L)" asp-for="Sizes" value="@Model.Sizes">
+        <div class="add-variant-row">
+            <button type="button" class="btn-add-variant" id="btnAddVariant">Add Size & Style</button>
+            <a href="/Seller/SizeGuide" class="size-guide-link">
+                Size Guide
+                <i class="fa-solid fa-ruler-horizontal"></i>
+            </a>
         </div>
 
-        <!-- Dynamic Color Entries -->
-        <h3 class="section-title" style="margin-top: 25px;">Colors &amp; Variant Photos</h3>
-        <div id="color-entries-container"></div>
-        <button type="button" class="btn-add-color" onclick="addColorEntry()">
-            <i class="fa-solid fa-plus"></i> Add Another Color
-        </button>
+        <input type="hidden" asp-for="Sizes" id="sizesHidden" />
+        <input type="hidden" asp-for="Stock" id="stockHidden" />
 
-        <div class="form-row">
+        <div class="bottom-details-row">
             <textarea class="custom-input" placeholder="Product Details" asp-for="Details">@Model.Details</textarea>
+
+            <div class="barcode-preview-box">
+                <span>Barcode Preview</span>
+                <svg id="liveBarcodePreview"></svg>
+            </div>
         </div>
 
         <div class="action-buttons">
             <button type="button" class="btn-cancel" onclick="window.history.back()">Cancel</button>
-            <button type="submit" class="btn-submit" id="dynamic-submit-btn">
-                @(mode == "edit" ? "Update Product" : mode == "renew" ? "Renew Product" : mode == "relist" ? "Relist Product" : "Add Product")
-            </button>
+            <button type="submit" class="btn-submit" id="dynamic-submit-btn">Add Product</button>
         </div>
+
         </form>
     </div>
 
@@ -687,155 +693,359 @@
             <h3>Select Variant Image</h3>
             <div class="grid-selector" id="modalGrid">
             </div>
-            <button class="close-modal" onclick="document.getElementById('imageModal').style.display='none'">Close</button>
+            <div style="display:flex; gap:10px; justify-content:center; margin-top:5px;">
+                <button type="button" class="close-modal-cancel" onclick="closeImageModal()">Cancel</button>
+                <button type="button" class="close-modal" onclick="confirmImageSelection()">Done</button>
+            </div>
         </div>
     </div>
 
     <script>
-        // ===== Page Mode Logic =====
+        // 0. Dynamic Page Logic & Live Barcode Generator
         document.addEventListener('DOMContentLoaded', () => {
-            const urlParams = new URLSearchParams(window.location.search);
-            const mode = urlParams.get('mode');
+            const mode = '@mode';
+
             const pageTitle = document.getElementById('dynamic-page-title');
             const submitBtn = document.getElementById('dynamic-submit-btn');
-            if (mode === 'edit') { pageTitle.innerText = 'Edit Product Listing'; submitBtn.innerText = 'Update Product'; }
-            else if (mode === 'renew') { pageTitle.innerText = 'Renew Product Listing'; submitBtn.innerText = 'Renew Product'; }
-            else if (mode === 'relist') { pageTitle.innerText = 'Relist Product Listing'; submitBtn.innerText = 'Relist Product'; }
-            else { pageTitle.innerText = 'Create Product Listing'; submitBtn.innerText = 'Add Product'; }
 
-            // Load existing color images for edit/relist/renew
-            const existingColors = @Html.Raw(ViewBag.ExistingColorImages);
-            if (existingColors && Object.keys(existingColors).length > 0) {
-                for (const [colorName, paths] of Object.entries(existingColors)) {
-                    addColorEntry(colorName, paths);
-                }
+            if (mode === 'edit') {
+                pageTitle.innerText = 'Edit Product Listing';
+                submitBtn.innerText = 'Update Product';
+            } else if (mode === 'renew') {
+                pageTitle.innerText = 'Renew Product Listing';
+                submitBtn.innerText = 'Renew Product';
+            } else if (mode === 'relist') {
+                pageTitle.innerText = 'Relist Product Listing';
+                submitBtn.innerText = 'Relist Product';
+            } else {
+                pageTitle.innerText = 'Create Product Listing';
+                submitBtn.innerText = 'Add Product';
+            }
+
+            // --- Auto Generate UPC and Render Barcode ---
+            const generatedUpc = generateUPC();
+            document.getElementById('hiddenProductUpc').value = generatedUpc; // Save to hidden field
+            updateBarcodePreview(generatedUpc); // Draw the barcode immediately
+
+            // Generate a starting SKU for the first variant row
+            const firstSkuField = document.getElementById('primarySkuField');
+            if(firstSkuField && !firstSkuField.value) {
+                firstSkuField.value = generateSKU();
             }
         });
 
-        // ===== Main Image Upload =====
+        // Function to generate the Barcode via JSBarcode
+        function updateBarcodePreview(upcValue) {
+            const svgTarget = document.getElementById("liveBarcodePreview");
+
+            if (!upcValue || upcValue.trim() === '') {
+                svgTarget.innerHTML = '';
+                return;
+            }
+
+            try {
+                JsBarcode("#liveBarcodePreview", upcValue.trim(), {
+                    format: "CODE128",
+                    lineColor: "#000000",
+                    background: "transparent",
+                    width: 2,
+                    height: 50,
+                    displayValue: true,
+                    fontSize: 14,
+                    font: "Inter",
+                    margin: 0
+                });
+            } catch (error) {
+                svgTarget.innerHTML = '';
+            }
+        }
+
+        // Generate an alphanumeric SKU for variants
+        function generateSKU() {
+            return 'SKU-' + Math.random().toString(36).substr(2, 6).toUpperCase();
+        }
+
+        // Generate a 12-digit numeric UPC for the product barcode
+        function generateUPC() {
+            return Math.floor(100000000000 + Math.random() * 900000000000).toString();
+        }
+
+        // --- Price and Discount Logic ---
+        const priceInput = document.getElementById('basePrice');
+        const discountInput = document.getElementById('discountPercent');
+        const finalPriceDisplay = document.getElementById('finalPriceDisplay');
+
+        function blockInvalidNumberInput(e) {
+            if (['e', 'E', '+', '-'].includes(e.key)) {
+                e.preventDefault();
+            }
+        }
+
+        function calculateFinalPrice() {
+            let price = parseFloat(priceInput.value) || 0;
+            let discount = parseFloat(discountInput.value) || 0;
+
+            if (discount > 100) {
+                discount = 100;
+                discountInput.value = 100;
+            }
+
+            const finalPrice = price - (price * (discount / 100));
+            finalPriceDisplay.innerText = finalPrice.toFixed(2);
+        }
+
+        priceInput.addEventListener('keydown', blockInvalidNumberInput);
+        discountInput.addEventListener('keydown', blockInvalidNumberInput);
+        priceInput.addEventListener('input', calculateFinalPrice);
+        discountInput.addEventListener('input', calculateFinalPrice);
+
+        // 1. Image Upload & Display Logic
         const uploadBox = document.getElementById('uploadBox');
         const imageInput = document.getElementById('imageInput');
         const thumbnailRow = document.getElementById('thumbnailRow');
-        let uploadedImages = [];
+        let selectedMainFiles = [];
 
-        uploadBox.addEventListener('click', () => imageInput.click());
+        uploadBox.addEventListener('click', () => {
+            imageInput.click();
+        });
 
-        imageInput.addEventListener('change', function(event) {
-            const files = event.target.files;
-            for (let i = 0; i < files.length; i++) {
-                const imageUrl = URL.createObjectURL(files[i]);
-                uploadedImages.push(imageUrl);
+        function syncMainFileInput() {
+            const dt = new DataTransfer();
+            selectedMainFiles.forEach(file => dt.items.add(file));
+            imageInput.files = dt.files;
+        }
+
+        function renderMainThumbnails() {
+            thumbnailRow.innerHTML = '';
+            selectedMainFiles.forEach((file, index) => {
+                const imageUrl = URL.createObjectURL(file);
                 const thumbDiv = document.createElement('div');
                 thumbDiv.className = 'thumbnail';
                 thumbDiv.innerHTML = `
                     <img src="${imageUrl}" alt="Uploaded Photo">
-                    <button class="delete-btn" onclick="removeThumbnail(this, '${imageUrl}')">
+                    <button type="button" class="delete-btn" onclick="removeMainThumbnail(${index})">
                         <i class="fa-solid fa-xmark"></i>
-                    </button>`;
+                    </button>
+                `;
                 thumbnailRow.appendChild(thumbDiv);
+            });
+        }
+
+        imageInput.addEventListener('change', function(event) {
+            const files = event.target.files;
+            for (let i = 0; i < files.length; i++) {
+                selectedMainFiles.push(files[i]);
+            }
+            syncMainFileInput();
+            renderMainThumbnails();
+        });
+
+        window.removeMainThumbnail = function(index) {
+            const removedFile = selectedMainFiles[index];
+            selectedMainFiles.splice(index, 1);
+            // Remove this file from any variant that had it selected
+            for (const [row, files] of variantImageMap.entries()) {
+                if (files.has(removedFile)) {
+                    files.delete(removedFile);
+                    updateVariantButtonDisplay(row);
+                }
+            }
+            syncMainFileInput();
+            renderMainThumbnails();
+        };
+
+
+        // 2. Dynamic Variant Row Logic
+        const btnAddVariant = document.getElementById('btnAddVariant');
+        const variantsContainer = document.getElementById('variants-container');
+        let variantIdCounter = 0;
+
+        btnAddVariant.addEventListener('click', () => {
+            variantIdCounter++;
+            const newRow = document.createElement('div');
+            newRow.className = 'variant-row';
+            const newSku = generateSKU();
+
+            newRow.innerHTML = `
+                <button type="button" class="btn-plus-square"><i class="fa-solid fa-plus" style="font-weight: 300;"></i></button>
+                <input type="text" class="small-input sku-field" value="${newSku}" placeholder="SKU |">
+                <input type="text" class="small-input" name="colorSizes" placeholder="Size |">
+                <input type="text" class="small-input" name="colorNames" placeholder="Style |">
+                <input type="text" class="small-input qty-input" placeholder="Quantity |">
+
+                <span class="availability-label">Availability</span>
+
+                <label class="custom-radio">
+                    <input type="radio" name="availability-${variantIdCounter}" checked>
+                    <div class="radio-box"></div>
+                    In Stock
+                </label>
+                <label class="custom-radio">
+                    <input type="radio" name="availability-${variantIdCounter}">
+                    <div class="radio-box"></div>
+                    Pre Order
+                </label>
+
+                <button type="button" onclick="removeVariantRow(this.parentElement)" style="background:none; border:none; color:var(--accent-red); font-size:1.2rem; cursor:pointer; margin-left: 5px;">
+                    <i class="fa-solid fa-trash"></i>
+                </button>
+            `;
+            variantsContainer.appendChild(newRow);
+        });
+
+        // Auto-toggle In Stock / Pre Order when quantity changes
+        variantsContainer.addEventListener('input', function(e) {
+            const qtyField = e.target.closest('.qty-input');
+            if (!qtyField) return;
+            const row = qtyField.closest('.variant-row');
+            if (!row) return;
+            const qty = parseInt(qtyField.value, 10);
+            const radios = row.querySelectorAll('input[type="radio"]');
+            if (radios.length >= 2) {
+                radios[0].checked = (qty > 0 || isNaN(qty) || qtyField.value.trim() === '');
+                radios[1].checked = (!isNaN(qty) && qty === 0 && qtyField.value.trim() !== '');
             }
         });
 
-        window.removeThumbnail = function(button, url) {
-            uploadedImages = uploadedImages.filter(img => img !== url);
-            button.parentElement.remove();
-        };
+        document.querySelector('form').addEventListener('submit', (e) => {
+            // Compute global Sizes as union of all per-color sizes (for backward compat)
+            const allSizeInputs = Array.from(variantsContainer.querySelectorAll('.variant-row input[name="colorSizes"]'));
+            const allSizeValues = allSizeInputs.flatMap(inp => (inp.value || '').split(',').map(s => s.trim()).filter(Boolean));
+            const uniqueSizes = [...new Set(allSizeValues)];
+            document.getElementById('sizesHidden').value = uniqueSizes.join(',');
 
-        // ===== Color Entries System =====
-        let colorIndex = 0;
-        // Per-color: { newFiles: DataTransfer, existingPaths: string[] }
-        let colorData = {};
+            const rows = Array.from(variantsContainer.querySelectorAll('.variant-row'));
+            const allQtys = rows.reduce((sum, row) => sum + (parseInt(row.querySelector('.qty-input')?.value || '0', 10) || 0), 0);
+            document.getElementById('stockHidden').value = allQtys;
 
-        function addColorEntry(prefilledName, prefilledPaths) {
-            const idx = colorIndex++;
-            colorData[idx] = { newFiles: new DataTransfer(), existingPaths: prefilledPaths ? [...prefilledPaths] : [] };
+            rows.forEach((row, i) => {
+                // Append colorStocks[] hidden input
+                const qty = parseInt(row.querySelector('.qty-input')?.value || '0', 10) || 0;
+                const si = document.createElement('input');
+                si.type = 'hidden';
+                si.name = 'colorStocks';
+                si.value = qty;
+                e.target.appendChild(si);
 
-            const container = document.getElementById('color-entries-container');
-            const entry = document.createElement('div');
-            entry.className = 'color-entry';
-            entry.id = `color-entry-${idx}`;
-            entry.innerHTML = `
-                <div class="color-entry-header">
-                    <input type="text" name="colorNames" placeholder="Color Name (e.g. Black)" value="${prefilledName || ''}">
-                    <button type="button" class="btn-remove-color" onclick="removeColorEntry(${idx})" title="Remove color">
-                        <i class="fa-solid fa-trash"></i>
-                    </button>
-                </div>
-                <input type="hidden" name="existingColorPaths_${idx}" id="existingPaths_${idx}" value="${(prefilledPaths || []).join(',')}">
-                <input type="file" id="colorFileInput_${idx}" name="colorFiles_${idx}" accept="image/*" multiple style="display:none;"
-                       onchange="handleColorFiles(${idx})">
-                <div class="color-photos-grid" id="colorPhotos_${idx}">
-                    <button type="button" class="color-add-photo-btn" onclick="document.getElementById('colorFileInput_${idx}').click()">
-                        <i class="fa-solid fa-camera"></i>
-                        <span>Add</span>
-                    </button>
-                </div>
-            `;
-            container.appendChild(entry);
-            renderColorPhotos(idx);
-        }
+                // Attach selected color images as named file inputs
+                const files = variantImageMap.get(row) || new Set();
+                if (files.size > 0) {
+                    const dt = new DataTransfer();
+                    for (const file of files) {
+                        dt.items.add(file);
+                    }
+                    const fi = document.createElement('input');
+                    fi.type = 'file';
+                    fi.name = `colorFiles_${i}`;
+                    fi.multiple = true;
+                    fi.style.display = 'none';
+                    fi.files = dt.files;
+                    e.target.appendChild(fi);
+                }
+            });
+        });
 
-        function removeColorEntry(idx) {
-            const el = document.getElementById(`color-entry-${idx}`);
-            if (el) el.remove();
-            delete colorData[idx];
-        }
+        // 3. Select Picture for specific variant Logic
+        const imageModal = document.getElementById('imageModal');
+        const modalGrid = document.getElementById('modalGrid');
+        let currentVariantBtn = null;
+        let currentVariantRow = null;
+        const variantImageMap = new Map(); // Map<rowElement, Set<File>>
 
-        function handleColorFiles(idx) {
-            const input = document.getElementById(`colorFileInput_${idx}`);
-            const dt = colorData[idx].newFiles;
-            for (const file of input.files) {
-                dt.items.add(file);
+        variantsContainer.addEventListener('click', function(e) {
+            const btn = e.target.closest('.btn-plus-square');
+            if (btn) {
+                currentVariantBtn = btn;
+                currentVariantRow = btn.closest('.variant-row');
+                openImageSelector();
             }
-            // Sync the input's files so the form submits them
-            input.files = dt.files;
-            renderColorPhotos(idx);
-        }
+        });
 
-        function removeNewFile(idx, fileIdx) {
-            const dt = colorData[idx].newFiles;
-            dt.items.remove(fileIdx);
-            const input = document.getElementById(`colorFileInput_${idx}`);
-            input.files = dt.files;
-            renderColorPhotos(idx);
-        }
+        function openImageSelector() {
+            modalGrid.innerHTML = '';
 
-        function removeExistingFile(idx, pathIdx) {
-            colorData[idx].existingPaths.splice(pathIdx, 1);
-            document.getElementById(`existingPaths_${idx}`).value = colorData[idx].existingPaths.join(',');
-            renderColorPhotos(idx);
-        }
+            if (selectedMainFiles.length === 0) {
+                modalGrid.innerHTML = '<p style="grid-column: 1 / -1; color: #555;">Please upload some photos first using the big cloud box above.</p>';
+                imageModal.style.display = 'flex';
+                return;
+            }
 
-        function renderColorPhotos(idx) {
-            const grid = document.getElementById(`colorPhotos_${idx}`);
-            if (!grid) return;
-            let html = '';
+            // Collect files already assigned to other variant rows
+            const usedByOthers = new Set();
+            for (const [row, files] of variantImageMap.entries()) {
+                if (row !== currentVariantRow) {
+                    files.forEach(f => usedByOthers.add(f));
+                }
+            }
 
-            // Existing images
-            colorData[idx].existingPaths.forEach((path, pi) => {
-                html += `<div class="color-photo-thumb">
-                    <img src="${path}" alt="Color photo">
-                    <button type="button" class="cp-del" onclick="removeExistingFile(${idx},${pi})"><i class="fa-solid fa-xmark"></i></button>
-                </div>`;
+            const currentSelected = variantImageMap.get(currentVariantRow) || new Set();
+
+            selectedMainFiles.forEach((file) => {
+                if (usedByOthers.has(file)) return; // hidden — assigned to another variant
+
+                const url = URL.createObjectURL(file);
+                const wrapper = document.createElement('div');
+                wrapper.className = 'img-selectable' + (currentSelected.has(file) ? ' selected' : '');
+
+                const img = document.createElement('img');
+                img.src = url;
+
+                const checkmark = document.createElement('div');
+                checkmark.className = 'img-checkmark';
+                checkmark.textContent = '✓';
+                checkmark.style.display = currentSelected.has(file) ? 'flex' : 'none';
+
+                wrapper.onclick = () => {
+                    const sel = variantImageMap.get(currentVariantRow) || new Set();
+                    if (sel.has(file)) {
+                        sel.delete(file);
+                        wrapper.classList.remove('selected');
+                        checkmark.style.display = 'none';
+                    } else {
+                        sel.add(file);
+                        wrapper.classList.add('selected');
+                        checkmark.style.display = 'flex';
+                    }
+                    variantImageMap.set(currentVariantRow, sel);
+                };
+
+                wrapper.appendChild(img);
+                wrapper.appendChild(checkmark);
+                modalGrid.appendChild(wrapper);
             });
 
-            // New uploads
-            const dt = colorData[idx].newFiles;
-            for (let fi = 0; fi < dt.files.length; fi++) {
-                const url = URL.createObjectURL(dt.files[fi]);
-                html += `<div class="color-photo-thumb">
-                    <img src="${url}" alt="New photo">
-                    <button type="button" class="cp-del" onclick="removeNewFile(${idx},${fi})"><i class="fa-solid fa-xmark"></i></button>
-                </div>`;
+            imageModal.style.display = 'flex';
+        }
+
+        function closeImageModal() {
+            imageModal.style.display = 'none';
+        }
+
+        function confirmImageSelection() {
+            updateVariantButtonDisplay(currentVariantRow);
+            imageModal.style.display = 'none';
+        }
+
+        function updateVariantButtonDisplay(row) {
+            const btn = row.querySelector('.btn-plus-square');
+            const files = variantImageMap.get(row) || new Set();
+            if (files.size === 0) {
+                btn.innerHTML = '<i class="fa-solid fa-plus" style="font-weight:300;"></i>';
+                btn.style.position = '';
+                return;
             }
+            const firstFile = Array.from(files)[0];
+            const url = URL.createObjectURL(firstFile);
+            const badge = files.size > 1
+                ? `<div style="position:absolute;top:3px;right:3px;background:#111;color:#fff;border-radius:50%;width:20px;height:20px;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;">+${files.size - 1}</div>`
+                : '';
+            btn.style.position = 'relative';
+            btn.innerHTML = `<img src="${url}" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;">${badge}`;
+        }
 
-            // Add button always at the end
-            html += `<button type="button" class="color-add-photo-btn" onclick="document.getElementById('colorFileInput_${idx}').click()">
-                <i class="fa-solid fa-camera"></i>
-                <span>Add</span>
-            </button>`;
-
-            grid.innerHTML = html;
+        function removeVariantRow(row) {
+            variantImageMap.delete(row);
+            row.remove();
         }
     </script>
 

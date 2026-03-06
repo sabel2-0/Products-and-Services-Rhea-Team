@@ -17,6 +17,8 @@ public class Product
     public string Brand { get; set; } = string.Empty; // "Nike", "Adidas", etc.
     public List<string> AvailableColors { get; set; } = new(); // Color options
     public Dictionary<string, List<string>> ColorImages { get; set; } = new(); // color name → image gallery
+    public Dictionary<string, int> ColorStocks { get; set; } = new(); // color name → stock quantity
+    public Dictionary<string, List<string>> ColorSizes { get; set; } = new(); // color name → available sizes
     public double Rating { get; set; }
     public int ReviewCount { get; set; }
     public List<Review> Reviews { get; set; } = new();

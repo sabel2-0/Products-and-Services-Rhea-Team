@@ -1,4 +1,4 @@
-@model MyAspNetApp.Models.DbProduct
+﻿@model MyAspNetApp.Models.DbProduct
 @{
     ViewData["Title"] = "View Product";
     Layout = null;
@@ -14,11 +14,13 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+
     <style>
         :root {
             --sidebar-bg: #000000;
             --main-bg: #ffffff;
-            --box-bg: #AEAFB2; /* Matches the solid gray detail boxes */
+            --box-bg: #AEAFB2;
             --pill-bg: #AEAFB2;
             --text-dark: #111;
         }
@@ -139,10 +141,9 @@
             .gallery-container img {
                 max-width: 100%;
                 max-height: 100%;
-                object-fit: contain; /* Shows image in actual size without filling box completely */
+                object-fit: contain;
             }
 
-        /* Clickable halves for image navigation */
         .click-zone {
             position: absolute;
             top: 0;
@@ -213,7 +214,7 @@
         .variant-thumb {
             width: 48px;
             height: 48px;
-            border-radius: 8px; /* Changed to rounded square */
+            border-radius: 8px;
             object-fit: cover;
         }
 
@@ -245,7 +246,7 @@
         .availability-label {
             font-weight: 700;
             font-size: 0.95rem;
-            margin-left: 20px; /* Reduced huge gap spacing */
+            margin-left: 20px;
             margin-right: 10px;
         }
 
@@ -321,8 +322,8 @@
 
             .barcode-box svg {
                 width: 100%;
-                height: 70px;
-                margin: 15px 0;
+                height: auto; /* Allows SVG to size naturally */
+                margin-top: 10px;
             }
 
         /* Dynamic Action Buttons */
@@ -341,7 +342,7 @@
             text-align: center;
             cursor: pointer;
             transition: 0.2s;
-            display: none; /* hidden by default, toggled via JS */
+            display: none;
         }
 
         .btn-delete {
@@ -378,7 +379,7 @@
 
         /* OVERLAY MODAL STYLING (For Delete Pop Up) */
         .overlay-modal {
-            display: none; /* Hidden by default */
+            display: none;
             position: fixed;
             top: 0;
             left: 0;
@@ -468,6 +469,8 @@
             <a href="/Seller" class="back-btn"><i class="fa-solid fa-arrow-left"></i></a>
 
             <div class="gallery-container">
+                <div class="click-zone zone-left" onclick="prevImage()"></div>
+                <div class="click-zone zone-right" onclick="nextImage()"></div>
                 <img id="mainGalleryImg" src="@(string.IsNullOrEmpty(Model.ImagePath) ? "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='600'%3E%3Crect width='600' height='600' fill='%23e0e0e0'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='Inter,sans-serif' font-size='20' fill='%23888'%3ENo Image%3C/text%3E%3C/svg%3E" : Model.ImagePath)" alt="Product Image" onerror="this.onerror=null;this.src='data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%27600%27 height=%27600%27%3E%3Crect width=%27600%27 height=%27600%27 fill=%27%23e0e0e0%27/%3E%3Ctext x=%2750%25%27 y=%2750%25%27 dominant-baseline=%27middle%27 text-anchor=%27middle%27 font-family=%27Inter,sans-serif%27 font-size=%2720%27 fill=%27%23888%27%3ENo Image%3C/text%3E%3C/svg%3E';">
             </div>
 
@@ -478,30 +481,71 @@
 
             <div class="info-box">@Model.ProductName</div>
 
-            <div class="info-box">₱@Model.Price.ToString("N2")
-                @if (Model.Discount.HasValue && Model.Discount.Value > 0)
-                {
-                    <span style="color:#888; text-decoration:line-through; margin-left:10px;">₱@((Model.Price + Model.Discount.Value).ToString("N2"))</span>
-                }
-            </div>
+            <div class="info-box">₱@Model.Price.ToString("N2")</div>
 
             <div class="info-box">@(Model.Category ?? "N/A")</div>
+
+            <div class="variant-bar">
+                <img src="@(string.IsNullOrEmpty(Model.ImagePath) ? "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64'%3E%3Crect width='64' height='64' fill='%23d0d0d0'/%3E%3C/svg%3E" : Model.ImagePath)" class="variant-thumb" alt="Thumb">
+
+                <div class="variant-pill">
+                    <span class="label">SKU</span>
+                    <div class="divider"></div>
+                    <span class="value" id="currentSkuValue">@($"SKU-{Model.ProductId:000000}")</span>
+                </div>
+
+                <div class="variant-pill">
+                    <span class="label">Size</span>
+                    <div class="divider"></div>
+                    <span class="value">@(string.IsNullOrWhiteSpace(Model.Sizes) ? "N/A" : Model.Sizes)</span>
+                </div>
+
+                <div class="variant-pill">
+                    <span class="label">Style</span>
+                    <div class="divider"></div>
+                    <span class="value">@(string.IsNullOrWhiteSpace(Model.Colors) ? "N/A" : Model.Colors)</span>
+                </div>
+
+                <div class="variant-pill">
+                    <span class="label">Quantity</span>
+                    <div class="divider"></div>
+                    <span class="value">@Model.Stock</span>
+                </div>
+
+                <span class="availability-label">Availability</span>
+
+                <div class="radio-stack">
+                    <div class="custom-radio">
+                        <div class="radio-box @(Model.Stock > 0 ? "box-active" : "box-inactive")"></div>
+                        In Stock
+                    </div>
+                    <div class="custom-radio">
+                        <div class="radio-box @(Model.Stock > 0 ? "box-inactive" : "box-active")"></div>
+                        Pre Order
+                    </div>
+                </div>
+            </div>
 
             <div class="bottom-details">
                 <div class="description-box">
                     @(Model.Details ?? "No details provided.")
                 </div>
+
+                <div class="barcode-box">
+                    @Model.ProductName
+                    <svg id="productBarcode"></svg>
+                </div>
             </div>
 
             <div class="action-bar" id="actionBar">
-                <form asp-action="DeleteProduct" asp-controller="Seller" method="post" style="flex:1; display:none;" id="deleteForm">
+                <form asp-action="DeleteProduct" asp-controller="Seller" method="post" id="deleteForm" style="flex:1; display:none;">
                     @Html.AntiForgeryToken()
                     <input type="hidden" name="id" value="@Model.ProductId" />
                     <button type="button" class="btn-action btn-delete" id="btnDelete" style="width:100%;" onclick="document.getElementById('deleteModal').style.display='flex'">Delete Product</button>
                 </form>
-                <button class="btn-action btn-renew" id="btnRenew" style="display:none;" onclick="window.location.href='/Seller/CreateProduct?mode=renew&id=@Model.ProductId'">Renew Product</button>
-                <button class="btn-action btn-edit" id="btnEdit" style="display:none;" onclick="window.location.href='/Seller/CreateProduct?mode=edit&id=@Model.ProductId'">Edit Product</button>
-                <button class="btn-action btn-relist" id="btnRelist" style="display:none;" onclick="window.location.href='/Seller/CreateProduct?mode=relist&id=@Model.ProductId'">Relist Product</button>
+                <button class="btn-action btn-renew" id="btnRenew" onclick="window.location.href='/Seller/CreateProduct?mode=renew&id=@Model.ProductId'">Renew Product</button>
+                <button class="btn-action btn-edit" id="btnEdit" onclick="window.location.href='/Seller/CreateProduct?mode=edit&id=@Model.ProductId'">Edit Product</button>
+                <button class="btn-action btn-relist" id="btnRelist" onclick="window.location.href='/Seller/CreateProduct?mode=relist&id=@Model.ProductId'">Relist Product</button>
             </div>
 
         </div>
@@ -520,8 +564,76 @@
     </div>
 
     <script>
-        /* --- Dynamic Button Logic based on state --- */
+        /* --- JsBarcode Initialization --- */
+        // Automatically generate barcode matching the SKU on load
         document.addEventListener('DOMContentLoaded', () => {
+            const skuValue = document.getElementById("currentSkuValue").innerText;
+
+            JsBarcode("#productBarcode", skuValue, {
+                format: "CODE128",
+                lineColor: "#000000",
+                background: "transparent",
+                width: 2,
+                height: 55,
+                displayValue: true,
+                fontSize: 16,
+                font: "Inter",
+                margin: 0
+            });
+        });
+
+
+        /* --- Image Gallery Logic --- */
+        @{
+            var galleryImgList = new System.Collections.Generic.List<string>();
+            if (!string.IsNullOrEmpty(Model.ImagePath)) galleryImgList.Add(Model.ImagePath);
+            var colorImgList = ViewBag.AllColorImages as System.Collections.Generic.List<string>;
+            if (colorImgList != null) { foreach (var ci in colorImgList) galleryImgList.Add(ci); }
+            if (galleryImgList.Count == 0) galleryImgList.Add("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='600'%3E%3Crect width='600' height='600' fill='%23e0e0e0'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='Inter,sans-serif' font-size='20' fill='%23888'%3ENo Image%3C/text%3E%3C/svg%3E");
+        }
+        const galleryImages = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(galleryImgList));
+
+        let currentImageIndex = 0;
+        const mainGalleryImg = document.getElementById('mainGalleryImg');
+        const dotsContainer = document.getElementById('galleryDots');
+
+        function renderGallery() {
+            mainGalleryImg.src = galleryImages[currentImageIndex];
+            dotsContainer.innerHTML = '';
+            const totalDots = Math.min(galleryImages.length, 4);
+
+            let activeDotIndex = currentImageIndex;
+            if (currentImageIndex >= 3 && galleryImages.length > 4) {
+                activeDotIndex = 3;
+            }
+
+            for (let i = 0; i < totalDots; i++) {
+                const dot = document.createElement('span');
+                if (i === activeDotIndex) {
+                    dot.classList.add('active');
+                }
+                dotsContainer.appendChild(dot);
+            }
+        }
+
+        function nextImage() {
+            if (galleryImages.length > 0) {
+                currentImageIndex = (currentImageIndex + 1) % galleryImages.length;
+                renderGallery();
+            }
+        }
+
+        function prevImage() {
+            if (galleryImages.length > 0) {
+                currentImageIndex = (currentImageIndex - 1 + galleryImages.length) % galleryImages.length;
+                renderGallery();
+            }
+        }
+
+        /* --- Dynamic Button Logic based on URL State --- */
+        document.addEventListener('DOMContentLoaded', () => {
+            renderGallery();
+
             const state = '@state';
 
             const actionBar = document.getElementById('actionBar');
@@ -530,6 +642,11 @@
             const btnRenew = document.getElementById('btnRenew');
             const btnEdit = document.getElementById('btnEdit');
             const btnRelist = document.getElementById('btnRelist');
+
+            deleteForm.style.display = 'none';
+            btnRenew.style.display = 'none';
+            btnEdit.style.display = 'none';
+            btnRelist.style.display = 'none';
 
             if (state === 'renew') {
                 deleteForm.style.display = 'block';

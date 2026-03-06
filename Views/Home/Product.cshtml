@@ -599,88 +599,92 @@ function renderProductPage() {
         ${pdProduct.subCategory ? `<span class="pd-meta-tag">${pdProduct.subCategory}</span>` : ''}
     `;
 
-    // Stock
+    // Stock — only render here when there are no color variants.
+    // When colors exist, the auto-click on the first color swatch (below) will call
+    // pdSelectColor which sets the correct per-color stock display.
     pdMaxStock = pdProduct.stock || 0;
     const stockEl = document.getElementById('pd-stock-display');
     const preorderBlock = document.getElementById('pd-preorder-block');
     const normalActions = document.getElementById('pd-normal-actions');
-
     const soldOutOverlay = document.getElementById('pd-img-soldout-overlay');
-    if (pdMaxStock === 0) {
-        if (pdProduct.isRestockPreOrder) {
-            // Existing product — sold out but restock pre-order is open
-            stockEl.innerHTML = '<span class="pd-stock-badge restock">Sold Out — Restock Pre-Order Open</span>';
-            // Show RESTOCKING overlay on image
-            if (soldOutOverlay) {
-                soldOutOverlay.classList.remove('overlay-soldout', 'overlay-preorder');
-                soldOutOverlay.classList.add('overlay-restock');
-                soldOutOverlay.querySelector('.pd-img-soldout-label').textContent = 'Restocking';
-                soldOutOverlay.style.display = 'flex';
+
+    if (!pdProduct.availableColors || pdProduct.availableColors.length === 0) {
+        if (pdMaxStock === 0) {
+            if (pdProduct.isRestockPreOrder) {
+                // Existing product — sold out but restock pre-order is open
+                stockEl.innerHTML = '<span class="pd-stock-badge restock">Sold Out — Restock Pre-Order Open</span>';
+                // Show RESTOCKING overlay on image
+                if (soldOutOverlay) {
+                    soldOutOverlay.classList.remove('overlay-soldout', 'overlay-preorder');
+                    soldOutOverlay.classList.add('overlay-restock');
+                    soldOutOverlay.querySelector('.pd-img-soldout-label').textContent = 'Restocking';
+                    soldOutOverlay.style.display = 'flex';
+                }
+                preorderBlock.style.display = 'block';
+                normalActions.style.display = 'none';
+                if (pdProduct.restockDate) {
+                    document.getElementById('pd-preorder-release').innerHTML =
+                        `<strong>Restock Expected:</strong> ${pdProduct.restockDate}`;
+                }
+                if (pdProduct.restockNote) {
+                    document.getElementById('pd-preorder-note').textContent = pdProduct.restockNote;
+                }
+                // Badge
+                const restockBadge = document.querySelector('.pd-preorder-badge');
+                if (restockBadge) restockBadge.innerHTML = '<span style="width:8px;height:8px;border-radius:50%;background:#f59e0b;display:inline-block;margin-right:8px;"></span> Restock Pre-Order';
+                // Button
+                const restockBtn = document.querySelector('.pd-btn-preorder');
+                if (restockBtn) restockBtn.innerHTML = 'Reserve My Pair <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>';
+                const restockInput = document.getElementById('pd-preorder-email');
+                if (restockInput) restockInput.placeholder = 'Enter your email to reserve';
+            } else if (pdProduct.isPreOrder) {
+                // Pre-order mode — product announced but not yet released
+                stockEl.innerHTML = '<span class="pd-stock-badge preorder">Pre-Order — Not Yet Released</span>';
+                preorderBlock.style.display = 'block';
+                normalActions.style.display = 'none';
+                // Show PRE-ORDER overlay on image
+                if (soldOutOverlay) {
+                    soldOutOverlay.classList.remove('overlay-soldout');
+                    soldOutOverlay.classList.add('overlay-preorder');
+                    soldOutOverlay.querySelector('.pd-img-soldout-label').textContent = 'Pre-Order';
+                    soldOutOverlay.style.display = 'flex';
+                }
+                // Populate pre-order meta
+                if (pdProduct.expectedReleaseDate) {
+                    document.getElementById('pd-preorder-release').innerHTML =
+                        `<strong>Expected Release:</strong> ${pdProduct.expectedReleaseDate}`;
+                }
+                if (pdProduct.preOrderNote) {
+                    document.getElementById('pd-preorder-note').textContent = pdProduct.preOrderNote;
+                }
+            } else {
+                // Out of stock — existing product that sold out
+                stockEl.innerHTML = '<span class="pd-stock-badge out">Sold Out</span>';
+                // Show SOLD OUT overlay on image
+                if (soldOutOverlay) {
+                    soldOutOverlay.classList.remove('overlay-preorder');
+                    soldOutOverlay.classList.add('overlay-soldout');
+                    soldOutOverlay.querySelector('.pd-img-soldout-label').textContent = 'Sold Out';
+                    soldOutOverlay.style.display = 'flex';
+                }
+                preorderBlock.style.display = 'block';
+                normalActions.style.display = 'none';
+                document.getElementById('pd-preorder-release').textContent = '';
+                document.getElementById('pd-preorder-note').textContent = 'This product is currently out of stock. Enter your email and we\'ll notify you the moment it\'s back.';
+                // Swap button label to Notify Me
+                const preorderBtn = document.querySelector('.pd-btn-preorder');
+                if (preorderBtn) preorderBtn.innerHTML = 'Notify Me When Back <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>';
+                const preorderInput = document.getElementById('pd-preorder-email');
+                if (preorderInput) preorderInput.placeholder = 'Enter your email to get notified';
+                // Change badge to reflect restock notification theme
+                const preorderBadge = document.querySelector('.pd-preorder-badge');
+                if (preorderBadge) preorderBadge.innerHTML = '<span style="width:8px;height:8px;border-radius:50%;background:#ef4444;display:inline-block;margin-right:8px;"></span> Currently Sold Out';
             }
-            preorderBlock.style.display = 'block';
-            normalActions.style.display = 'none';
-            if (pdProduct.restockDate) {
-                document.getElementById('pd-preorder-release').innerHTML =
-                    `<strong>Restock Expected:</strong> ${pdProduct.restockDate}`;
-            }
-            if (pdProduct.restockNote) {
-                document.getElementById('pd-preorder-note').textContent = pdProduct.restockNote;
-            }
-            // Badge
-            const restockBadge = document.querySelector('.pd-preorder-badge');
-            if (restockBadge) restockBadge.innerHTML = '<span style="width:8px;height:8px;border-radius:50%;background:#f59e0b;display:inline-block;margin-right:8px;"></span> Restock Pre-Order';
-            // Button
-            const restockBtn = document.querySelector('.pd-btn-preorder');
-            if (restockBtn) restockBtn.innerHTML = 'Reserve My Pair <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>';
-            const restockInput = document.getElementById('pd-preorder-email');
-            if (restockInput) restockInput.placeholder = 'Enter your email to reserve';
-        } else if (pdProduct.isPreOrder) {
-            // Pre-order mode — product announced but not yet released
-            stockEl.innerHTML = '<span class="pd-stock-badge preorder">Pre-Order — Not Yet Released</span>';
-            preorderBlock.style.display = 'block';
-            normalActions.style.display = 'none';
-            // Show PRE-ORDER overlay on image
-            if (soldOutOverlay) {
-                soldOutOverlay.classList.remove('overlay-soldout');
-                soldOutOverlay.classList.add('overlay-preorder');
-                soldOutOverlay.querySelector('.pd-img-soldout-label').textContent = 'Pre-Order';
-                soldOutOverlay.style.display = 'flex';
-            }
-            // Populate pre-order meta
-            if (pdProduct.expectedReleaseDate) {
-                document.getElementById('pd-preorder-release').innerHTML =
-                    `<strong>Expected Release:</strong> ${pdProduct.expectedReleaseDate}`;
-            }
-            if (pdProduct.preOrderNote) {
-                document.getElementById('pd-preorder-note').textContent = pdProduct.preOrderNote;
-            }
+        } else if (pdMaxStock <= 5) {
+            stockEl.innerHTML = `<span class="pd-stock-badge low">Low Stock — Only ${pdMaxStock} left</span>`;
         } else {
-            // Out of stock — existing product that sold out
-            stockEl.innerHTML = '<span class="pd-stock-badge out">Sold Out</span>';
-            // Show SOLD OUT overlay on image
-            if (soldOutOverlay) {
-                soldOutOverlay.classList.remove('overlay-preorder');
-                soldOutOverlay.classList.add('overlay-soldout');
-                soldOutOverlay.querySelector('.pd-img-soldout-label').textContent = 'Sold Out';
-                soldOutOverlay.style.display = 'flex';
-            }
-            preorderBlock.style.display = 'block';
-            normalActions.style.display = 'none';
-            document.getElementById('pd-preorder-release').textContent = '';
-            document.getElementById('pd-preorder-note').textContent = 'This product is currently out of stock. Enter your email and we\'ll notify you the moment it\'s back.';
-            // Swap button label to Notify Me
-            const preorderBtn = document.querySelector('.pd-btn-preorder');
-            if (preorderBtn) preorderBtn.innerHTML = 'Notify Me When Back <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>';
-            const preorderInput = document.getElementById('pd-preorder-email');
-            if (preorderInput) preorderInput.placeholder = 'Enter your email to get notified';
-            // Change badge to reflect restock notification theme
-            const preorderBadge = document.querySelector('.pd-preorder-badge');
-            if (preorderBadge) preorderBadge.innerHTML = '<span style="width:8px;height:8px;border-radius:50%;background:#ef4444;display:inline-block;margin-right:8px;"></span> Currently Sold Out';
+            stockEl.innerHTML = `<span class="pd-stock-badge in">In Stock (${pdMaxStock} available)</span>`;
         }
-    } else if (pdMaxStock <= 5) {
-        stockEl.innerHTML = `<span class="pd-stock-badge low">Low Stock — Only ${pdMaxStock} left</span>`;
-    } else {
-        stockEl.innerHTML = `<span class="pd-stock-badge in">In Stock (${pdMaxStock} available)</span>`;
     }
 
     // Reviews
@@ -844,6 +848,51 @@ function pdSelectColor(color, el) {
     // Update color name label
     const nameEl = document.getElementById('pd-color-name');
     if (nameEl) nameEl.textContent = color;
+
+    // Update stock display for this color
+    const colorStocks = pdProduct.colorStocks || {};
+    pdMaxStock = (color in colorStocks) ? colorStocks[color] : (pdProduct.stock || 0);
+
+    const stockEl = document.getElementById('pd-stock-display');
+    const preorderBlock = document.getElementById('pd-preorder-block');
+    const normalActions = document.getElementById('pd-normal-actions');
+    if (stockEl) {
+        if (pdMaxStock <= 0) {
+            stockEl.innerHTML = '<span class="pd-stock-badge out">Out of Stock</span>';
+            if (preorderBlock) preorderBlock.style.display = 'none';
+            if (normalActions) normalActions.style.display = '';
+        } else if (pdMaxStock <= 5) {
+            stockEl.innerHTML = `<span class="pd-stock-badge low">Low Stock — Only ${pdMaxStock} left</span>`;
+            if (preorderBlock) preorderBlock.style.display = 'none';
+            if (normalActions) normalActions.style.display = '';
+        } else {
+            stockEl.innerHTML = `<span class="pd-stock-badge in">In Stock (${pdMaxStock} available)</span>`;
+            if (preorderBlock) preorderBlock.style.display = 'none';
+            if (normalActions) normalActions.style.display = '';
+        }
+    }
+
+    // Update sizes for this color
+    const colorSizes = pdProduct.colorSizes || {};
+    const sizeContainer = document.getElementById('pd-size-options');
+    if (sizeContainer) {
+        const sizesToShow = (color in colorSizes && colorSizes[color].length > 0)
+            ? colorSizes[color]
+            : (pdProduct.sizes || []);
+        // Clear selected size if it's not available for this color
+        if (pdSelectedSize && !sizesToShow.includes(pdSelectedSize)) {
+            pdSelectedSize = null;
+        }
+        sizeContainer.innerHTML = sizesToShow.map(s =>
+            `<div class="pd-size-opt${s === pdSelectedSize ? ' selected' : ''}" onclick="pdSelectSize('${s}', this)">${s}</div>`
+        ).join('');
+    }
+
+    // Reset qty to 1 when switching colors
+    pdQty = 1;
+    const qtyEl = document.getElementById('pd-qty');
+    if (qtyEl) qtyEl.textContent = '1';
+
     // Swap gallery if this color has its own images
     const colorImages = pdProduct.colorImages || {};
     const imgs = colorImages[color];
