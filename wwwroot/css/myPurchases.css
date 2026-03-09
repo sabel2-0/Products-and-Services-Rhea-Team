@@ -229,10 +229,13 @@
 
 .order-img-large {
     width: 100px;
-    height: 130px;
-    object-fit: cover;
+    height: 100px; /* make square */
+    object-fit: contain; /* show full image without cropping */
+    object-position: center; /* center the image inside the square */
+    background-color: #fff;
     border-radius: 8px;
     border: 1px solid #eee;
+    display: block;
 }
 
 .product-details-main {

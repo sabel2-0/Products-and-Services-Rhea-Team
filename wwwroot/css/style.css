@@ -5201,15 +5201,15 @@ body.modal-open {
 /* Product snapshot */
 .rv-product-snap {
     display: flex;
-    gap: var(--space-xl);
+    gap: var(--space-2xl); /* a bit more breathing room */
     align-items: center;
     padding: var(--space-2xl) 0 var(--space-xl);
     border-bottom: 1px solid var(--border-color);
     margin-bottom: var(--space-2xl);
 }
 .rv-snap-image {
-    width: 160px;
-    height: 160px;
+    width: 220px; /* larger image */
+    height: 220px;
     border-radius: var(--radius-md);
     overflow: hidden;
     flex-shrink: 0;
@@ -5225,12 +5225,12 @@ body.modal-open {
     flex-direction: column;
     gap: var(--space-sm);
     flex: 0 0 auto;
-    min-width: 220px;
-    max-width: 320px;
+    min-width: 260px; /* allow more room for text */
+    max-width: 380px;
     padding-right: var(--space-2xl);
 }
 .rv-snap-brand {
-    font-size: 11px;
+    font-size: 13px;
     font-weight: 700;
     letter-spacing: 3px;
     text-transform: uppercase;
@@ -5238,7 +5238,7 @@ body.modal-open {
 }
 .rv-snap-name {
     font-family: var(--font-display);
-    font-size: clamp(26px, 3vw, 36px);
+    font-size: clamp(30px, 4vw, 44px); /* bumped up */
     font-weight: 700;
     line-height: 1.2;
     margin: 0;
@@ -5247,14 +5247,14 @@ body.modal-open {
     display: flex;
     align-items: center;
     gap: var(--space-sm);
-    font-size: 14px;
+    font-size: 16px;
 }
 .rv-snap-score { font-weight: 700; }
 .rv-snap-sep { opacity: 0.3; }
 .rv-snap-link {
     display: inline-flex;
     align-items: center;
-    font-size: 12px;
+    font-size: 14px;
     font-weight: 700;
     letter-spacing: 1px;
     text-decoration: none;
@@ -5297,12 +5297,12 @@ body.modal-open {
 }
 .rv-big-num {
     font-family: var(--font-display);
-    font-size: 56px;
+    font-size: 72px; /* larger rating number */
     font-weight: 800;
     line-height: 1;
 }
-.rv-big-stars .stars { font-size: 20px; }
-.rv-big-label { font-size: 11px; opacity: 0.5; font-weight: 600; white-space: nowrap; }
+.rv-big-stars .stars { font-size: 24px; }
+.rv-big-label { font-size: 13px; opacity: 0.5; font-weight: 600; white-space: nowrap; }
 .rv-dist {
     flex: 1;
     display: flex;

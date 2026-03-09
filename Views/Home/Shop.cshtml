@@ -500,6 +500,20 @@ function updateProductCount(count) {
 
     const wasVideo    = stripVideo  && stripVideo.style.display !== 'none';
 
+    // Returns a suitable Unsplash source URL for a label. Uses Unsplash Source to fetch
+    // an image matching the label words (falls back to a generic store/products image).
+    function getUnsplashBgUrlForLabel(lbl) {
+        if (!lbl) return "url('/images/shop-hero-all.jpg')";
+        const cleaned = lbl.toString().trim().toLowerCase();
+        // If header contains 'next horizon' or similar, favour retail/store/product imagery
+        if (cleaned.includes('next') && cleaned.includes('horizon')) {
+            return "url('https://source.unsplash.com/1600x900/?retail,store,products')";
+        }
+        // For multi-word labels, use them as search tags
+        const tags = cleaned.split(/\s+/).slice(0,4).map(encodeURIComponent).join(',');
+        return `url('https://source.unsplash.com/1600x900/?${tags},products')`;
+    }
+
     // Dual-layer slide: old image exits left, new content slides in from right simultaneously.
     // newBgUrl = '' for dark/brand mode, or the image URL for all-products mode.
     function doSlide(newBgUrl, afterSlide) {
@@ -564,11 +578,13 @@ function updateProductCount(count) {
         }
         doSlide('');
     } else {
-        // → ALL: slide in store image
+        // → ALL / SEARCH: choose an image that fits the header label.
         if (wasVideo) hideVideo();
         if (shoeWrap) shoeWrap.style.display = 'none';
         if (bannerImg) { bannerImg.src = ''; bannerImg.style.opacity = '0'; }
-        doSlide("url('/images/shop-hero-all.jpg')");
+        // Use Unsplash Source queries to pick images matching the visible label.
+        const unsplashUrl = getUnsplashBgUrlForLabel(label || (activeQ || 'products'));
+        doSlide(unsplashUrl);
     }
 }
 
