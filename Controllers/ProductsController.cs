@@ -13,11 +13,13 @@ namespace MyAspNetApp.Controllers
     {
         private readonly AppDbContext _db;
         private readonly IMemoryCache _cache;
+        private readonly TimeSpan _cacheDuration;
 
-        public ProductsController(AppDbContext db, IMemoryCache cache)
+        public ProductsController(AppDbContext db, IMemoryCache cache, IConfiguration config)
         {
             _db = db;
             _cache = cache;
+            _cacheDuration = TimeSpan.FromMinutes(config.GetValue<int>("Cache:ProductCacheMinutes", 5));
         }
 
         private static Review MapDbReview(DbReview review, List<DbReviewImage> reviewImages)
@@ -127,7 +129,7 @@ namespace MyAspNetApp.Controllers
             {
                 var result = await _cache.GetOrCreateAsync("products:all", async entry =>
                 {
-                    entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(20);
+                    entry.AbsoluteExpirationRelativeToNow = _cacheDuration;
 
                     var dbProducts = await _db.Products
                         .AsNoTracking()
@@ -171,7 +173,7 @@ namespace MyAspNetApp.Controllers
             {
                 var result = await _cache.GetOrCreateAsync("products:men", async entry =>
                 {
-                    entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(20);
+                    entry.AbsoluteExpirationRelativeToNow = _cacheDuration;
 
                     var products = await _db.Products
                         .AsNoTracking()
@@ -213,7 +215,7 @@ namespace MyAspNetApp.Controllers
             {
                 var result = await _cache.GetOrCreateAsync("products:women", async entry =>
                 {
-                    entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(20);
+                    entry.AbsoluteExpirationRelativeToNow = _cacheDuration;
 
                     var products = await _db.Products
                         .AsNoTracking()
