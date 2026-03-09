@@ -5,122 +5,97 @@
 <!-- Shop Page -->
 <main class="shop-page">
 
-    <!-- Shop Category Strip -->
-    <div class="shop-category-strip">
-        <div class="shop-strip-bg" id="shop-strip-bg">
-            <div class="shop-strip-bg-img" id="shop-strip-bg-img" style="background-image:url('/images/shop-hero-all.jpg')"></div>
-            <video id="shop-strip-video" class="shop-strip-bg-video" src="/images/Sale.mp4" loop muted playsinline style="display:none"></video>
-        </div>
-        <div class="shop-strip-inner">
-            <div class="shop-strip-left">
-                <p class="shop-strip-subtitle" id="shop-strip-subtitle"></p>
-                <h1 class="shop-strip-title" id="shop-strip-title">All Products</h1>
-            </div>
-            <div class="shop-strip-shoe" id="shop-strip-shoe" style="display:none">
-                <img src="" alt="Brand Logo" class="shop-strip-shoe-img is-brand-logo" id="shop-banner-img">
-            </div>
-        </div>
-    </div>
-
-    <!-- Filter Drawer Overlay -->
-    <div class="fd-backdrop" id="fd-backdrop" onclick="closeFilterDrawer()"></div>
-    <aside class="filter-drawer" id="filter-drawer">
-        <div class="fd-header">
-            <span class="fd-title">Filter</span>
-            <button class="fd-close" onclick="closeFilterDrawer()">&#10005;</button>
-        </div>
-        <div class="fd-body">
-
-            <!-- Item Type accordion -->
-            <div class="fd-accordion is-open" id="subcategory-filter-section">
-                <button class="fd-acc-trigger" onclick="toggleAccordion(this)">
-                    Item Type <span class="fd-acc-icon">&#8722;</span>
-                </button>
-                <div class="fd-acc-content">
-                    <div id="subcategory-filter-list"></div>
-                </div>
-            </div>
-
-            <!-- Price Range accordion -->
-            <div class="fd-accordion">
-                <button class="fd-acc-trigger" onclick="toggleAccordion(this)">
-                    Price Range <span class="fd-acc-icon">+</span>
-                </button>
-                <div class="fd-acc-content" style="display:none;">
-                    <div class="price-range-slider">
-                        <input type="range" id="price-slider" min="0" max="20000" step="500" value="20000"
-                               oninput="onSliderInput(this.value)">
-                        <div class="price-range-display">Up to ₱<span id="price-display">20,000</span></div>
-                    </div>
-                    <div class="price-range-inputs" style="margin-top:12px;">
-                        <div class="price-input-wrap">
-                            <span class="price-input-prefix">₱</span>
-                            <input type="number" id="price-min" placeholder="Min" min="0" max="20000" step="100" oninput="onPriceInputChange()">
-                        </div>
-                        <span class="price-sep">—</span>
-                        <div class="price-input-wrap">
-                            <span class="price-input-prefix">₱</span>
-                            <input type="number" id="price-max" placeholder="Max" min="0" max="99999" step="100" oninput="onPriceInputChange()">
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Brand accordion -->
-            <div class="fd-accordion is-open">
-                <button class="fd-acc-trigger" onclick="toggleAccordion(this)">
-                    Brand <span class="fd-acc-icon">&#8722;</span>
-                </button>
-                <div class="fd-acc-content">
-                    <div id="brand-filter-list"></div>
-                </div>
-            </div>
-
-            <!-- Size accordion — only when Apparel is in scope -->
-            <div class="fd-accordion" id="size-filter-section" style="display:none;">
-                <button class="fd-acc-trigger" onclick="toggleAccordion(this)">
-                    Size <span class="fd-acc-icon">+</span>
-                </button>
-                <div class="fd-acc-content" style="display:none;">
-                    <div class="size-filter-grid">
-                        <button class="size-filter-btn" data-size="XS" onclick="toggleSizeFilter('XS')">XS</button>
-                        <button class="size-filter-btn" data-size="S" onclick="toggleSizeFilter('S')">S</button>
-                        <button class="size-filter-btn" data-size="M" onclick="toggleSizeFilter('M')">M</button>
-                        <button class="size-filter-btn" data-size="L" onclick="toggleSizeFilter('L')">L</button>
-                        <button class="size-filter-btn" data-size="XL" onclick="toggleSizeFilter('XL')">XL</button>
-                        <button class="size-filter-btn" data-size="XXL" onclick="toggleSizeFilter('XXL')">XXL</button>
-                    </div>
-                </div>
-            </div>
-
-        </div>
-        <div class="fd-footer">
-            <button class="fd-clear-btn" onclick="clearAllFilters()">Clear</button>
-            <button class="fd-view-btn" id="fd-view-btn" onclick="closeFilterDrawer()">View products</button>
-        </div>
-    </aside>
-
     <div class="container">
-        <section class="products-section">
-            <div class="products-header">
-                <div class="products-header-left">
-                    <button class="filter-trigger-btn" onclick="openFilterDrawer()">
-                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                            <path d="M2 4h12M4 8h8M6 12h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-                        </svg>
-                        Filter
-                    </button>
-                    <div class="brand-pills-row" id="brand-pills-row"></div>
-                </div>
+        <div class="products-header">
+            <h1 class="shop-title-text" id="shop-strip-title">All Products</h1>
+            <button class="filter-toggle-btn" id="filter-toggle-btn" onclick="toggleFilterSidebar()">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                    <path d="M2 4h12M4 8h8M6 12h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                </svg>
+                <span id="filter-toggle-text">Hide Filter</span>
+            </button>
+        </div>
 
-            </div>
-            <div id="products-grid" class="products-grid">
-                <div id="products-loading" class="products-loading">
-                    <div class="loading-spinner"></div>
-                    <p>Loading products...</p>
+        <div class="shop-layout" id="shop-layout">
+            <!-- Inline Filter Sidebar -->
+            <aside class="filter-sidebar is-open" id="filter-sidebar">
+                <div class="fd-body">
+
+                    <!-- Item Type accordion -->
+                    <div class="fd-accordion is-open" id="subcategory-filter-section">
+                        <button class="fd-acc-trigger" onclick="toggleAccordion(this)">
+                            Item Type <span class="fd-acc-icon">&#8722;</span>
+                        </button>
+                        <div class="fd-acc-content">
+                            <div id="subcategory-filter-list"></div>
+                        </div>
+                    </div>
+
+                    <!-- Price Range accordion -->
+                    <div class="fd-accordion">
+                        <button class="fd-acc-trigger" onclick="toggleAccordion(this)">
+                            Price Range <span class="fd-acc-icon">+</span>
+                        </button>
+                        <div class="fd-acc-content" style="display:none;">
+                            <div class="price-range-inputs">
+                                <div class="price-input-wrap">
+                                    <span class="price-input-prefix">&#x20B1;</span>
+                                    <input type="number" id="price-min" placeholder="Min" min="0" max="20000" step="100" oninput="onPriceInputChange()">
+                                </div>
+                                <span class="price-sep">--</span>
+                                <div class="price-input-wrap">
+                                    <span class="price-input-prefix">&#x20B1;</span>
+                                    <input type="number" id="price-max" placeholder="Max" min="0" max="99999" step="100" oninput="onPriceInputChange()">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Brand accordion -->
+                    <div class="fd-accordion is-open">
+                        <button class="fd-acc-trigger" onclick="toggleAccordion(this)">
+                            Brand <span class="fd-acc-icon">&#8722;</span>
+                        </button>
+                        <div class="fd-acc-content">
+                            <input type="text" class="brand-search-input" id="brand-search-input"
+                                   placeholder="Search brands..." oninput="filterBrandList(this.value)">
+                            <div id="brand-filter-list"></div>
+                        </div>
+                    </div>
+
+                    <!-- Size accordion -->
+                    <div class="fd-accordion" id="size-filter-section" style="display:none;">
+                        <button class="fd-acc-trigger" onclick="toggleAccordion(this)">
+                            Size <span class="fd-acc-icon">+</span>
+                        </button>
+                        <div class="fd-acc-content" style="display:none;">
+                            <div class="size-filter-grid">
+                                <button class="size-filter-btn" data-size="XS" onclick="toggleSizeFilter('XS')">XS</button>
+                                <button class="size-filter-btn" data-size="S" onclick="toggleSizeFilter('S')">S</button>
+                                <button class="size-filter-btn" data-size="M" onclick="toggleSizeFilter('M')">M</button>
+                                <button class="size-filter-btn" data-size="L" onclick="toggleSizeFilter('L')">L</button>
+                                <button class="size-filter-btn" data-size="XL" onclick="toggleSizeFilter('XL')">XL</button>
+                                <button class="size-filter-btn" data-size="XXL" onclick="toggleSizeFilter('XXL')">XXL</button>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
-            </div>
-        </section>
+                <div class="fd-footer">
+                    <button class="fd-clear-btn" onclick="clearAllFilters()">Clear All</button>
+                </div>
+            </aside>
+
+            <!-- Product Grid -->
+            <section class="products-section">
+                <div id="products-grid" class="products-grid">
+                    <div id="products-loading" class="products-loading">
+                        <div class="loading-spinner"></div>
+                        <p>Loading products...</p>
+                    </div>
+                </div>
+            </section>
+        </div>
     </div>
 </main>
 
@@ -129,6 +104,23 @@
 let selectedSizes = [];
 let currentSort = 'price-low';
 // allProducts and currentCategory come from app.js globals
+
+function toggleFilterSidebar() {
+    const sidebar = document.getElementById('filter-sidebar');
+    const text = document.getElementById('filter-toggle-text');
+    if (!sidebar) return;
+    sidebar.classList.toggle('is-open');
+    if (text) text.textContent = sidebar.classList.contains('is-open') ? 'Hide Filter' : 'Show Filter';
+}
+
+function filterBrandList(query) {
+    const items = document.querySelectorAll('#brand-filter-list .filter-checkbox');
+    const q = (query || '').toLowerCase();
+    items.forEach(label => {
+        const text = label.textContent.toLowerCase();
+        label.style.display = text.includes(q) ? '' : 'none';
+    });
+}
 
 document.addEventListener('DOMContentLoaded', function() {
     // Set sticky offset for products-header based on site header height
@@ -190,55 +182,7 @@ async function loadProducts() {
 function buildFiltersForScope(scopeProducts) {
     buildSubcategoryFilter(scopeProducts);
     buildBrandFilter(scopeProducts);
-    buildBrandPills(scopeProducts);
     updateSizeVisibility();
-}
-
-function buildBrandPills(scopeProducts) {
-    const pillsRow = document.getElementById('brand-pills-row');
-    if (!pillsRow) return;
-    const brandCount = {};
-    scopeProducts.forEach(p => { if (p.brand) brandCount[p.brand] = (brandCount[p.brand] || 0) + 1; });
-    const brands = Object.keys(brandCount).sort();
-    if (brands.length <= 1) { pillsRow.innerHTML = ''; return; }
-    const checked = Array.from(document.querySelectorAll('input[name="brand"]:checked')).map(c => c.value);
-    const allActive = checked.length === 0;
-    const allPill = `<button class="brand-pill${allActive ? ' active' : ''}" data-brand="__all__" onclick="toggleAllBrandPill()">ALL <span class="pill-count">(${scopeProducts.length})</span></button>`;
-    pillsRow.innerHTML = allPill + brands.map(brand =>
-        `<button class="brand-pill${checked.includes(brand) ? ' active' : ''}" data-brand="${brand}" onclick="toggleBrandPill('${brand}')">${brand} <span class="pill-count">(${brandCount[brand]})</span></button>`
-    ).join('');
-}
-
-function toggleAllBrandPill() {
-    document.querySelectorAll('input[name="brand"]').forEach(cb => cb.checked = false);
-    document.querySelectorAll('.brand-pill').forEach(p => p.classList.remove('active'));
-    const allPill = document.querySelector('.brand-pill[data-brand="__all__"]');
-    if (allPill) allPill.classList.add('active');
-    applyFilters();
-}
-
-function toggleBrandPill(brand) {
-    const pill = document.querySelector(`.brand-pill[data-brand="${brand}"]`);
-    const wasActive = pill && pill.classList.contains('active');
-
-    // Deselect all
-    document.querySelectorAll('input[name="brand"]').forEach(cb => cb.checked = false);
-    document.querySelectorAll('.brand-pill').forEach(p => p.classList.remove('active'));
-
-    // If it wasn't already active, activate just this one
-    if (!wasActive) {
-        const cb = document.querySelector(`input[name="brand"][value="${brand}"]`);
-        if (cb) cb.checked = true;
-        if (pill) pill.classList.add('active');
-    }
-
-    // If nothing is active now, highlight ALL
-    const anyActive = Array.from(document.querySelectorAll('input[name="brand"]:checked')).length > 0;
-    if (!anyActive) {
-        const allPill = document.querySelector('.brand-pill[data-brand="__all__"]');
-        if (allPill) allPill.classList.add('active');
-    }
-    applyFilters();
 }
 
 function buildSubcategoryFilter(scopeProducts) {
@@ -378,11 +322,6 @@ function applyFilters() {
 
     updateSizeVisibility(subcategories);
     updateFilterCounts(filtered);
-    // Sync brand pills active state
-    const checkedBrandsSynced = Array.from(document.querySelectorAll('input[name="brand"]:checked')).map(c => c.value);
-    document.querySelectorAll('.brand-pill').forEach(pill => {
-        pill.classList.toggle('active', checkedBrandsSynced.includes(pill.dataset.brand));
-    });
     // Apply current sort order
     if (currentSort === 'price-low')  filtered.sort((a, b) => a.price - b.price);
     else if (currentSort === 'price-high') filtered.sort((a, b) => b.price - a.price);
@@ -449,143 +388,25 @@ function updateProductCount(count) {
     const liveQ = (document.getElementById('header-search-input')?.value || '').trim();
     const activeQ = liveQ || urlQ;
 
-    const brandLogoMap = {
-        'Nike':   '/images/popular brands/nike.svg',
-        'Adidas': '/images/popular brands/adidas.svg',
-    };
-
     let label = 'All Products';
-    let subtitle = '';
-    let logoBrand = null;
-    // If a header link set a `label` param, prefer it (this comes from header clicks)
     if (labelParam) {
-        if (labelParam.toLowerCase() === 'sale') {
-            subtitle = 'Now On';
-            label = 'Sale';
-        } else {
-            label = labelParam;
-        }
+        label = labelParam;
     } else if (activeQ && activeQ.toLowerCase() === 'sale') {
-        subtitle = 'Now On';
         label = 'Sale';
     } else if (activeQ) {
-        subtitle = 'Search results for:';
         label = activeQ;
-        // Check if typed text exactly matches a brand (case-insensitive)
-        const matchedBrand = Object.keys(brandLogoMap).find(b => b.toLowerCase() === activeQ.toLowerCase());
-        if (matchedBrand) logoBrand = matchedBrand;
     } else if (checkedSubs.length === 1) {
         label = checkedSubs[0];
     } else if (checkedSubs.length > 1) {
         label = 'Multiple Categories';
     } else if (checkedBrands.length === 1) {
         label = checkedBrands[0];
-        logoBrand = checkedBrands[0];
     } else if (currentCategory && currentCategory !== 'all') {
         label = currentCategory.charAt(0).toUpperCase() + currentCategory.slice(1);
     }
 
     const stripTitle = document.getElementById('shop-strip-title');
     if (stripTitle) stripTitle.textContent = label;
-    const stripSubtitle = document.getElementById('shop-strip-subtitle');
-    if (stripSubtitle) stripSubtitle.textContent = subtitle;
-
-    // Swap banner: image fills right panel for All, brand logo floats for brand filter
-    const stripBgImg  = document.getElementById('shop-strip-bg-img');
-    const stripVideo  = document.getElementById('shop-strip-video');
-    const shoeWrap    = document.getElementById('shop-strip-shoe');
-    const bannerImg   = document.getElementById('shop-banner-img');
-    const isSale      = label === 'Sale';
-    const isLogo      = logoBrand && brandLogoMap[logoBrand];
-
-    const wasVideo    = stripVideo  && stripVideo.style.display !== 'none';
-
-    // Returns a suitable Unsplash source URL for a label. Uses Unsplash Source to fetch
-    // an image matching the label words (falls back to a generic store/products image).
-    function getUnsplashBgUrlForLabel(lbl) {
-        if (!lbl) return "url('/images/shop-hero-all.jpg')";
-        const cleaned = lbl.toString().trim().toLowerCase();
-        // If header contains 'next horizon' or similar, favour retail/store/product imagery
-        if (cleaned.includes('next') && cleaned.includes('horizon')) {
-            return "url('https://source.unsplash.com/1600x900/?retail,store,products')";
-        }
-        // For multi-word labels, use them as search tags
-        const tags = cleaned.split(/\s+/).slice(0,4).map(encodeURIComponent).join(',');
-        return `url('https://source.unsplash.com/1600x900/?${tags},products')`;
-    }
-
-    // Dual-layer slide: old image exits left, new content slides in from right simultaneously.
-    // newBgUrl = '' for dark/brand mode, or the image URL for all-products mode.
-    function doSlide(newBgUrl, afterSlide) {
-        const parent = stripBgImg ? stripBgImg.parentElement : null;
-        if (!parent) { afterSlide && afterSlide(); return; }
-
-        // Clean up any stale layers
-        parent.querySelectorAll('.shop-strip-bg-overlay, .shop-strip-bg-slide').forEach(el => el.remove());
-
-        // --- EXIT layer: old image slides out to the left ---
-        const oldBgUrl = stripBgImg ? stripBgImg.style.backgroundImage : '';
-        if (oldBgUrl) {
-            const exitLayer = document.createElement('div');
-            exitLayer.className = 'shop-strip-bg-overlay';
-            exitLayer.style.backgroundImage = oldBgUrl;
-            parent.appendChild(exitLayer);
-            exitLayer.addEventListener('animationend', () => exitLayer.remove(), { once: true });
-        }
-
-        // --- ENTER layer: new content slides in from the right ---
-        const enterLayer = document.createElement('div');
-        enterLayer.className = 'shop-strip-bg-slide';
-        if (newBgUrl) enterLayer.style.backgroundImage = newBgUrl;
-        parent.appendChild(enterLayer);
-        enterLayer.addEventListener('animationend', () => {
-            // Commit the final state to stripBgImg, then remove temp layer
-            if (stripBgImg) stripBgImg.style.backgroundImage = newBgUrl || '';
-            enterLayer.remove();
-            afterSlide && afterSlide();
-        }, { once: true });
-    }
-
-    // Fade out video then stop it
-    function hideVideo() {
-        if (!stripVideo) return;
-        stripVideo.classList.remove('active');
-        setTimeout(() => { stripVideo.pause(); stripVideo.currentTime = 0; stripVideo.style.display = 'none'; }, 450);
-    }
-
-    if (isSale) {
-        // → SALE: hide logo, fade in video
-        if (wasVideo) return; // already showing video
-        if (shoeWrap) shoeWrap.style.display = 'none';
-        if (bannerImg) { bannerImg.src = ''; bannerImg.style.opacity = '0'; }
-        // Slide out current bg, then start video on top
-        doSlide('', () => {
-            if (stripVideo) {
-                stripVideo.style.display = '';
-                stripVideo.play();
-                requestAnimationFrame(() => requestAnimationFrame(() => stripVideo.classList.add('active')));
-            }
-        });
-    } else if (isLogo) {
-        // → BRAND: show logo first, then slide in dark panel behind it
-        if (wasVideo) hideVideo();
-        if (stripBgImg) stripBgImg.style.backgroundImage = '';
-        if (shoeWrap) shoeWrap.style.display = '';
-        if (bannerImg) {
-            bannerImg.style.opacity = '0';
-            bannerImg.src = brandLogoMap[logoBrand];
-            requestAnimationFrame(() => bannerImg.style.opacity = '1');
-        }
-        doSlide('');
-    } else {
-        // → ALL / SEARCH: choose an image that fits the header label.
-        if (wasVideo) hideVideo();
-        if (shoeWrap) shoeWrap.style.display = 'none';
-        if (bannerImg) { bannerImg.src = ''; bannerImg.style.opacity = '0'; }
-        // Use Unsplash Source queries to pick images matching the visible label.
-        const unsplashUrl = getUnsplashBgUrlForLabel(label || (activeQ || 'products'));
-        doSlide(unsplashUrl);
-    }
 }
 
 function renderProducts(products) {
