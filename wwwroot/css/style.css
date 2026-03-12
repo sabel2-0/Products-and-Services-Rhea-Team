@@ -2787,6 +2787,45 @@ body.modal-open {
     opacity: 0.8;
     margin: 0;
 }
+
+/* seller reply styling (minimal, below photos) */
+.rv-seller-reply {
+    margin-top: var(--space-md);
+    padding: var(--space-sm) var(--space-md);
+    background: var(--subtle-gray);
+    border-radius: var(--radius-md);
+    font-size: 13px;
+}
+.rv-seller-reply-meta {
+    font-weight: 600;
+    opacity: 0.65;
+    margin-bottom: 4px;
+    font-size: 12px;
+}
+.rv-seller-reply-text {
+    color: var(--pure-black);
+    line-height: 1.4;
+}
+
+/* product page reply uses same styles but with pd- prefix */
+.pd-seller-reply {
+    margin-top: var(--space-md);
+    padding: var(--space-sm) var(--space-md);
+    background: var(--subtle-gray);
+    border-radius: var(--radius-md);
+    font-size: 13px;
+}
+.pd-seller-reply-meta {
+    font-weight: 600;
+    opacity: 0.65;
+    margin-bottom: 4px;
+    font-size: 12px;
+}
+.pd-seller-reply-text {
+    color: var(--pure-black);
+    line-height: 1.4;
+}
+
 .rv-empty {
     grid-column: 1 / -1;
     text-align: center;

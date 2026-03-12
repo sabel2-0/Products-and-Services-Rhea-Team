@@ -264,7 +264,7 @@ function renderMetrics(reviews) {
     function makeSvgTrack3(pct) { return makeDivTrack3(pct); }
 
     function twoEndSlider(pct, leftLabel, rightLabel, title) {
-        return '<div class="rv-metric">' +
+        return '<div class="rv-card">' +
             '<div class="rv-metric-title">' + title + '</div>' +
             '<div class="rv-metric-track rv-track-2">' + makeSvgTrack2(pct) + '</div>' +
             '<div class="rv-metric-labels rv-metric-labels-2">' +
@@ -277,9 +277,9 @@ function renderMetrics(reviews) {
             return '<span class="' + (i === activeIdx ? 'rv-label-active' : '') + '">' + l + '</span>';
         }).join('');
         return '<div class="rv-metric">' +
-            '<div class="rv-metric-title">' + title + '</div>' +
-            '<div class="rv-metric-track rv-track-3">' + makeSvgTrack3(pct) + '</div>' +
-            '<div class="rv-metric-labels rv-metric-labels-3">' + labelHtml + '</div></div>';
+            thumb +
+            photos +
+            sellerReplyHtml +
     }
 
     const metricsEl = document.getElementById('rv-metrics');

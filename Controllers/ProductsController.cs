@@ -105,7 +105,8 @@ namespace MyAspNetApp.Controllers
                 Price = p.Discount.HasValue && p.Discount.Value > 0 ? p.Price - p.Discount.Value : p.Price,
                 OriginalPrice = p.Discount.HasValue && p.Discount.Value > 0 ? p.Price : null,
                 Image = p.ImagePath ?? "",
-                Category = p.Category ?? "Unisex",
+                Gender = p.Gender ?? "Unisex",
+                Category = p.Category ?? "",
                 SubCategory = p.Category ?? "",
                 Brand = p.Brand ?? "",
                 Description = p.Details ?? "",
@@ -177,7 +178,7 @@ namespace MyAspNetApp.Controllers
 
                     var products = await _db.Products
                         .AsNoTracking()
-                        .Where(p => p.Status == "active" && p.Category == "Men")
+                        .Where(p => p.Status == "active" && p.Gender == "Men")
                         .ToListAsync();
                     var productIds = products.Select(p => p.ProductId).ToList();
                     var colorImgs = await _db.ProductColorImages
@@ -219,7 +220,7 @@ namespace MyAspNetApp.Controllers
 
                     var products = await _db.Products
                         .AsNoTracking()
-                        .Where(p => p.Status == "active" && p.Category == "Women")
+                        .Where(p => p.Status == "active" && p.Gender == "Women")
                         .ToListAsync();
                     var productIds = products.Select(p => p.ProductId).ToList();
                     var colorImgs = await _db.ProductColorImages

@@ -12,8 +12,9 @@ public class Product
     public string Image { get; set; } = string.Empty;
     public List<string> Images { get; set; } = new(); // Multiple product images
     public List<string> Sizes { get; set; } = new();
-    public string Category { get; set; } = string.Empty; // "Men" or "Women"
-    public string SubCategory { get; set; } = string.Empty; // "Running Shoes", "Apparel", "Accessories"
+    public string Gender { get; set; } = "Unisex"; // "Men", "Women", or "Unisex"
+    public string Category { get; set; } = string.Empty; // e.g. "Tops", "Accessories"
+    public string SubCategory { get; set; } = string.Empty; // "Running Shoes", "Apparel", etc.
     public string Brand { get; set; } = string.Empty; // "Nike", "Adidas", etc.
     public List<string> AvailableColors { get; set; } = new(); // Color options
     public Dictionary<string, List<string>> ColorImages { get; set; } = new(); // color name → image gallery

@@ -126,6 +126,7 @@ namespace MyAspNetApp.Controllers
                     existing.Sizes = model.Sizes;
                     existing.ColorStocks = model.ColorStocks;
                     existing.ColorSizes = model.ColorSizes;
+                    existing.Gender = model.Gender; // new field
                     existing.Status = model.Status ?? "active";
                     if (!string.IsNullOrEmpty(model.ImagePath))
                         existing.ImagePath = model.ImagePath;
@@ -150,6 +151,7 @@ namespace MyAspNetApp.Controllers
                     existing.Sizes = model.Sizes;
                     existing.ColorStocks = model.ColorStocks;
                     existing.ColorSizes = model.ColorSizes;
+                    existing.Gender = model.Gender;
                     if (!string.IsNullOrEmpty(model.ImagePath))
                         existing.ImagePath = model.ImagePath;
                     await _db.SaveChangesAsync();

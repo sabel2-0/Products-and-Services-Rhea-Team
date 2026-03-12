@@ -37,6 +37,10 @@ namespace MyAspNetApp.Models
         public string? ColorStocks { get; set; }
 
         public string? ColorSizes { get; set; }
+
+        // new gender column: Men, Women, Unisex, etc.
+        [Required]
+        public string Gender { get; set; } = string.Empty;
     }
 
     [Table("ProductColorImages")]
