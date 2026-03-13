@@ -150,7 +150,15 @@ async function loadProducts() {
     const loader = document.getElementById('products-loading');
     try {
         const response = await fetch('/api/products');
-        allProducts = await response.json();
+        if (!response.ok) {
+            const errorBody = await response.json().catch(() => null);
+            const message = errorBody?.message || `${response.status} ${response.statusText}`;
+            throw new Error(message);
+        }
+
+        const data = await response.json();
+        allProducts = Array.isArray(data) ? data : [];
+
         buildFiltersForScope(allProducts);
         // If there's a ?q= param, apply text filter on load
         const urlQ = (new URLSearchParams(window.location.search).get('q') || '').trim().toLowerCase();
@@ -173,7 +181,7 @@ async function loadProducts() {
         if (loader) loader.remove();
     } catch (error) {
         console.error('Error loading products:', error);
-        if (loader) loader.innerHTML = '<p>Failed to load products.</p>';
+        if (loader) loader.innerHTML = `<p>Failed to load products. ${error?.message ? error.message : ''}</p>`;
     }
 }
 

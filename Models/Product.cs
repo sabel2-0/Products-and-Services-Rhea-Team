@@ -13,6 +13,14 @@ public class Product
     public List<string> Images { get; set; } = new(); // Multiple product images
     public List<string> Sizes { get; set; } = new();
     public string Gender { get; set; } = "Unisex"; // "Men", "Women", or "Unisex"
+
+    // optional SKU and physical attributes
+    // product-level SKU/dimensions are deprecated; prefer variant values when available
+    public string SKU { get; set; } = string.Empty;
+    public decimal? Weight { get; set; }
+    public decimal? Length { get; set; }
+    public decimal? Height { get; set; }
+    public decimal? Width { get; set; }
     public string Category { get; set; } = string.Empty; // e.g. "Tops", "Accessories"
     public string SubCategory { get; set; } = string.Empty; // "Running Shoes", "Apparel", etc.
     public string Brand { get; set; } = string.Empty; // "Nike", "Adidas", etc.
@@ -20,6 +28,10 @@ public class Product
     public Dictionary<string, List<string>> ColorImages { get; set; } = new(); // color name → image gallery
     public Dictionary<string, int> ColorStocks { get; set; } = new(); // color name → stock quantity
     public Dictionary<string, List<string>> ColorSizes { get; set; } = new(); // color name → available sizes
+
+    // list of variants carrying per-variant attributes (price, SKU, dimensions, stock, etc.)
+    public List<ProductVariant> Variants { get; set; } = new();
+
     public double Rating { get; set; }
     public int ReviewCount { get; set; }
     public List<Review> Reviews { get; set; } = new();
@@ -32,6 +44,22 @@ public class Product
     public string RestockDate { get; set; } = string.Empty; // e.g. "Mid-March 2026"
     public string RestockNote { get; set; } = string.Empty; // e.g. "Limited restock — reserve yours now"
     public int SellerId { get; set; } = 1; // FK to seller
+}
+
+public class ProductVariant
+{
+    public int Id { get; set; }
+    public string SKU { get; set; } = string.Empty;
+    public string Size { get; set; } = string.Empty;
+    public string Style { get; set; } = string.Empty;
+    public int Quantity { get; set; }
+    public string Availability { get; set; } = "In Stock";
+    public string ImagePath { get; set; } = string.Empty;
+    public decimal? Price { get; set; }
+    public decimal? Weight { get; set; }
+    public decimal? Length { get; set; }
+    public decimal? Height { get; set; }
+    public decimal? Width { get; set; }
 }
 
 public class Seller

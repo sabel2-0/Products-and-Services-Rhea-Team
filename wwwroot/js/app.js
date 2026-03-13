@@ -200,6 +200,7 @@ function handleSearchInput(val) {
     const matched = products.filter(p =>
         (p.name || '').toLowerCase().includes(q) ||
         (p.brand || '').toLowerCase().includes(q) ||
+        (p.gender || '').toLowerCase().includes(q) ||
         (p.subCategory || '').toLowerCase().includes(q) ||
         (p.category || '').toLowerCase().includes(q)
     );
@@ -208,7 +209,7 @@ function handleSearchInput(val) {
     const seenTerms = new Set();
     const suggestions = [];
     matched.forEach(p => {
-        [p.name, p.subCategory, p.brand].forEach(term => {
+        [p.name, p.gender, p.subCategory, p.brand].forEach(term => {
             if (!term) return;
             const tl = term.toLowerCase();
             if (tl.includes(q) && !seenTerms.has(tl)) {
@@ -243,7 +244,11 @@ function handleSearchInput(val) {
                 <a class="search-prod-item" href="/Home/Product?id=${p.id}">
                     <img class="search-prod-img" src="${p.image}" alt="${p.name}" loading="lazy" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2256%22 height=%2256%22%3E%3Crect width=%2256%22 height=%2256%22 fill=%22%23f5f5f5%22/%3E%3C/svg%3E'">
                     <div class="search-prod-info">
-                        <div class="search-prod-cat">${p.category} ${p.subCategory}</div>
+                        <div class="search-prod-cat">
+                            ${p.category || ''}
+                            ${p.gender ? ' ' + p.gender : ''}
+                            ${p.subCategory && p.subCategory !== p.category ? ' ' + p.subCategory : ''}
+                        </div>
                         <div class="search-prod-name">${p.name}</div>
                         <div class="search-prod-price">${formatPeso(p.price)}</div>
                     </div>

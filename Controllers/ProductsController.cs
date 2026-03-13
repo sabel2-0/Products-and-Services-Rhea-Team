@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
@@ -14,11 +15,15 @@ namespace MyAspNetApp.Controllers
         private readonly AppDbContext _db;
         private readonly IMemoryCache _cache;
         private readonly TimeSpan _cacheDuration;
+        private readonly ILogger<ProductsController> _logger;
+        private readonly IWebHostEnvironment _env;
 
-        public ProductsController(AppDbContext db, IMemoryCache cache, IConfiguration config)
+        public ProductsController(AppDbContext db, IMemoryCache cache, IConfiguration config, ILogger<ProductsController> logger, IWebHostEnvironment env)
         {
             _db = db;
             _cache = cache;
+            _logger = logger;
+            _env = env;
             _cacheDuration = TimeSpan.FromMinutes(config.GetValue<int>("Cache:ProductCacheMinutes", 5));
         }
 
@@ -52,6 +57,7 @@ namespace MyAspNetApp.Controllers
         private Product MapDbProduct(
             DbProduct p,
             List<DbProductColorImage>? colorImgs = null,
+            List<DbProductVariant>? variants = null,
             Dictionary<int, (double Rating, int Count)>? reviewStats = null,
             Dictionary<int, List<Review>>? reviewsByProduct = null)
         {
@@ -62,29 +68,41 @@ namespace MyAspNetApp.Controllers
                 .GroupBy(ci => ci.ColorName)
                 .ToDictionary(g => g.Key, g => g.Select(ci => ci.ImagePath).ToList());
 
-            var availColors = colorImageDict.Keys.ToList();
-            if (availColors.Count == 0 && !string.IsNullOrEmpty(p.Colors))
-                availColors = p.Colors.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToList();
+            var variantsByColor = (variants ?? new List<DbProductVariant>())
+                .GroupBy(v => v.ColorName)
+                .ToDictionary(g => g.Key, g => g.ToList());
 
-            // Build per-color stock dictionary
-            var colorStocksList = !string.IsNullOrEmpty(p.ColorStocks)
-                ? p.ColorStocks.Split(',').Select(s => int.TryParse(s.Trim(), out var n) ? n : 0).ToList()
-                : new List<int>();
+            var availColors = variantsByColor.Keys.ToList();
+            if (availColors.Count == 0)
+                availColors = colorImageDict.Keys.ToList();
+
             var colorStockDict = new Dictionary<string, int>();
-            for (int i = 0; i < availColors.Count; i++)
-                colorStockDict[availColors[i]] = i < colorStocksList.Count ? colorStocksList[i] : p.Stock;
-
-            // Build per-color sizes dictionary
-            var colorSizesSegments = !string.IsNullOrEmpty(p.ColorSizes)
-                ? p.ColorSizes.Split('|')
-                : Array.Empty<string>();
             var colorSizesDict = new Dictionary<string, List<string>>();
-            for (int i = 0; i < availColors.Count; i++)
+
+            foreach (var color in availColors)
             {
-                var seg = i < colorSizesSegments.Length ? colorSizesSegments[i] : "";
-                if (!string.IsNullOrEmpty(seg))
-                    colorSizesDict[availColors[i]] = seg.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToList();
+                if (variantsByColor.TryGetValue(color, out var vlist))
+                {
+                    colorStockDict[color] = vlist.Sum(v => v.Stock);
+                    var sizes = vlist
+                        .SelectMany(v => (v.Sizes ?? "").Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+                        .Where(s => !string.IsNullOrWhiteSpace(s))
+                        .Distinct()
+                        .ToList();
+                    if (sizes.Any())
+                        colorSizesDict[color] = sizes;
+                }
+                else
+                {
+                    colorStockDict[color] = p.Stock;
+                }
             }
+
+            var allSizes = (variants ?? new List<DbProductVariant>())
+                .SelectMany(v => (v.Sizes ?? "").Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+                .Where(s => !string.IsNullOrWhiteSpace(s))
+                .Distinct()
+                .ToList();
 
             var rating = 0d;
             var reviewCount = 0;
@@ -98,23 +116,76 @@ namespace MyAspNetApp.Controllers
             if (reviewsByProduct != null && reviewsByProduct.TryGetValue(p.ProductId, out var fullReviews))
                 mappedReviews = fullReviews;
 
+            // Prefer variant-level SKU/dimensions (normalized schema) but fall back to product-level if present.
+            var productVariants = (variants ?? new List<DbProductVariant>())
+                .Where(v => v.ProductId == p.ProductId)
+                .ToList();
+            var firstVariant = productVariants.FirstOrDefault();
+
+            var sku = !string.IsNullOrWhiteSpace(p.SKU) ? p.SKU : firstVariant?.SKU ?? string.Empty;
+            var weight = p.Weight ?? firstVariant?.Weight;
+            var length = p.Length ?? firstVariant?.Length;
+            var height = p.Height ?? firstVariant?.Height;
+            var width = p.Width ?? firstVariant?.Width;
+
+            // assemble image path: prefer first variant's image, then product fallback
+            string imagePath = firstVariant?.ImagePath ?? p.ImagePath ?? string.Empty;
+
+            // compute price using variant first if available
+            // compute price entirely from variant. if none supplied, default to 0.
+            decimal basePrice = 0m;
+            decimal? baseOriginal = null;
+            if (firstVariant != null && firstVariant.Price.HasValue)
+            {
+                basePrice = firstVariant.Price.Value;
+            }
+            // else leave zero (caller may interpret as not priced)
+
+            // convert db variants to API variant models
+            var variantModels = productVariants.Select(v => new ProductVariant
+            {
+                Id = v.Id,
+                SKU = v.SKU,
+                Size = v.Size,
+                Style = v.Style,
+                Quantity = v.Quantity,
+                Availability = v.Availability,
+                ImagePath = v.ImagePath,
+                Price = v.Price,
+                Weight = v.Weight,
+                Length = v.Length,
+                Height = v.Height,
+                Width = v.Width
+            }).ToList();
+
             return new Product
             {
+                Variants = variantModels,
                 Id = p.ProductId,
                 Name = p.ProductName,
-                Price = p.Discount.HasValue && p.Discount.Value > 0 ? p.Price - p.Discount.Value : p.Price,
-                OriginalPrice = p.Discount.HasValue && p.Discount.Value > 0 ? p.Price : null,
-                Image = p.ImagePath ?? "",
+                Price = basePrice,
+                OriginalPrice = baseOriginal,
+                Image = imagePath,
+                SKU = sku,
                 Gender = p.Gender ?? "Unisex",
                 Category = p.Category ?? "",
-                SubCategory = p.Category ?? "",
+                // the database currently doesn't have a separate subcategory column;
+                // we will leave this blank to avoid showing the same tag twice
+                // (gender is now displayed separately on the UI).
+                // TODO: add SubCategory column when needed and map appropriately.
+                SubCategory = "",
                 Brand = p.Brand ?? "",
+                Weight = weight,
+                Length = length,
+                Height = height,
+                Width = width,
                 Description = p.Details ?? "",
                 Rating = rating,
                 ReviewCount = reviewCount,
                 Reviews = mappedReviews,
-                Stock = p.Stock,
-                Sizes = string.IsNullOrEmpty(p.Sizes) ? new List<string>() : p.Sizes.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToList(),
+                // compute total stock from variants since product.Stock no longer used
+                Stock = productVariants.Sum(v => v.Quantity),
+                Sizes = allSizes,
                 AvailableColors = availColors,
                 ColorImages = colorImageDict,
                 ColorStocks = colorStockDict,
@@ -146,11 +217,16 @@ namespace MyAspNetApp.Controllers
                         .AsNoTracking()
                         .Where(r => productIds.Contains(r.ProductId))
                         .ToListAsync();
+                    var variants = await _db.ProductVariants
+                        .AsNoTracking()
+                        .Where(v => productIds.Contains(v.ProductId))
+                        .ToListAsync();
+
                     var reviewStats = dbReviews
                         .GroupBy(r => r.ProductId)
                         .ToDictionary(g => g.Key, g => ((double)g.Average(x => x.Rating), g.Count()));
 
-                    return dbProducts.Select(p => MapDbProduct(p, colorImgs, reviewStats)).ToList();
+                    return dbProducts.Select(p => MapDbProduct(p, colorImgs, variants, reviewStats)).ToList();
                 });
 
                 if (result == null)
@@ -162,7 +238,12 @@ namespace MyAspNetApp.Controllers
             }
             catch (Exception ex) when (IsTransientDatabaseException(ex))
             {
-                return StatusCode(StatusCodes.Status503ServiceUnavailable, new { message = "Database is temporarily unavailable." });
+                _logger.LogError(ex, "Error fetching all products from the database.");
+                return StatusCode(StatusCodes.Status503ServiceUnavailable, new
+                {
+                    message = "Database is temporarily unavailable.",
+                    detail = ex.Message
+                });
             }
         }
 
@@ -189,10 +270,16 @@ namespace MyAspNetApp.Controllers
                         .AsNoTracking()
                         .Where(r => productIds.Contains(r.ProductId))
                         .ToListAsync();
+
+                    var variants = await _db.ProductVariants
+                        .AsNoTracking()
+                        .Where(v => productIds.Contains(v.ProductId))
+                        .ToListAsync();
+
                     var reviewStats = dbReviews
                         .GroupBy(r => r.ProductId)
                         .ToDictionary(g => g.Key, g => ((double)g.Average(x => x.Rating), g.Count()));
-                    return products.Select(p => MapDbProduct(p, colorImgs, reviewStats)).ToList();
+                    return products.Select(p => MapDbProduct(p, colorImgs, variants, reviewStats)).ToList();
                 });
 
                 if (result == null)
@@ -231,10 +318,16 @@ namespace MyAspNetApp.Controllers
                         .AsNoTracking()
                         .Where(r => productIds.Contains(r.ProductId))
                         .ToListAsync();
+
+                    var variants = await _db.ProductVariants
+                        .AsNoTracking()
+                        .Where(v => productIds.Contains(v.ProductId))
+                        .ToListAsync();
+
                     var reviewStats = dbReviews
                         .GroupBy(r => r.ProductId)
                         .ToDictionary(g => g.Key, g => ((double)g.Average(x => x.Rating), g.Count()));
-                    return products.Select(p => MapDbProduct(p, colorImgs, reviewStats)).ToList();
+                    return products.Select(p => MapDbProduct(p, colorImgs, variants, reviewStats)).ToList();
                 });
 
                 if (result == null)
@@ -278,11 +371,16 @@ namespace MyAspNetApp.Controllers
                         .ToDictionary(
                             g => g.Key,
                             g => g.Select(r => MapDbReview(r, reviewImages)).ToList());
+                    var variants = await _db.ProductVariants
+                        .AsNoTracking()
+                        .Where(v => v.ProductId == id)
+                        .ToListAsync();
+
                     var reviewStats = dbReviews
                         .GroupBy(r => r.ProductId)
                         .ToDictionary(g => g.Key, g => ((double)g.Average(x => x.Rating), g.Count()));
 
-                    return Ok(MapDbProduct(dbProduct, colorImgs, reviewStats, mappedReviews));
+                    return Ok(MapDbProduct(dbProduct, colorImgs, variants, reviewStats, mappedReviews));
                 }
                 return NotFound();
             }
@@ -311,10 +409,15 @@ namespace MyAspNetApp.Controllers
                     .AsNoTracking()
                     .Where(r => productIds.Contains(r.ProductId))
                     .ToListAsync();
+                var variants = await _db.ProductVariants
+                    .AsNoTracking()
+                    .Where(v => productIds.Contains(v.ProductId))
+                    .ToListAsync();
+
                 var reviewStats = dbReviews
                     .GroupBy(r => r.ProductId)
                     .ToDictionary(g => g.Key, g => ((double)g.Average(x => x.Rating), g.Count()));
-                return Ok(products.Select(p => MapDbProduct(p, colorImgs, reviewStats)).ToList());
+                return Ok(products.Select(p => MapDbProduct(p, colorImgs, variants, reviewStats)).ToList());
             }
             catch (Exception ex) when (IsTransientDatabaseException(ex))
             {

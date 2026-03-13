@@ -59,12 +59,20 @@ builder.Services.AddCors(options =>
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
+// For debugging, always show the developer exception page so we can see the real error.
+app.UseDeveloperExceptionPage();
+
 app.UseExceptionHandler(errorApp =>
 {
     errorApp.Run(async context =>
     {
         var feature = context.Features.Get<IExceptionHandlerFeature>();
         var exception = feature?.Error;
+        if (exception != null)
+        {
+            app.Logger.LogError(exception, "Unhandled exception caught by exception handler.");
+        }
+
         var isDbTimeout =
             exception is TimeoutException ||
             exception is SqlException ||
@@ -107,10 +115,7 @@ app.UseExceptionHandler(errorApp =>
     });
 });
 
-if (!app.Environment.IsDevelopment())
-{
-    app.UseHsts();
-}
+app.UseHsts();
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
