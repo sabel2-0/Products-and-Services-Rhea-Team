@@ -472,10 +472,13 @@ var priceList = (variantPrices ?? Array.Empty<string>())
                 {
                     var colorImages = await _db.ProductColorImages
                         .Where(ci => ci.ProductId == id.Value)
-                        .Select(ci => ci.ImagePath)
-                        .Distinct()
                         .ToListAsync();
-                    ViewBag.AllColorImages = colorImages;
+
+                    // keep flat list for main gallery, plus grouping by style for variant cards
+                    ViewBag.AllColorImages = colorImages.Select(ci => ci.ImagePath).Distinct().ToList();
+                    ViewBag.ImagesByStyle = colorImages
+                        .GroupBy(ci => ci.ColorName)
+                        .ToDictionary(g => g.Key, g => g.Select(ci => ci.ImagePath).ToList());
 
                     var variants = await _db.ProductVariants
                         .Where(v => v.ProductId == id.Value)
