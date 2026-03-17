@@ -64,6 +64,11 @@ public static class ProductData
         {
             Id = 1,
             Name = "Horizon Elite Road Runner",
+            SKU = "HR-ELITE-001",
+            Weight = 1.2m,
+            Length = 30m,
+            Height = 15m,
+            Width = 10m,
             Description = "Premium carbon-plated running shoes engineered for speed and endurance. Features advanced cushioning technology and breathable mesh upper for maximum performance.",
             Price = 8999.00m,
             Image = "/images/Lime Shimmer-Green Lux/PUMA-x-ASTON-MARTIN-ARAMCO-F1®-TEAM-Fade-Men's-Sneakers.avif",
@@ -132,6 +137,11 @@ public static class ProductData
         {
             Id = 2,
             Name = "Sprint Pro Training Shoes",
+            SKU = "SP-TRAIN-002",
+            Weight = 1.1m,
+            Length = 29m,
+            Height = 14m,
+            Width = 9.5m,
             Description = "Versatile training shoes with responsive cushioning perfect for speed work and interval training. Durable outsole for all-terrain running.",
             Price = 6499.00m,
             Image = "https://images.pexels.com/photos/1598505/pexels-photo-1598505.jpeg?auto=compress&cs=tinysrgb&w=600",

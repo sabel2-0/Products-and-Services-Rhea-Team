@@ -8,561 +8,231 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NEXT HORIZON - Product Size Guide</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <title>NEXT HORIZON — Product Size Guide</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-    <style>
-        :root {
-            --main-bg: #ffffff;
-            --input-bg: #AFAFB3;
-            --text-dark: #111;
-            --accent-red: #c5221f;
-        }
-
-        body {
-            margin: 0;
-            font-family: 'Inter', sans-serif;
-            background-color: var(--main-bg);
-            color: var(--text-dark);
-        }
-
-        /* Top Navigation Menu */
-        .top-nav {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px 40px;
-            border-bottom: 1px solid #eee;
-        }
-
-        .logo {
-            font-weight: 800;
-            font-style: italic;
-            font-size: 1.4rem;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .nav-actions {
-            display: flex;
-            align-items: center;
-            gap: 25px;
-        }
-
-        /* Main Container */
-        .container {
-            max-width: 900px;
-            margin: 0 auto;
-            padding: 40px 20px 100px 20px;
-        }
-
-        h2.page-title {
-            font-size: 1.8rem;
-            font-weight: 700;
-            margin-bottom: 20px;
-        }
-
-        .custom-input {
-            width: 100%;
-            background-color: var(--input-bg);
-            border: none;
-            padding: 20px 25px;
-            border-radius: 12px;
-            font-family: 'Inter', sans-serif;
-            font-size: 1.05rem;
-            color: #222;
-            box-sizing: border-box;
-            outline: none;
-            margin-bottom: 20px;
-        }
-
-            .custom-input::placeholder {
-                color: #444;
-            }
-
-        /* Select Dropdowns */
-        .select-row {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-
-        .custom-select {
-            appearance: none;
-            -webkit-appearance: none;
-            -moz-appearance: none;
-            background-image: url('data:image/svg+xml;utf8,<svg fill="%23444" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/><path d="M0 0h24v24H0z" fill="none"/></svg>');
-            background-repeat: no-repeat;
-            background-position-x: 95%;
-            background-position-y: center;
-        }
-
-        /* Upload Section */
-        .main-upload-box {
-            width: 100%;
-            height: 250px;
-            background-color: var(--input-bg);
-            border-radius: 12px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 15px;
-            cursor: pointer;
-            margin-bottom: 20px;
-            transition: 0.2s;
-        }
-
-            .main-upload-box:hover {
-                background-color: #a0a0a5;
-            }
-
-            .main-upload-box i {
-                font-size: 5rem;
-                color: #444;
-            }
-
-            .main-upload-box span {
-                font-size: 1.3rem;
-                font-weight: 600;
-                color: #222;
-            }
-
-        /* Thumbnails */
-        .upload-label {
-            font-size: 0.95rem;
-            font-weight: 600;
-            margin-bottom: 10px;
-            display: block;
-        }
-
-        .thumbnail-row {
-            display: flex;
-            gap: 15px;
-            overflow-x: auto;
-            padding: 5px 0 20px 0;
-        }
-
-        .thumbnail {
-            width: 85px;
-            height: 85px;
-            background-color: var(--input-bg);
-            border-radius: 10px;
-            flex-shrink: 0;
-            position: relative;
-            overflow: hidden;
-        }
-
-            .thumbnail img {
-                width: 100%;
-                height: 100%;
-                object-fit: cover;
-            }
-
-        .delete-btn {
-            position: absolute;
-            top: 5px;
-            right: 5px;
-            background: rgba(0,0,0,0.7);
-            color: white;
-            border: none;
-            border-radius: 50%;
-            width: 22px;
-            height: 22px;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            font-size: 12px;
-            cursor: pointer;
-        }
-
-            .delete-btn:hover {
-                background: var(--accent-red);
-            }
-
-        .thumbnail:hover .delete-btn {
-            display: flex;
-        }
-
-        /* OR Divider */
-        .divider-container {
-            display: flex;
-            align-items: center;
-            text-align: center;
-            margin: 30px 0;
-        }
-
-            .divider-container::before, .divider-container::after {
-                content: '';
-                flex: 1;
-                border-bottom: 1px solid #111;
-            }
-
-            .divider-container span {
-                padding: 0 15px;
-                font-weight: 800;
-                font-size: 1.2rem;
-            }
-
-        /* Create Table Button */
-        .btn-create-table {
-            width: 100%;
-            background-color: var(--input-bg);
-            border: none;
-            padding: 20px;
-            border-radius: 12px;
-            font-family: 'Inter', sans-serif;
-            font-size: 1.1rem;
-            color: #222;
-            cursor: pointer;
-            text-align: center;
-            font-weight: 500;
-            margin-bottom: 30px;
-            transition: 0.2s;
-        }
-
-            .btn-create-table:hover {
-                background-color: #a0a0a5;
-            }
-
-        /* Dynamic Table Styling */
-        #dynamic-tables-container {
-            display: flex;
-            flex-direction: column;
-            gap: 40px;
-            margin-bottom: 30px;
-        }
-
-        .table-wrapper {
-            display: flex;
-            flex-direction: column;
-            width: 100%;
-        }
-
-        .table-inner-wrapper {
-            border: 1px solid #888;
-            border-radius: 12px;
-            overflow: hidden;
-            background: #fff;
-        }
-
-        .size-guide-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-            .size-guide-table td {
-                border: 1px solid #888;
-                padding: 0;
-                height: 45px;
-            }
-
-            .size-guide-table tr:first-child td {
-                border-top: none;
-            }
-
-            .size-guide-table tr:last-child td {
-                border-bottom: none;
-            }
-
-            .size-guide-table td:first-child {
-                border-left: none;
-            }
-
-            .size-guide-table td:last-child {
-                border-right: none;
-            }
-
-            .size-guide-table input {
-                width: 100%;
-                height: 100%;
-                border: none;
-                outline: none;
-                background: transparent;
-                padding: 0 12px;
-                text-align: center;
-                font-family: 'Inter', sans-serif;
-                font-size: 1rem;
-                box-sizing: border-box;
-            }
-
-                .size-guide-table input:focus {
-                    background-color: #f0f0f0;
-                }
-
-        /* Floating Corner Buttons */
-        .corner-btn {
-            position: absolute;
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            background-color: var(--input-bg);
-            color: #222;
-            border: 1px solid #888;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 14px;
-            cursor: pointer;
-            transition: 0.2s;
-            z-index: 10;
-        }
-
-            .corner-btn:hover {
-                background-color: #666;
-                color: #fff;
-            }
-
-        .btn-add-col {
-            top: -12px;
-            right: -12px;
-        }
-
-        .btn-add-row {
-            bottom: -12px;
-            left: -12px;
-        }
-
-        .btn-delete-rc {
-            bottom: -12px;
-            right: -12px;
-            background-color: #ddd;
-        }
-
-        /* Bottom Text Areas */
-        textarea.custom-input {
-            height: 110px;
-            resize: none;
-            margin-bottom: 15px;
-        }
-
-        /* Submit Button Alignment */
-        .action-buttons {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 20px;
-        }
-
-        .btn-submit {
-            background-color: #1a1a1a;
-            color: #fff;
-            border: none;
-            padding: 20px 60px;
-            border-radius: 12px;
-            font-family: 'Inter', sans-serif;
-            font-size: 1.1rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-
-            .btn-submit:hover {
-                background-color: #000;
-            }
-
-        .btn-back {
-            background-color: #fff;
-            color: #111;
-            border: 1px solid #111;
-            padding: 20px 40px;
-            border-radius: 12px;
-            font-family: 'Inter', sans-serif;
-            font-size: 1.1rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: 0.2s;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-        }
-
-            .btn-back:hover {
-                background-color: #f5f5f5;
-            }
-
-        /* Overlay Modals */
-        .overlay-modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.6);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .overlay-content {
-            background: #fff;
-            padding: 30px;
-            border-radius: 16px;
-            max-width: 400px;
-            width: 90%;
-            text-align: center;
-        }
-
-            .overlay-content h3 {
-                margin-top: 0;
-                margin-bottom: 20px;
-                font-size: 1.4rem;
-            }
-
-        .modal-inputs {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-
-            .modal-inputs input {
-                width: 100%;
-                padding: 15px;
-                border: 1px solid #ccc;
-                border-radius: 8px;
-                font-size: 1rem;
-                font-family: 'Inter', sans-serif;
-                text-align: center;
-            }
-
-        .modal-actions {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-
-        .btn-modal {
-            padding: 12px 20px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            flex: 1;
-        }
-
-        .btn-cancel-modal {
-            background: #eee;
-            color: #333;
-        }
-
-        .btn-confirm-modal {
-            background: #111;
-            color: #fff;
-        }
-
-        .btn-danger-modal {
-            background: var(--accent-red);
-            color: #fff;
-        }
-
-        .btn-delete-entire {
-            background: #8b0000;
-            color: #fff;
-            width: 100%;
-            margin-top: 10px;
-        }
-    </style>
+    
+    <link rel="stylesheet" href="~/css/SizeGuide.css" />
 </head>
 <body>
 
-    <header class="top-nav">
+    <aside class="sidebar">
         <div class="logo">
-            <div style="background: black; color: white; padding: 2px 10px; border-radius: 6px;">H</div>
+            <div style="background: white; color: black; padding: 2px 10px; border-radius: 6px;">H</div>
             NEXT HORIZON
         </div>
-        <div class="nav-actions">
-            <i class="fa-regular fa-bell" style="font-size: 1.4rem; cursor: pointer;"></i>
-            <div style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
-                <i class="fa-regular fa-circle-user" style="font-size: 1.8rem;"></i>
-                <span style="font-weight: 600;">Seller</span>
-                <i class="fa-solid fa-chevron-down" style="font-size: 0.7rem;"></i>
+        <nav>
+            <a href="#" class="nav-item"><i class="fa-solid fa-house"></i> Dashboard</a>
+            <a href="#" class="nav-item"><i class="fa-solid fa-receipt"></i> Orders</a>
+            <a href="#" class="nav-item active"><i class="fa-solid fa-bag-shopping"></i> Products</a>
+            <a href="#" class="nav-item"><i class="fa-solid fa-wallet"></i> Finances</a>
+            <a href="#" class="nav-item"><i class="fa-solid fa-chart-line"></i> Analytics</a>
+            <a href="#" class="nav-item"><i class="fa-solid fa-gear"></i> Settings</a>
+        </nav>
+    </aside>
+
+    <div class="main-wrapper">
+
+        <header class="top-nav">
+            <div class="nav-left">
+                <a href="#" class="logo">
+                    <div class="logo-mark">H</div>
+                    Next Horizon
+                </a>
+                <div class="nav-divider"></div>
+                <div class="nav-breadcrumb">
+                    <span>Seller Portal</span>
+                    <i class="fa-solid fa-chevron-right" style="font-size:9px; color:var(--border-strong);"></i>
+                    <span>Products</span>
+                    <i class="fa-solid fa-chevron-right" style="font-size:9px; color:var(--border-strong);"></i>
+                    <strong>Size Guide</strong>
+                </div>
             </div>
-        </div>
-    </header>
-
-    <div class="container">
-        <h2 class="page-title">Product Size Guide</h2>
-
-        <input type="text" class="custom-input" id="sizeGuideTitle" placeholder="Size Guide Title">
-
-        <input type="file" id="imageInput" multiple accept="image/*" style="display: none;">
-        <div class="main-upload-box" id="uploadBox">
-            <i class="fa-solid fa-cloud-arrow-up"></i>
-            <span>Upload Photos</span>
-        </div>
-
-        <span class="upload-label">Upload Size Guide</span>
-        <div class="thumbnail-row" id="thumbnailRow"></div>
-
-        <div class="divider-container">
-            <span>OR</span>
-        </div>
-
-        <h2 class="page-title" style="margin-bottom: 15px;">Create Size Guide</h2>
-
-        <div class="select-row">
-            <select class="custom-input custom-select" id="measurementUnit">
-                <option value="" disabled selected>Measurement Unit</option>
-                <option value="cm">Centimeters (cm)</option>
-                <option value="in">Inches (in)</option>
-            </select>
-            <select class="custom-input custom-select" id="categorySelect">
-                <option value="" disabled selected>Category</option>
-                <option value="Tops">Tops</option>
-                <option value="Bottoms">Bottoms</option>
-                <option value="Footwear">Footwear</option>
-                <option value="Outerwear">Outerwear</option>
-                <option value="Dresses &amp; Jumpsuits">Dresses &amp; Jumpsuits</option>
-                <option value="Activewear">Activewear</option>
-                <option value="Accessories">Accessories</option>
-            </select>
-        </div>
-
-        <button class="btn-create-table" id="btnShowCreateTableModal">Create Table</button>
-
-        <div id="dynamic-tables-container">
-        </div>
-
-        <h3 style="margin-top: 30px; margin-bottom: 15px; font-size: 1.2rem;">Additional Information</h3>
-        <textarea class="custom-input" id="fitTips" placeholder="Fit Tips (e.g., Fits true to size, take your normal size.)"></textarea>
-        <textarea class="custom-input" id="howToMeasure" placeholder="How to Measure (e.g., Chest: Measure around the fullest part of your chest...)"></textarea>
-        <textarea class="custom-input" id="additionalNotes" placeholder="Additional Notes or Details (Optional)"></textarea>
-
-        <div class="action-buttons">
-            <a href="/Seller/CreateProduct" class="btn-back"><i class="fa-solid fa-arrow-left" style="margin-right: 10px;"></i> Back</a>
-            <button class="btn-submit" id="btnSaveSizeGuide">Save Size Guide</button>
-        </div>
-    </div>
-
-    <div class="overlay-modal" id="createTableModal">
-        <div class="overlay-content">
-            <h3>Table Dimensions</h3>
-            <p style="color: #666; margin-bottom: 20px; font-size: 0.9rem;">How many columns and rows do you need?</p>
-            <div class="modal-inputs">
-                <input type="number" id="colCountInput" placeholder="Columns" min="1" value="5">
-                <input type="number" id="rowCountInput" placeholder="Rows" min="1" value="4">
+            <div class="nav-right">
+                <button class="nav-icon-btn"><i class="fa-regular fa-bell"></i></button>
+                <div class="nav-user">
+                    <div class="nav-avatar">SE</div>
+                    <span>Seller</span>
+                    <i class="fa-solid fa-chevron-down"></i>
+                </div>
             </div>
-            <div class="modal-actions">
-                <button class="btn-modal btn-cancel-modal" onclick="closeModal('createTableModal')">Cancel</button>
-                <button class="btn-modal btn-confirm-modal" id="btnGenerateTable">Generate</button>
+        </header>
+
+        <div class="page-wrapper">
+
+            <div class="page-header">
+                <div class="page-header-left">
+                    <div class="page-eyebrow">Listing Configurations</div>
+                    <h1 class="page-title">Product Size Guide</h1>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon"><i class="fa-solid fa-tag"></i></div>
+                    <div>
+                        <div class="card-title">Size Guide Identity</div>
+                        <div class="card-subtitle">Name your size guide to easily attach it to products later.</div>
+                    </div>
+                </div>
+                <div class="field">
+                    <label class="field-label">Size Guide Title</label>
+                    <input type="text" class="field-input" id="sizeGuideTitle" placeholder="e.g. Men's Standard Tops">
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon"><i class="fa-regular fa-image"></i></div>
+                    <div>
+                        <div class="card-title">Upload Existing Guide</div>
+                        <div class="card-subtitle">Upload a pre-made size guide graphic if you have one.</div>
+                    </div>
+                </div>
+
+                <input type="file" id="imageInput" multiple accept="image/*" style="display: none;">
+                <div class="upload-zone" id="uploadBox">
+                    <div class="upload-zone-icon"><i class="fa-solid fa-arrow-up-from-bracket"></i></div>
+                    <div class="upload-zone-text">
+                        <strong>Click to upload photos</strong>
+                        <span>PNG, JPG, WEBP — up to 10MB each</span>
+                    </div>
+                </div>
+                <div class="thumbnail-strip" id="thumbnailRow"></div>
+            </div>
+
+            <div class="divider-container">
+                <span>OR BUILD A CUSTOM ONE</span>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon"><i class="fa-solid fa-table"></i></div>
+                    <div>
+                        <div class="card-title">Create Dynamic Size Table</div>
+                        <div class="card-subtitle">Generate a custom measurement table for this guide.</div>
+                    </div>
+                </div>
+
+                <div class="field-group cols-2" style="margin-bottom: 16px;">
+                    <div class="field">
+                        <label class="field-label">Measurement Unit</label>
+                        <select class="field-input" id="measurementUnit">
+                            <option value="" disabled selected>Select unit</option>
+                            <option value="cm">Centimeters (cm)</option>
+                            <option value="in">Inches (in)</option>
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label class="field-label">Category</label>
+                        <select class="field-input" id="categorySelect">
+                            <option value="" disabled selected>Select category</option>
+                            <option value="Tops">Tops</option>
+                            <option value="Bottoms">Bottoms</option>
+                            <option value="Footwear">Footwear</option>
+                            <option value="Outerwear">Outerwear</option>
+                            <option value="Dresses & Jumpsuits">Dresses &amp; Jumpsuits</option>
+                            <option value="Activewear">Activewear</option>
+                            <option value="Accessories">Accessories</option>
+                        </select>
+                    </div>
+                </div>
+
+                <button class="btn-outline-dashed" id="btnShowCreateTableModal" style="margin-bottom: 24px;">
+                    <i class="fa-solid fa-plus"></i> Add Table
+                </button>
+
+                <div id="dynamic-tables-container"></div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon"><i class="fa-solid fa-circle-info"></i></div>
+                    <div>
+                        <div class="card-title">Additional Information</div>
+                        <div class="card-subtitle">Provide context to help buyers measure correctly.</div>
+                    </div>
+                </div>
+
+                <div class="field-group" style="margin-bottom: 10px;">
+                    <div class="field">
+                        <label class="field-label">Fit Tips</label>
+                        <textarea class="field-input" id="fitTips" placeholder="e.g., Fits true to size, take your normal size."></textarea>
+                    </div>
+                </div>
+                <div class="field-group cols-2">
+                    <div class="field">
+                        <label class="field-label">How to Measure</label>
+                        <textarea class="field-input" id="howToMeasure" placeholder="e.g., Chest: Measure around the fullest part of your chest..."></textarea>
+                    </div>
+                    <div class="field">
+                        <label class="field-label">Additional Notes</label>
+                        <textarea class="field-input" id="additionalNotes" placeholder="Additional Details (Optional)"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-footer">
+                <div class="form-footer-left">
+                    Ensure measurements are accurate to reduce returns.
+                </div>
+                <div class="form-footer-right">
+                    <a href="/Seller/CreateProduct" class="btn btn-ghost">Cancel</a>
+                    <button class="btn btn-primary" id="btnSaveSizeGuide">
+                        <i class="fa-solid fa-check"></i> Save Size Guide
+                    </button>
+                </div>
+            </div>
+
+        </div> </div> <div class="overlay-modal" id="createTableModal">
+        <div class="overlay-content" style="width: 400px;">
+            <div class="modal-header">
+                <span class="modal-title">Table Dimensions</span>
+                <button type="button" class="modal-close" onclick="closeModal('createTableModal')">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p style="color: var(--text-secondary); margin-bottom: 16px; font-size: 13px;">How many columns and rows do you need?</p>
+                <div class="field-group cols-2">
+                    <div class="field">
+                        <label class="field-label">Columns</label>
+                        <input type="number" class="field-input" id="colCountInput" min="1" value="5">
+                    </div>
+                    <div class="field">
+                        <label class="field-label">Rows</label>
+                        <input type="number" class="field-input" id="rowCountInput" min="1" value="4">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('createTableModal')">Cancel</button>
+                <button type="button" class="btn btn-primary" id="btnGenerateTable">Generate</button>
             </div>
         </div>
     </div>
 
     <div class="overlay-modal" id="deleteRowColModal">
-        <div class="overlay-content">
-            <h3>Delete Options</h3>
-            <p style="color: #666; margin-bottom: 20px; font-size: 0.9rem;">What would you like to remove from this table?</p>
-            <div class="modal-actions">
-                <button class="btn-modal btn-cancel-modal" onclick="closeModal('deleteRowColModal')">Cancel</button>
-                <button class="btn-modal btn-danger-modal" id="btnConfirmDeleteRow">Delete Row</button>
-                <button class="btn-modal btn-danger-modal" id="btnConfirmDeleteCol">Delete Column</button>
-                <button class="btn-modal btn-delete-entire" id="btnConfirmDeleteTable">Delete Entire Table</button>
+        <div class="overlay-content" style="width: 400px;">
+            <div class="modal-header">
+                <span class="modal-title">Delete Options</span>
+                <button type="button" class="modal-close" onclick="closeModal('deleteRowColModal')">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
             </div>
-            <p id="deleteWarning" style="color: var(--accent-red); font-size: 0.85rem; margin-top: 15px; display: none;">Cannot delete the last remaining row/column!</p>
+            <div class="modal-body" style="text-align: center;">
+                <p style="color: var(--text-secondary); font-size: 13px; margin-bottom: 20px;">What would you like to remove from this table?</p>
+                
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                    <button class="btn btn-secondary" id="btnConfirmDeleteRow" style="justify-content: center;">Delete Last Row</button>
+                    <button class="btn btn-secondary" id="btnConfirmDeleteCol" style="justify-content: center;">Delete Last Column</button>
+                    <button class="btn btn-primary" id="btnConfirmDeleteTable" style="justify-content: center; background: var(--red);">Delete Entire Table</button>
+                </div>
+
+                <p id="deleteWarning" style="color: var(--red); font-size: 12px; margin-top: 15px; display: none; font-weight: 500;">
+                    <i class="fa-solid fa-triangle-exclamation"></i> Cannot delete the last remaining row/column!
+                </p>
+            </div>
         </div>
     </div>
 
@@ -580,10 +250,10 @@
             for (let i = 0; i < files.length; i++) {
                 const imageUrl = URL.createObjectURL(files[i]);
                 const thumbDiv = document.createElement('div');
-                thumbDiv.className = 'thumbnail';
+                thumbDiv.className = 'thumb-item'; // Updated to match CSS
                 thumbDiv.innerHTML = `
                     <img src="${imageUrl}" alt="Uploaded Photo">
-                    <button class="delete-btn" onclick="this.parentElement.remove()">
+                    <button type="button" class="thumb-delete" onclick="this.parentElement.remove()">
                         <i class="fa-solid fa-xmark"></i>
                     </button>
                 `;
@@ -592,14 +262,16 @@
             imageInput.value = '';
         });
 
-
         // --- 2. Modal Utility Functions ---
-        function openModal(id) { document.getElementById(id).style.display = 'flex'; }
+        function openModal(id) { 
+            document.getElementById(id).style.display = 'flex'; 
+        }
         function closeModal(id) {
             document.getElementById(id).style.display = 'none';
-            document.getElementById('deleteWarning').style.display = 'none';
+            if (id === 'deleteRowColModal') {
+                document.getElementById('deleteWarning').style.display = 'none';
+            }
         }
-
 
         // --- 3. Dynamic Table Generation Logic ---
         const btnShowCreateTableModal = document.getElementById('btnShowCreateTableModal');
@@ -624,22 +296,22 @@
             const wrapper = document.createElement('div');
             wrapper.className = 'table-wrapper';
 
-            const titleInputHTML = `<input type="text" class="custom-input" placeholder="Table Title" style="margin-bottom: 10px; padding: 15px 25px; font-weight: 600;">`;
-
-            const addColBtn = `<button class="corner-btn btn-add-col" title="Add Column"><i class="fa-solid fa-plus"></i></button>`;
-            const addRowBtn = `<button class="corner-btn btn-add-row" title="Add Row"><i class="fa-solid fa-plus"></i></button>`;
-            const delRcBtn = `<button class="corner-btn btn-delete-rc" title="Delete Options"><i class="fa-solid fa-xmark"></i></button>`;
+            const titleInputHTML = `<input type="text" class="field-input" placeholder="Table Title (e.g. Tops)" style="margin-bottom: 12px; font-weight: 600;">`;
+            const addColBtn = `<button type="button" class="corner-btn btn-add-col" title="Add Column"><i class="fa-solid fa-plus"></i></button>`;
+            const addRowBtn = `<button type="button" class="corner-btn btn-add-row" title="Add Row"><i class="fa-solid fa-plus"></i></button>`;
+            const delRcBtn = `<button type="button" class="corner-btn btn-delete-rc" title="Delete Options"><i class="fa-solid fa-xmark"></i></button>`;
 
             let tableHTML = `<div class="table-inner-wrapper"><table class="size-guide-table"><tbody>`;
+            
             for (let r = 0; r < rows; r++) {
                 tableHTML += `<tr>`;
                 for (let c = 0; c < cols; c++) {
-                    tableHTML += `<td><input type="text"></td>`;
+                    tableHTML += `<td><input type="text" placeholder="${r===0 ? 'Header' : '-'}"></td>`;
                 }
                 tableHTML += `</tr>`;
             }
             tableHTML += `</tbody></table></div>`;
-
+            
             wrapper.innerHTML = titleInputHTML + `<div style="position: relative;">` + addColBtn + addRowBtn + delRcBtn + tableHTML + `</div>`;
             tablesContainer.appendChild(wrapper);
         }
@@ -655,9 +327,9 @@
 
             // Add Column
             if (target.classList.contains('btn-add-col')) {
-                rows.forEach(row => {
+                rows.forEach((row, index) => {
                     const newCell = document.createElement('td');
-                    newCell.innerHTML = `<input type="text">`;
+                    newCell.innerHTML = `<input type="text" placeholder="${index===0 ? 'Header' : '-'}">`;
                     row.appendChild(newCell);
                 });
             }
@@ -668,7 +340,7 @@
                 const newRow = document.createElement('tr');
                 for (let i = 0; i < colCount; i++) {
                     const newCell = document.createElement('td');
-                    newCell.innerHTML = `<input type="text">`;
+                    newCell.innerHTML = `<input type="text" placeholder="-">`;
                     newRow.appendChild(newCell);
                 }
                 tableBody.appendChild(newRow);

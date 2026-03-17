@@ -608,10 +608,17 @@ function renderProductPage() {
     `).join('');
 
     // Meta
-    document.getElementById('pd-meta').innerHTML = `
-        <span class="pd-meta-tag">${pdProduct.category || ''}</span>
-        ${pdProduct.subCategory ? `<span class="pd-meta-tag">${pdProduct.subCategory}</span>` : ''}
-    `;
+    // show category, gender, and subcategory as tags; also include SKU / weight info when available
+    const metaTags = [];
+    if (pdProduct.category) metaTags.push(`<span class="pd-meta-tag">${pdProduct.category}</span>`);
+    if (pdProduct.gender) metaTags.push(`<span class="pd-meta-tag">${pdProduct.gender}</span>`);
+    if (pdProduct.subCategory && pdProduct.subCategory !== pdProduct.category) {
+        metaTags.push(`<span class="pd-meta-tag">${pdProduct.subCategory}</span>`);
+    }
+    if (pdProduct.sku) metaTags.push(`<span class="pd-meta-tag">SKU: ${pdProduct.sku}</span>`);
+    if (pdProduct.weight) metaTags.push(`<span class="pd-meta-tag">${pdProduct.weight} kg</span>`);
+    // dimensions could be shown in description or extended area; skipping for now
+    document.getElementById('pd-meta').innerHTML = metaTags.join('');
 
     // Stock — only render here when there are no color variants.
     // When colors exist, the auto-click on the first color swatch (below) will call
