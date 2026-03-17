@@ -2,409 +2,282 @@
     ViewData["Title"] = "Leaderboard Dashboard";
 }
 
+@section Styles {
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
-    /* Base Variables & Reset */
-    :root {
-        --bg-dark: #000000;
-        --bg-light: #ffffff;
-        --podium-grey: #a1a5a6;
-        --text-dark: #1a1a1a;
-        --text-light: #ffffff;
-    }
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+    --gray-50:#FAFAFA; --gray-100:#F5F5F3; --gray-200:#E8E8E6;
+    --gray-400:#999; --gray-600:#555; --border:rgba(0,0,0,0.08);
+    --font-display:'Bebas Neue',sans-serif; --font-body:'DM Sans',sans-serif;
+    --radius-md:12px; --radius-lg:18px;
+}
+html,body{font-family:var(--font-body);background:#fff;color:#000;overflow-x:hidden;}
 
-    html, body {
-        font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-        margin: 0;
-        padding: 0;
-        width: 100%;
-        overflow-x: hidden; /* Prevents whole-page side-scrolling */
-        background-color: var(--bg-light);
-        color: var(--text-dark);
-    }
+/* HERO */
+.hero{position:relative;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 24px 80px;background:#fff;overflow:hidden;}
+.hero::before{content:'';position:absolute;inset:0;background-image:linear-gradient(rgba(0,0,0,0.04) 1px,transparent 1px),linear-gradient(90deg,rgba(0,0,0,0.04) 1px,transparent 1px);background-size:60px 60px;mask-image:radial-gradient(ellipse 80% 60% at 50% 0%,black,transparent);pointer-events:none;}
+.season-label{font-size:11px;letter-spacing:4px;color:var(--gray-400);text-transform:uppercase;margin-bottom:16px;opacity:.8;position:relative;z-index:1;}
+.hero-title{font-family:var(--font-display);font-size:clamp(72px,14vw,140px);line-height:.88;letter-spacing:4px;text-align:center;color:#000;margin-bottom:12px;position:relative;z-index:1;}
+.hero-sub{font-size:11px;letter-spacing:6px;color:var(--gray-400);text-transform:uppercase;margin-bottom:56px;position:relative;z-index:1;}
 
-    /* --- TOP SECTION (Full Screen) --- */
-    .top-section {
-        min-height: 100vh;
-        display: flex;
-        flex-direction: column;
-        justify-content: center; /* Centers content vertically */
-        align-items: center;
-        padding: 20px;
-        box-sizing: border-box;
-    }
+/* PODIUM */
+.podium-wrap{display:flex;align-items:flex-end;gap:12px;position:relative;z-index:2;margin-bottom:44px;}
+.podium-card{display:flex;flex-direction:column;align-items:center;position:relative;}
+.p-avatar-ring{position:relative;margin-bottom:-1px;z-index:2;}
+.p-avatar{width:88px;height:88px;border-radius:50%;object-fit:cover;display:block;border:3px solid #fff;box-shadow:0 4px 16px rgba(0,0,0,.12);}
+.p-avatar.first{width:108px;height:108px;}
+.p-crown{position:absolute;top:-26px;left:50%;transform:translateX(-50%);font-size:20px;}
+.p-medal{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;position:absolute;top:-12px;right:-6px;border:2px solid #fff;z-index:3;box-shadow:0 2px 8px rgba(0,0,0,.15);}
+.p-medal.gold{background:#000;color:#fff;}
+.p-medal.silver{background:#555;color:#fff;}
+.p-medal.bronze{background:#888;color:#fff;}
+.p-pillar{width:130px;border-radius:12px 12px 0 0;display:flex;flex-direction:column;align-items:center;padding:16px 8px 20px;position:relative;}
+.p-pillar.first{height:200px;width:150px;background:#000;}
+.p-pillar.second{height:158px;background:var(--gray-200);border:1px solid rgba(0,0,0,.1);}
+.p-pillar.third{height:128px;background:var(--gray-100);border:1px solid rgba(0,0,0,.08);}
+.p-rank{font-family:var(--font-display);font-size:40px;line-height:1;margin-bottom:4px;}
+.p-pillar.first .p-rank{color:#fff;} .p-pillar.second .p-rank,.p-pillar.third .p-rank{color:#000;}
+.p-name{font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;text-align:center;line-height:1.3;margin-bottom:4px;}
+.p-pillar.first .p-name{color:rgba(255,255,255,.85);} .p-pillar.second .p-name,.p-pillar.third .p-name{color:#000;}
+.p-stat{font-size:10px;}
+.p-pillar.first .p-stat{color:rgba(255,255,255,.5);} .p-pillar.second .p-stat,.p-pillar.third .p-stat{color:var(--gray-400);}
 
-    .hero-podium-wrapper {
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-end;
-        width: 100%;
-        max-width: 1200px;
-        margin-bottom: 100px;
-    }
+/* TOGGLES */
+.toggle-row{display:flex;gap:6px;background:var(--gray-100);border:1px solid var(--border);border-radius:100px;padding:4px;position:relative;z-index:2;}
+.toggle-btn{padding:8px 24px;border-radius:100px;font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;cursor:pointer;border:none;transition:all .2s;color:var(--gray-600);background:transparent;font-family:var(--font-body);}
+.toggle-btn.active{background:#000;color:#fff;}
 
-    .hero-text {
-        max-width: 500px;
-        padding-bottom: 20px;
-    }
+/* CARD SCROLL SECTION */
+.lb-section{background:#fff;padding:64px 0 0;border-top:1px solid var(--border);}
+.lb-header{padding:0 40px 36px;display:flex;justify-content:space-between;align-items:flex-end;}
+.lb-header-left{display:flex;flex-direction:column;gap:4px;}
+.lb-eyebrow{font-size:10px;letter-spacing:5px;color:var(--gray-400);text-transform:uppercase;}
+.lb-title-row{display:flex;align-items:baseline;gap:16px;}
+.lb-title{font-family:var(--font-display);font-size:clamp(40px,5vw,64px);letter-spacing:3px;color:#000;line-height:1;}
+.lb-view-link{font-size:10px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--gray-600);text-decoration:none;border-bottom:1px solid rgba(0,0,0,.3);padding-bottom:1px;transition:color .2s;}
+.lb-view-link:hover{color:#000;}
+.lb-nav-btns{display:flex;gap:8px;}
+.lb-nav{width:42px;height:42px;border-radius:50%;border:1.5px solid #000;background:#fff;color:#000;cursor:pointer;display:grid;place-items:center;font-size:16px;transition:all .2s;}
+.lb-nav:hover{background:#000;color:#fff;}
 
-        .hero-text h1 {
-            font-size: 5rem;
-            font-weight: 900;
-            margin: 0 0 10px 0;
-            line-height: 1;
-            letter-spacing: -2px;
-        }
+.scroll-track{display:flex;gap:20px;padding:0 40px 52px;overflow-x:auto;scroll-behavior:smooth;scroll-snap-type:x mandatory;scrollbar-width:none;-webkit-overflow-scrolling:touch;}
+.scroll-track::-webkit-scrollbar{display:none;}
 
-        .hero-text h2 {
-            font-size: 1.7rem;
-            font-weight: 600;
-            font-style: italic;
-            margin: 0 0 10px 0;
-        }
+.lb-card{flex:0 0 240px;position:relative;cursor:pointer;border-radius:var(--radius-lg);overflow:hidden;border:1px solid var(--border);background:#fff;box-shadow:0 2px 12px rgba(0,0,0,.05);scroll-snap-align:start;transition:transform .3s cubic-bezier(.22,.68,0,1.2),box-shadow .3s,border-color .3s;}
+.lb-card:hover{transform:translateY(-8px);box-shadow:0 16px 40px rgba(0,0,0,.1);border-color:rgba(0,0,0,.2);}
+.lb-card-img-wrap{position:relative;border-radius:10px;margin:8px 8px 0;overflow:hidden;aspect-ratio:3/4;background:var(--gray-100);}
+.lb-card-img{width:100%;height:100%;object-fit:cover;display:block;filter:saturate(.75) contrast(1.05);transition:transform .4s,filter .3s;}
+.lb-card:hover .lb-card-img{transform:scale(1.05);filter:saturate(1);}
+.lb-card-overlay{position:absolute;inset:0;background:linear-gradient(0deg,rgba(0,0,0,.85) 0%,rgba(0,0,0,.2) 50%,transparent 100%);border-radius:inherit;}
+.lb-card-rank-badge{position:absolute;top:12px;left:12px;background:rgba(0,0,0,.75);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.15);border-radius:100px;padding:4px 12px;font-family:var(--font-display);font-size:15px;letter-spacing:1px;color:#fff;z-index:2;}
+.lb-card.rank-1 .lb-card-rank-badge{background:#fff;color:#000;border-color:#fff;}
+.lb-card-avatar{position:absolute;bottom:52px;left:50%;transform:translateX(-50%);width:52px;height:52px;border-radius:50%;border:2px solid rgba(255,255,255,.2);object-fit:cover;z-index:3;box-shadow:0 4px 16px rgba(0,0,0,.4);}
+.lb-card-info{position:absolute;bottom:0;left:0;right:0;padding:0 12px 14px;z-index:3;}
+.lb-card-name{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;text-align:center;color:#fff;margin-bottom:2px;}
+.lb-card-stat{font-size:9px;color:rgba(255,255,255,.45);text-align:center;}
+.lb-card.rank-1 .lb-card-img-wrap::after{content:'';position:absolute;top:0;left:-100%;width:60%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.08),transparent);animation:shimmer 3s infinite;pointer-events:none;z-index:1;}
+@@keyframes shimmer{0%{left:-100%}55%,100%{left:120%}}
 
-        .hero-text p {
-            font-size: 1rem;
-            color: #555;
-            font-style: italic;
-            margin: 0;
-        }
+/* SLIDING TABLE */
+.slide-table-section{background:#fff;border-top:1px solid var(--border);}
+.slide-table-outer{overflow-x:auto;scrollbar-width:thin;scrollbar-color:rgba(0,0,0,.12) transparent;-webkit-overflow-scrolling:touch;cursor:grab;}
+.slide-table-outer:active{cursor:grabbing;}
+.slide-table-outer::-webkit-scrollbar{height:4px;}
+.slide-table-outer::-webkit-scrollbar-thumb{background:rgba(0,0,0,.12);border-radius:100px;}
+.slide-table{min-width:700px;width:100%;}
+.st-head{display:grid;grid-template-columns:56px 1fr 110px 110px 80px;padding:14px 40px;border-bottom:2px solid #000;font-size:9px;letter-spacing:2.5px;color:var(--gray-400);text-transform:uppercase;}
+.st-row{display:grid;grid-template-columns:56px 1fr 110px 110px 80px;align-items:center;padding:14px 40px;border-bottom:1px solid var(--border);cursor:pointer;position:relative;transition:background .2s;}
+.st-row:hover{background:var(--gray-50);}
+.st-row.top3{background:var(--gray-50);}
+.st-row.top3::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:#000;}
+.st-rank{font-family:var(--font-display);font-size:24px;color:var(--gray-400);}
+.st-row.top3 .st-rank{color:#000;}
+.st-person{display:flex;align-items:center;gap:12px;}
+.st-avatar{width:36px;height:36px;border-radius:50%;object-fit:cover;border:1px solid var(--border);}
+.st-name{font-size:12px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:#000;margin-bottom:1px;}
+.st-tag{font-size:10px;color:var(--gray-400);}
+.st-dist{font-size:13px;font-weight:700;color:#000;}
+.st-time{font-size:12px;color:var(--gray-600);}
+.st-change{font-size:11px;font-weight:700;text-align:right;}
+.st-change.up{color:#000;} .st-change.same{color:var(--gray-400);} .st-change.down{color:#888;}
+.st-bar-wrap{grid-column:1/-1;height:2px;background:rgba(0,0,0,.05);border-radius:1px;overflow:hidden;margin-top:8px;display:none;}
+.st-row.top3 .st-bar-wrap{display:block;}
+.st-bar{height:100%;background:#000;border-radius:1px;}
 
-    /* Podium Section */
-    .podium-container {
-        display: flex;
-        align-items: flex-end;
-        gap: 20px;
-    }
+/* FOOTER */
+.footer-section{background:#fff;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;padding:28px 40px;gap:16px;}
+.footer-outline-btn{font-size:10px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:#000;background:#fff;border:1.5px solid #000;border-radius:100px;padding:10px 28px;cursor:pointer;transition:all .2s;text-decoration:none;display:inline-block;}
+.footer-outline-btn:hover{background:#000;color:#fff;}
+.footer-fill-btn{font-size:10px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:#fff;background:#000;border:none;border-radius:100px;padding:10px 28px;cursor:pointer;transition:all .2s;text-decoration:none;display:inline-block;}
+.footer-fill-btn:hover{background:#333;}
 
-    .podium-pillar {
-        background-color: var(--podium-grey);
-        border-top-left-radius: 100px;
-        border-top-right-radius: 100px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        position: relative;
-        text-align: center;
-    }
+@@keyframes fadeUp{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:translateY(0)}}
+.anim{opacity:0;animation:fadeUp .7s ease forwards;}
+.d1{animation-delay:.1s} .d2{animation-delay:.25s} .d3{animation-delay:.4s} .d4{animation-delay:.55s} .d5{animation-delay:.7s}
 
-        .podium-pillar.first {
-            height: 400px;
-            width: 160px;
-        }
-
-        .podium-pillar.second {
-            height: 320px;
-            width: 160px;
-        }
-
-        .podium-pillar.third {
-            height: 270px;
-            width: 160px;
-        }
-
-    .podium-avatar {
-        width: 140px;
-        height: 140px;
-        border-radius: 50%;
-        object-fit: cover;
-        border: 4px solid var(--bg-dark);
-        position: absolute;
-        top: -15px;
-    }
-
-    .podium-info {
-        margin-top: 140px;
-        padding: 0 10px;
-    }
-
-        .podium-info h3 {
-            font-size: 0.85rem;
-            margin: 0 0 5px 0;
-            text-transform: uppercase;
-        }
-
-        .podium-info p {
-            font-size: 0.8rem;
-            margin: 0;
-        }
-
-    /* Toggles */
-    .toggle-container {
-        display: flex;
-        justify-content: center;
-        gap: 15px;
-    }
-
-    .toggle-btn {
-        padding: 8px 30px;
-        border-radius: 25px;
-        font-weight: 600;
-        font-size: 0.9rem;
-        cursor: pointer;
-        border: 1px solid var(--bg-dark);
-        text-decoration: none;
-    }
-
-        .toggle-btn.outline {
-            background: transparent;
-            color: var(--text-dark);
-        }
-
-        .toggle-btn.filled {
-            background: var(--bg-dark);
-            color: var(--text-light);
-        }
-
-
-    /* --- LEADERBOARD SECTION (Black, Full Width) --- */
-    .leaderboard-section {
-        background-color: var(--bg-dark);
-        color: var(--text-light);
-        /* THE FIX: Break out of the ASP.NET _Layout container */
-        width: 100vw;
-        position: relative;
-        left: 50%;
-        right: 50%;
-        margin-left: -50vw;
-        margin-right: -50vw;
-        padding: 60px 0 0 0;
-        text-align: center;
-        box-sizing: border-box;
-    }
-
-
-        .leaderboard-section h2 {
-            font-size: 4rem;
-            font-weight: 900;
-            margin: 0 0 30px 0;
-            letter-spacing: 2px;
-        }
-
-    /* Horizontal Scrolling Container */
-    .scrolling-wrapper {
-        display: flex;
-        flex-wrap: nowrap;
-        overflow-x: auto;
-        padding: 40px 40px 80px 40px; /* Padding accommodates the popping elements */
-        gap: 30px;
-        /* Hide scrollbar */
-        -webkit-overflow-scrolling: touch;
-        -ms-overflow-style: none; /* IE and Edge */
-        scrollbar-width: none; /* Firefox */
-    }
-
-        .scrolling-wrapper::-webkit-scrollbar {
-            display: none; /* Chrome, Safari and Opera */
-        }
-
-    /* Leaderboard Cards (Matching 4th Screenshot) */
-    .card {
-        flex: 0 0 auto;
-        width: 280px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-    }
-
-    .card-image-wrapper {
-        position: relative;
-        width: 100%;
-        margin-bottom: 10px;
-    }
-
-    .card-rank {
-        position: absolute;
-        top: -20px;
-        left: -20px;
-        background: var(--bg-light);
-        color: var(--text-dark);
-        width: 55px;
-        height: 55px;
-        border-radius: 50%;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        font-size: 1.3rem;
-        font-weight: 800;
-        z-index: 10;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.3);
-    }
-
-    .card-image {
-        width: 100%;
-        height: 420px;
-        border: 3px solid var(--bg-light);
-        border-radius: 12px;
-        object-fit: cover;
-        display: block;
-        box-sizing: border-box;
-    }
-
-    .card-avatar {
-        width: 90px;
-        height: 90px;
-        border-radius: 50%;
-        border: 4px solid var(--bg-light);
-        position: absolute;
-        bottom: -45px; /* Pulls it down over the edge of the image */
-        left: 50%;
-        transform: translateX(-50%);
-        z-index: 5;
-        object-fit: cover;
-        background-color: var(--bg-dark); /* Failsafe if image is transparent */
-    }
-
-    .card-nameplate {
-        background: var(--bg-light);
-        color: var(--text-dark);
-        width: 100%;
-        padding: 50px 10px 15px 10px; /* Extra top padding prevents text from hiding behind avatar */
-        border-radius: 8px;
-        text-align: center;
-        font-weight: 700;
-        font-size: 0.95rem;
-        box-sizing: border-box;
-    }
-
-    /* Footer Links */
-    .view-all-link {
-        display: inline-block;
-        color: var(--text-light);
-        text-decoration: none;
-        font-size: 0.9rem;
-        font-weight: 600;
-        letter-spacing: 1px;
-        border-bottom: 1px solid var(--text-light);
-        padding-bottom: 2px;
-        margin-bottom: 20px;
-        text-transform: uppercase;
-    }
-
-    .upload-section {
-        background-color: var(--bg-light);
-        padding: 40px;
-        text-align: center;
-        width: 100%;
-    }
-
-    .upload-btn {
-        display: inline-block;
-        color: var(--text-dark);
-        text-decoration: none;
-        font-size: 1.1rem;
-        font-weight: 600;
-        letter-spacing: 1px;
-        border-bottom: 1px solid var(--text-dark);
-        padding-bottom: 2px;
-    }
+@@media(max-width:600px){
+    .lb-header,.scroll-track,.footer-section{padding-left:20px;padding-right:20px;}
+    .st-head,.st-row{padding-left:20px;padding-right:20px;}
+}
 </style>
+}
 
-<section class="top-section">
-    <div class="hero-podium-wrapper">
-        <div class="hero-text">
-            <h1>CHAMPIONS</h1>
-            <h2>Train hard. Stay focused.</h2>
-            <p>Progress is built daily.</p>
+<!-- HERO -->
+<section class="hero">
+    <p class="season-label anim d1">Season 2025 · National Rankings</p>
+    <h1 class="hero-title anim d2">CHAMPIONS</h1>
+    <p class="hero-sub anim d3">Train hard · Stay focused · Progress daily</p>
+
+    <div class="podium-wrap anim d4">
+        <div class="podium-card">
+            <div class="p-avatar-ring" style="margin-bottom:-6px">
+                <img class="p-avatar" src="https://i.pravatar.cc/150?img=32" alt="Alexandra">
+                <div class="p-medal silver">2</div>
+            </div>
+            <div class="p-pillar second">
+                <div class="p-rank">02</div>
+                <div class="p-name">Alexandra<br>Eala</div>
+                <div class="p-stat">5.11 km</div>
+            </div>
         </div>
-
-        <div class="podium-container">
-            <div class="podium-pillar second">
-                <img src="https://i.pravatar.cc/150?img=32" alt="Alexandra" class="podium-avatar">
-                <div class="podium-info">
-                    <h3>ALEXANDRA EALA</h3>
-                    <p>5.11 KM Distance</p>
-                </div>
+        <div class="podium-card">
+            <div class="p-avatar-ring" style="margin-bottom:-6px;position:relative">
+                <img class="p-avatar first" src="https://i.pravatar.cc/150?img=11" alt="Cristiano">
+                <div class="p-crown">👑</div>
+                <div class="p-medal gold" style="top:-10px;right:-4px">1</div>
             </div>
-
-            <div class="podium-pillar first">
-                <img src="https://i.pravatar.cc/150?img=11" alt="Cristiano" class="podium-avatar">
-                <div class="podium-info">
-                    <h3>CRISTIANO RONALDO</h3>
-                    <p>7.09KM Distance</p>
-                </div>
+            <div class="p-pillar first">
+                <div class="p-rank">01</div>
+                <div class="p-name">Cristiano<br>Ronaldo</div>
+                <div class="p-stat">7.09 km</div>
             </div>
-
-            <div class="podium-pillar third">
-                <img src="https://i.pravatar.cc/150?img=12" alt="Carlos" class="podium-avatar">
-                <div class="podium-info">
-                    <h3>CARLOS YULO</h3>
-                    <p>5.02KM Distance</p>
-                </div>
+        </div>
+        <div class="podium-card">
+            <div class="p-avatar-ring" style="margin-bottom:-6px">
+                <img class="p-avatar" src="https://i.pravatar.cc/150?img=12" alt="Carlos">
+                <div class="p-medal bronze">3</div>
+            </div>
+            <div class="p-pillar third">
+                <div class="p-rank">03</div>
+                <div class="p-name">Carlos<br>Yulo</div>
+                <div class="p-stat">5.02 km</div>
             </div>
         </div>
     </div>
 
-    <div class="toggle-container">
-        <a href="#" class="toggle-btn outline">REGION</a>
-        <a href="#" class="toggle-btn filled">NATIONAL</a>
+    <div class="toggle-row anim d5">
+        <button class="toggle-btn" onclick="setFilter('region',this)">Region</button>
+        <button class="toggle-btn active" onclick="setFilter('national',this)">National</button>
+        <button class="toggle-btn" onclick="setFilter('global',this)">Global</button>
     </div>
 </section>
 
-<section class="leaderboard-section">
-    <h2>LEADERBOARD</h2>
-
-    <div class="scrolling-wrapper">
-        <div class="card">
-            <div class="card-image-wrapper">
-                <div class="card-rank">1st</div>
-                <img src="https://images.unsplash.com/photo-1551632811-561732d1e306?q=80&w=400&auto=format&fit=crop" alt="Run Track" class="card-image">
-                <img src="https://i.pravatar.cc/150?img=11" alt="Profile" class="card-avatar">
+<!-- CARD SCROLL -->
+<section class="lb-section">
+    <div class="lb-header">
+        <div class="lb-header-left">
+            <span class="lb-eyebrow">Top Performers</span>
+            <div class="lb-title-row">
+                <h2 class="lb-title">LEADERBOARD</h2>
+                <a href="#" class="lb-view-link">View All →</a>
             </div>
-            <div class="card-nameplate">CRISTIANO RONALDO</div>
         </div>
-
-        <div class="card">
-            <div class="card-image-wrapper">
-                <div class="card-rank">2nd</div>
-                <img src="https://images.unsplash.com/photo-1476480862126-209bfaa8edc8?q=80&w=400&auto=format&fit=crop" alt="Run Track" class="card-image">
-                <img src="https://i.pravatar.cc/150?img=32" alt="Profile" class="card-avatar">
-            </div>
-            <div class="card-nameplate">ALEXANDRA EALA</div>
+        <div class="lb-nav-btns">
+            <button class="lb-nav" id="navPrev">←</button>
+            <button class="lb-nav" id="navNext">→</button>
         </div>
-
-        <div class="card">
-            <div class="card-image-wrapper">
-                <div class="card-rank">3rd</div>
-                <img src="https://images.unsplash.com/photo-1530143311094-34d807799e8f?q=80&w=400&auto=format&fit=crop" alt="Run Track" class="card-image">
-                <img src="https://i.pravatar.cc/150?img=12" alt="Profile" class="card-avatar">
-            </div>
-            <div class="card-nameplate">CARLOS YULO</div>
-        </div>
-
-        <div class="card">
-            <div class="card-image-wrapper">
-                <div class="card-rank">4th</div>
-                <img src="https://images.unsplash.com/photo-1502224562085-639556652f33?q=80&w=400&auto=format&fit=crop" alt="Run Track" class="card-image">
-                <img src="https://i.pravatar.cc/150?img=15" alt="Profile" class="card-avatar">
-            </div>
-            <div class="card-nameplate">MANNY P</div>
-        </div>
-
-        <div class="card">
-            <div class="card-image-wrapper">
-                <div class="card-rank">4th</div>
-                <img src="https://images.unsplash.com/photo-1502224562085-639556652f33?q=80&w=400&auto=format&fit=crop" alt="Run Track" class="card-image">
-                <img src="https://i.pravatar.cc/150?img=15" alt="Profile" class="card-avatar">
-            </div>
-            <div class="card-nameplate">MANNY P</div>
-        </div>
-
-        <div class="card">
-            <div class="card-image-wrapper">
-                <div class="card-rank">4th</div>
-                <img src="https://images.unsplash.com/photo-1502224562085-639556652f33?q=80&w=400&auto=format&fit=crop" alt="Run Track" class="card-image">
-                <img src="https://i.pravatar.cc/150?img=15" alt="Profile" class="card-avatar">
-            </div>
-            <div class="card-nameplate">MANNY P</div>
-        </div>
-
     </div>
 
-    <a href="viewallboard.cshtml" class="view-all-link">VIEW ALL</a>
+    <div class="scroll-track" id="cardTrack">
+        <div class="lb-card rank-1"><div class="lb-card-img-wrap"><img class="lb-card-img" src="https://images.unsplash.com/photo-1551632811-561732d1e306?q=80&w=400&auto=format&fit=crop" alt=""><div class="lb-card-overlay"></div><div class="lb-card-rank-badge">#1</div><img class="lb-card-avatar" src="https://i.pravatar.cc/150?img=11" alt=""><div class="lb-card-info"><div class="lb-card-name">Cristiano Ronaldo</div><div class="lb-card-stat">7.09 km · 42:18</div></div></div></div>
+        <div class="lb-card"><div class="lb-card-img-wrap"><img class="lb-card-img" src="https://images.unsplash.com/photo-1476480862126-209bfaa8edc8?q=80&w=400&auto=format&fit=crop" alt=""><div class="lb-card-overlay"></div><div class="lb-card-rank-badge">#2</div><img class="lb-card-avatar" src="https://i.pravatar.cc/150?img=32" alt=""><div class="lb-card-info"><div class="lb-card-name">Alexandra Eala</div><div class="lb-card-stat">5.11 km · 31:05</div></div></div></div>
+        <div class="lb-card"><div class="lb-card-img-wrap"><img class="lb-card-img" src="https://images.unsplash.com/photo-1530143311094-34d807799e8f?q=80&w=400&auto=format&fit=crop" alt=""><div class="lb-card-overlay"></div><div class="lb-card-rank-badge">#3</div><img class="lb-card-avatar" src="https://i.pravatar.cc/150?img=12" alt=""><div class="lb-card-info"><div class="lb-card-name">Carlos Yulo</div><div class="lb-card-stat">5.02 km · 30:11</div></div></div></div>
+        <div class="lb-card"><div class="lb-card-img-wrap"><img class="lb-card-img" src="https://images.unsplash.com/photo-1502224562085-639556652f33?q=80&w=400&auto=format&fit=crop" alt=""><div class="lb-card-overlay"></div><div class="lb-card-rank-badge">#4</div><img class="lb-card-avatar" src="https://i.pravatar.cc/150?img=15" alt=""><div class="lb-card-info"><div class="lb-card-name">Manny Pacquiao</div><div class="lb-card-stat">4.88 km · 29:40</div></div></div></div>
+        <div class="lb-card"><div class="lb-card-img-wrap"><img class="lb-card-img" src="https://images.unsplash.com/photo-1571008887538-b36bb32f4571?q=80&w=400&auto=format&fit=crop" alt=""><div class="lb-card-overlay"></div><div class="lb-card-rank-badge">#5</div><img class="lb-card-avatar" src="https://i.pravatar.cc/150?img=20" alt=""><div class="lb-card-info"><div class="lb-card-name">Raquel Santos</div><div class="lb-card-stat">4.75 km · 28:22</div></div></div></div>
+        <div class="lb-card"><div class="lb-card-img-wrap"><img class="lb-card-img" src="https://images.unsplash.com/photo-1559478945-2560c41c6de4?q=80&w=400&auto=format&fit=crop" alt=""><div class="lb-card-overlay"></div><div class="lb-card-rank-badge">#6</div><img class="lb-card-avatar" src="https://i.pravatar.cc/150?img=25" alt=""><div class="lb-card-info"><div class="lb-card-name">Marco Reyes</div><div class="lb-card-stat">4.62 km · 27:54</div></div></div></div>
+    </div>
 </section>
 
-<section class="upload-section">
-    <a href="uploadtrack.cshtml" class="upload-btn">UPLOAD YOURS NOW</a>
+<!-- SLIDING TABLE -->
+<section class="slide-table-section">
+    <div class="slide-table-outer" id="tableOuter">
+        <div class="slide-table">
+            <div class="st-head">
+                <div>Rank</div><div>Athlete</div><div>Distance</div><div>Time</div><div style="text-align:right">Change</div>
+            </div>
+            <div class="st-row top3">
+                <div class="st-rank">1</div>
+                <div class="st-person"><img class="st-avatar" src="https://i.pravatar.cc/150?img=11" alt=""><div><div class="st-name">Cristiano Ronaldo</div><div class="st-tag">National · Week 12</div></div></div>
+                <div class="st-dist">7.09 km</div><div class="st-time">42:18</div>
+                <div class="st-change up" style="text-align:right">↑ 2</div>
+                <div class="st-bar-wrap"><div class="st-bar" style="width:100%"></div></div>
+            </div>
+            <div class="st-row top3">
+                <div class="st-rank">2</div>
+                <div class="st-person"><img class="st-avatar" src="https://i.pravatar.cc/150?img=32" alt=""><div><div class="st-name">Alexandra Eala</div><div class="st-tag">National · Week 12</div></div></div>
+                <div class="st-dist">5.11 km</div><div class="st-time">31:05</div>
+                <div class="st-change same" style="text-align:right">— 0</div>
+                <div class="st-bar-wrap"><div class="st-bar" style="width:72%"></div></div>
+            </div>
+            <div class="st-row top3">
+                <div class="st-rank">3</div>
+                <div class="st-person"><img class="st-avatar" src="https://i.pravatar.cc/150?img=12" alt=""><div><div class="st-name">Carlos Yulo</div><div class="st-tag">National · Week 12</div></div></div>
+                <div class="st-dist">5.02 km</div><div class="st-time">30:11</div>
+                <div class="st-change up" style="text-align:right">↑ 1</div>
+                <div class="st-bar-wrap"><div class="st-bar" style="width:71%"></div></div>
+            </div>
+            <div class="st-row">
+                <div class="st-rank">4</div>
+                <div class="st-person"><img class="st-avatar" src="https://i.pravatar.cc/150?img=15" alt=""><div><div class="st-name">Manny Pacquiao</div><div class="st-tag">National · Week 12</div></div></div>
+                <div class="st-dist">4.88 km</div><div class="st-time">29:40</div>
+                <div class="st-change down" style="text-align:right">↓ 1</div>
+            </div>
+            <div class="st-row">
+                <div class="st-rank">5</div>
+                <div class="st-person"><img class="st-avatar" src="https://i.pravatar.cc/150?img=20" alt=""><div><div class="st-name">Raquel Santos</div><div class="st-tag">National · Week 12</div></div></div>
+                <div class="st-dist">4.75 km</div><div class="st-time">28:22</div>
+                <div class="st-change up" style="text-align:right">↑ 3</div>
+            </div>
+            <div class="st-row">
+                <div class="st-rank">6</div>
+                <div class="st-person"><img class="st-avatar" src="https://i.pravatar.cc/150?img=25" alt=""><div><div class="st-name">Marco Reyes</div><div class="st-tag">National · Week 12</div></div></div>
+                <div class="st-dist">4.62 km</div><div class="st-time">27:54</div>
+                <div class="st-change same" style="text-align:right">— 0</div>
+            </div>
+        </div>
+    </div>
 </section>
 
+<!-- FOOTER -->
+<div class="footer-section">
+    <a href="#" class="footer-outline-btn">View All Rankings</a>
+    <a href="/Leaderboard/UploadTrack" class="footer-fill-btn">Upload Your Activity</a>
+</div>
 
+@section Scripts {
+<script>
+function setFilter(type, btn) {
+    document.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+}
+
+// Card scroll nav
+const track = document.getElementById('cardTrack');
+document.getElementById('navPrev')?.addEventListener('click', () => track.scrollBy({ left: -280, behavior: 'smooth' }));
+document.getElementById('navNext')?.addEventListener('click', () => track.scrollBy({ left:  280, behavior: 'smooth' }));
+
+// Table drag-to-scroll (mouse + touch)
+const outer = document.getElementById('tableOuter');
+let isDown = false, startX, scrollLeft;
+outer.addEventListener('mousedown', e => { isDown = true; startX = e.pageX - outer.offsetLeft; scrollLeft = outer.scrollLeft; });
+outer.addEventListener('mouseleave', () => { isDown = false; });
+outer.addEventListener('mouseup', () => { isDown = false; });
+outer.addEventListener('mousemove', e => {
+    if (!isDown) return;
+    e.preventDefault();
+    const x = e.pageX - outer.offsetLeft;
+    outer.scrollLeft = scrollLeft - (x - startX) * 1.5;
+});
+</script>
+}
