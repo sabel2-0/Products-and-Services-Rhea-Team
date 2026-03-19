@@ -18,9 +18,9 @@ namespace MyAspNetApp.Controllers
         }
 
         [HttpGet]
-        public IActionResult SizeGuide()
+        public IActionResult SizeGuide(int? id)
         {
-            return RedirectToAction("SizeGuide", "Seller");
+            return RedirectToAction("SizeGuide", "Seller", new { id });
         }
 
         [HttpGet]

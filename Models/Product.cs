@@ -44,6 +44,32 @@ public class Product
     public string RestockDate { get; set; } = string.Empty; // e.g. "Mid-March 2026"
     public string RestockNote { get; set; } = string.Empty; // e.g. "Limited restock — reserve yours now"
     public int SellerId { get; set; } = 1; // FK to seller
+    public ProductSizeGuide? SizeGuide { get; set; }
+}
+
+public class ProductSizeGuide
+{
+    public string Title { get; set; } = string.Empty;
+    public string MeasurementUnit { get; set; } = "in";
+    public string PhotoMeasurementUnit { get; set; } = "in";
+    public string TableMeasurementUnit { get; set; } = "in";
+    public Dictionary<string, string> PhotoGuideUnitsByUrl { get; set; } = new();
+    public string Category { get; set; } = string.Empty;
+    public string FitTips { get; set; } = string.Empty;
+    public string HowToMeasure { get; set; } = string.Empty;
+    public string AdditionalNotes { get; set; } = string.Empty;
+    public List<List<string>> TableData { get; set; } = new();
+    public List<ProductSizeGuideTable> Tables { get; set; } = new();
+    public List<string> ImageUrls { get; set; } = new();
+}
+
+public class ProductSizeGuideTable
+{
+    public string Title { get; set; } = string.Empty;
+    public string MeasurementUnit { get; set; } = string.Empty;
+    public int PhotoOrder { get; set; }
+    public List<List<string>> Data { get; set; } = new();
+    public string ImageUrl { get; set; } = string.Empty;
 }
 
 public class ProductVariant

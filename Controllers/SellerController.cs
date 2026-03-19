@@ -33,23 +33,38 @@ namespace MyAspNetApp.Controllers
                 // load base products
                 var products = await _db.Products.ToListAsync();
 
-                // also fetch first variant image per product so UI can show something
-                var variantImages = await _db.ProductVariants
-                    .Where(v => !string.IsNullOrEmpty(v.ImagePath))
+                var variantSnapshots = await _db.ProductVariants
+                    .AsNoTracking()
                     .GroupBy(v => v.ProductId)
                     .Select(g => new
                     {
                         ProductId = g.Key,
-                        ImagePath = g.OrderBy(v => v.Id).Select(v => v.ImagePath).FirstOrDefault()
+                        ImagePath = g
+                            .Where(v => !string.IsNullOrEmpty(v.ImagePath))
+                            .OrderBy(v => v.Id)
+                            .Select(v => v.ImagePath)
+                            .FirstOrDefault(),
+                        Price = g
+                            .Where(v => v.Price.HasValue && v.Price.Value > 0)
+                            .Select(v => v.Price)
+                            .Min()
                     })
                     .ToListAsync();
 
-                var imageMap = variantImages.ToDictionary(x => x.ProductId, x => x.ImagePath);
+                var variantMap = variantSnapshots.ToDictionary(x => x.ProductId, x => x);
                 foreach (var p in products)
                 {
-                    if (imageMap.TryGetValue(p.ProductId, out var img) && !string.IsNullOrEmpty(img))
+                    if (variantMap.TryGetValue(p.ProductId, out var snapshot))
                     {
-                        p.ImagePath = img;
+                        if (!string.IsNullOrEmpty(snapshot.ImagePath))
+                        {
+                            p.ImagePath = snapshot.ImagePath;
+                        }
+
+                        if (snapshot.Price.HasValue)
+                        {
+                            p.Price = snapshot.Price.Value;
+                        }
                     }
                 }
 
@@ -75,7 +90,6 @@ namespace MyAspNetApp.Controllers
         public async Task<IActionResult> CreateProduct(string? mode, int? id)
         {
             ViewBag.Mode = mode ?? "create";
-            ViewBag.ExistingColorImages = "{}";
             ViewBag.ExistingVariants = "[]";
 
             if (id.HasValue && (mode == "edit" || mode == "renew" || mode == "relist"))
@@ -83,13 +97,6 @@ namespace MyAspNetApp.Controllers
                 var product = await _db.Products.FindAsync(id.Value);
                 if (product != null)
                 {
-                    var colorImages = await _db.ProductColorImages
-                        .Where(ci => ci.ProductId == product.ProductId)
-                        .ToListAsync();
-                    var grouped = colorImages
-                        .GroupBy(ci => ci.ColorName)
-                        .ToDictionary(g => g.Key, g => g.Select(ci => ci.ImagePath).ToList());
-                    ViewBag.ExistingColorImages = System.Text.Json.JsonSerializer.Serialize(grouped);
 
                     var variants = await _db.ProductVariants
                         .Where(v => v.ProductId == product.ProductId)
@@ -220,6 +227,9 @@ var priceList = (variantPrices ?? Array.Empty<string>())
 
                 var variants = new List<DbProductVariant>();
                 var usedSkus = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                var variantUploadsDir = Path.Combine(_env.WebRootPath, "uploads", "products");
+                Directory.CreateDirectory(variantUploadsDir);
+
                 for (int i = 0; i < colorNameList.Count; i++)
                 {
                     var colorName = colorNameList[i]!;
@@ -247,6 +257,27 @@ var priceList = (variantPrices ?? Array.Empty<string>())
                     }
                     usedSkus.Add(variantSku);
 
+                    var variantImagePath = model.ImagePath ?? string.Empty;
+                    var colorFiles = Request.Form.Files.GetFiles($"colorFiles_{i}");
+                    if (colorFiles.Count > 0)
+                    {
+                        var file = colorFiles[0];
+                        if (file.Length > 0)
+                        {
+                            var fn = Guid.NewGuid().ToString("N") + Path.GetExtension(file.FileName);
+                            var fp = Path.Combine(variantUploadsDir, fn);
+                            using var fs = new FileStream(fp, FileMode.Create);
+                            await file.CopyToAsync(fs);
+                            variantImagePath = "/uploads/products/" + fn;
+
+                            // If product image isn't set, default it to the first variant image
+                            if (string.IsNullOrEmpty(model.ImagePath))
+                            {
+                                model.ImagePath = variantImagePath;
+                            }
+                        }
+                    }
+
                     variants.Add(new DbProductVariant
                     {
                         ProductId = model.ProductId,
@@ -257,7 +288,7 @@ var priceList = (variantPrices ?? Array.Empty<string>())
                         Availability = !string.IsNullOrWhiteSpace(variantAvailabilityInput)
                             ? variantAvailabilityInput!
                             : (stock > 0 ? "In Stock" : "Pre-Order"),
-                        ImagePath = model.ImagePath ?? string.Empty,
+                        ImagePath = variantImagePath,
                         Price = (i < priceList.Count) ? priceList[i] : (decimal?)null,
                         Weight = variantWeight,
                         Length = variantLength,
@@ -348,94 +379,19 @@ var priceList = (variantPrices ?? Array.Empty<string>())
                     _logger.LogInformation($"Variants saved successfully");
                 }
 
-            // Save color images
-            if (colorNameList.Count > 0)
+            // Ensure product has a main image (fall back to first variant image if available)
+            if (string.IsNullOrEmpty(model.ImagePath))
             {
-                // Remove old color images for this product
-                var oldImages = _db.ProductColorImages.Where(ci => ci.ProductId == productId);
-                _db.ProductColorImages.RemoveRange(oldImages);
-                await _db.SaveChangesAsync();
-
-                var uploadsDir = Path.Combine(_env.WebRootPath, "uploads", "products");
-                Directory.CreateDirectory(uploadsDir);
-
-                for (int i = 0; i < colorNameList.Count; i++)
+                var firstVariantWithImage = variants
+                    .FirstOrDefault(v => !string.IsNullOrWhiteSpace(v.ImagePath));
+                if (firstVariantWithImage != null)
                 {
-                    var colorName = colorNameList[i].Trim();
-
-                    // Re-insert existing images that were kept
-                    var existingPaths = Request.Form[$"existingColorPaths_{i}"].ToString();
-                    if (!string.IsNullOrEmpty(existingPaths))
+                    model.ImagePath = firstVariantWithImage.ImagePath;
+                    var productToUpdate = await _db.Products.FindAsync(productId);
+                    if (productToUpdate != null)
                     {
-                        foreach (var path in existingPaths.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
-                        {
-                            _db.ProductColorImages.Add(new DbProductColorImage
-                            {
-                                ProductId = productId,
-                                ColorName = colorName,
-                                ImagePath = path
-                            });
-                        }
-                    }
-
-                    // Save newly uploaded files for this color
-                    var colorFiles = Request.Form.Files.GetFiles($"colorFiles_{i}");
-                    foreach (var file in colorFiles)
-                    {
-                        if (file.Length > 0)
-                        {
-                            var fn = Guid.NewGuid().ToString("N") + Path.GetExtension(file.FileName);
-                            var fp = Path.Combine(uploadsDir, fn);
-                            using var fs = new FileStream(fp, FileMode.Create);
-                            await file.CopyToAsync(fs);
-                            _db.ProductColorImages.Add(new DbProductColorImage
-                            {
-                                ProductId = productId,
-                                ColorName = colorName,
-                                ImagePath = "/uploads/products/" + fn
-                            });
-                        }
-                    }
-                }
-                await _db.SaveChangesAsync();
-
-                // Sync ProductVariants.imagePath using first image per style/color.
-                var styleImageLookup = await _db.ProductColorImages
-                    .Where(ci => ci.ProductId == productId)
-                    .GroupBy(ci => ci.ColorName)
-                    .Select(g => new { Style = g.Key, ImagePath = g.OrderBy(x => x.Id).Select(x => x.ImagePath).FirstOrDefault() })
-                    .ToListAsync();
-
-                var productVariants = await _db.ProductVariants
-                    .Where(v => v.ProductId == productId)
-                    .ToListAsync();
-
-                foreach (var variant in productVariants)
-                {
-                    var matched = styleImageLookup.FirstOrDefault(x => string.Equals(x.Style, variant.Style, StringComparison.OrdinalIgnoreCase));
-                    if (!string.IsNullOrWhiteSpace(matched?.ImagePath))
-                    {
-                        variant.ImagePath = matched.ImagePath!;
-                    }
-                }
-
-                await _db.SaveChangesAsync();
-
-                // Set product main image from first color's first photo if not already set
-                if (string.IsNullOrEmpty(model.ImagePath))
-                {
-                    var firstColorImage = await _db.ProductColorImages
-                        .Where(ci => ci.ProductId == productId)
-                        .OrderBy(ci => ci.Id)
-                        .FirstOrDefaultAsync();
-                    if (firstColorImage != null)
-                    {
-                        var product = await _db.Products.FindAsync(productId);
-                        if (product != null)
-                        {
-                            product.ImagePath = firstColorImage.ImagePath;
-                            await _db.SaveChangesAsync();
-                        }
+                        productToUpdate.ImagePath = model.ImagePath;
+                        await _db.SaveChangesAsync();
                     }
                 }
             }
@@ -448,6 +404,12 @@ var priceList = (variantPrices ?? Array.Empty<string>())
                 TempData["SuccessMessage"] = "Product added successfully.";
 
             InvalidateProductCaches();
+
+            if (mode != "edit" && mode != "relist")
+            {
+                return RedirectToAction("Index", new { sizeGuideProductId = productId });
+            }
+
             return RedirectToAction("Index");
             }
             catch (Exception ex)
@@ -455,7 +417,6 @@ var priceList = (variantPrices ?? Array.Empty<string>())
                 _logger.LogError(ex, "Error while creating/updating product");
                 TempData["ErrorMessage"] = "Product save failed. Please review your variant fields and try again.";
                 ViewBag.Mode = mode ?? "create";
-                ViewBag.ExistingColorImages = "{}";
                 ViewBag.ExistingVariants = "[]";
                 return View(model);
             }
@@ -470,19 +431,34 @@ var priceList = (variantPrices ?? Array.Empty<string>())
                 var product = await _db.Products.FindAsync(id.Value);
                 if (product != null)
                 {
-                    var colorImages = await _db.ProductColorImages
-                        .Where(ci => ci.ProductId == id.Value)
-                        .ToListAsync();
-
-                    // keep flat list for main gallery, plus grouping by style for variant cards
-                    ViewBag.AllColorImages = colorImages.Select(ci => ci.ImagePath).Distinct().ToList();
-                    ViewBag.ImagesByStyle = colorImages
-                        .GroupBy(ci => ci.ColorName)
-                        .ToDictionary(g => g.Key, g => g.Select(ci => ci.ImagePath).ToList());
-
                     var variants = await _db.ProductVariants
                         .Where(v => v.ProductId == id.Value)
                         .ToListAsync();
+
+                    // keep flat list for main gallery, plus grouping by style for variant cards
+                    ViewBag.AllColorImages = variants
+                        .Where(v => !string.IsNullOrWhiteSpace(v.ImagePath))
+                        .Select(v => v.ImagePath)
+                        .Distinct()
+                        .ToList();
+
+                    ViewBag.ImagesByStyle = variants
+                        .GroupBy(v => v.Style)
+                        .ToDictionary(g => g.Key, g => g
+                            .Where(v => !string.IsNullOrWhiteSpace(v.ImagePath))
+                            .Select(v => v.ImagePath)
+                            .Distinct()
+                            .ToList());
+
+                    var variantPrices = variants
+                        .Where(v => v.Price.HasValue && v.Price.Value > 0)
+                        .Select(v => v.Price!.Value)
+                        .ToList();
+                    if (variantPrices.Count > 0)
+                    {
+                        product.Price = variantPrices.Min();
+                    }
+
                     ViewBag.ProductVariants = variants;
 
                     return View(product);
@@ -523,57 +499,737 @@ var priceList = (variantPrices ?? Array.Empty<string>())
             return RedirectToAction("Index");
         }
 
-        // GET: /Seller/SizeGuide
-        public IActionResult SizeGuide()
+        // GET: /Seller/SizeGuide?id=1
+        public async Task<IActionResult> SizeGuide(int? id)
         {
-            return View();
+            if (!id.HasValue)
+            {
+                TempData["ErrorMessage"] = "Please open a product from the product list before editing its size guide.";
+                return RedirectToAction("Index");
+            }
+
+            var product = await _db.Products.FindAsync(id.Value);
+            if (product == null)
+            {
+                TempData["ErrorMessage"] = "Product not found. Please select a valid product.";
+                return RedirectToAction("Index");
+            }
+
+            var model = new MyAspNetApp.Models.ViewSizeGuideViewModel
+            {
+                ProductId = product.ProductId,
+                ProductTitle = product.ProductName,
+                ProductBrand = product.Brand ?? string.Empty,
+                ProductDetails = product.Details ?? string.Empty,
+                IsPhotoUpload = false,
+                MeasurementUnit = "in",
+                PhotoMeasurementUnit = "in",
+                TableMeasurementUnit = "in",
+                Category = product.Category ?? string.Empty,
+                TableTitle = string.Empty,
+                FitTips = GetDefaultFitTips(product.Category),
+                HowToMeasure = GetDefaultHowToMeasure(product.Category),
+                TableData = new List<List<string>>(),
+                Tables = new List<SizeGuideTableItem>()
+            };
+
+            var productImage = await _db.ProductVariants
+                .AsNoTracking()
+                .Where(v => v.ProductId == product.ProductId)
+                .Where(v => v.ImagePath != null && v.ImagePath != "")
+                .OrderBy(v => v.Id)
+                .Select(v => v.ImagePath)
+                .FirstOrDefaultAsync();
+            model.ProductImageUrl = productImage ?? string.Empty;
+
+            // Load existing size guide if available
+            var existingGuide = await _db.SizeGuides
+                .Include(g => g.Images)
+                .FirstOrDefaultAsync(g => g.ProductId == product.ProductId);
+
+            if (existingGuide != null)
+            {
+                model.TableTitle = existingGuide.Title ?? model.TableTitle;
+                model.MeasurementUnit = existingGuide.MeasurementUnit ?? model.MeasurementUnit;
+                model.PhotoMeasurementUnit = model.MeasurementUnit;
+                model.TableMeasurementUnit = model.MeasurementUnit;
+                model.Category = existingGuide.Category ?? model.Category;
+                model.FitTips = string.IsNullOrWhiteSpace(existingGuide.FitTips) ? GetDefaultFitTips(model.Category) : existingGuide.FitTips;
+                model.HowToMeasure = string.IsNullOrWhiteSpace(existingGuide.HowToMeasure) ? GetDefaultHowToMeasure(model.Category) : existingGuide.HowToMeasure;
+                model.AdditionalNotes = existingGuide.AdditionalNotes ?? string.Empty;
+
+                var parsedPayload = ParseSizeGuidePayload(existingGuide.TableJson, existingGuide.Title);
+                model.PhotoMeasurementUnit = string.IsNullOrWhiteSpace(parsedPayload.PhotoMeasurementUnit) ? model.PhotoMeasurementUnit : parsedPayload.PhotoMeasurementUnit;
+                model.TableMeasurementUnit = string.IsNullOrWhiteSpace(parsedPayload.TableMeasurementUnit) ? model.TableMeasurementUnit : parsedPayload.TableMeasurementUnit;
+                model.PhotoGuideUnitsByUrl = parsedPayload.PhotoGuideUnitsByUrl;
+                model.Tables = parsedPayload.Tables;
+                if (model.Tables.Count > 0)
+                {
+                    model.TableTitle = model.Tables[0].Title;
+                    model.TableData = model.Tables[0].Data;
+                }
+
+                model.UploadedPhotoUrls = existingGuide.Images
+                    .OrderBy(i => i.SortOrder)
+                    .Select(i => i.ImagePath)
+                    .ToList();
+
+                foreach (var table in model.Tables)
+                {
+                    if (table.PhotoOrder <= 0 && !string.IsNullOrWhiteSpace(table.ImageUrl))
+                    {
+                        var idx = model.UploadedPhotoUrls.FindIndex(u => string.Equals(u, table.ImageUrl, StringComparison.OrdinalIgnoreCase));
+                        if (idx >= 0)
+                        {
+                            table.PhotoOrder = idx + 1;
+                        }
+                    }
+                }
+
+                model.IsPhotoUpload = model.UploadedPhotoUrls.Count > 0;
+            }
+
+            return View(model);
         }
 
-        // GET: /Seller/ViewSizeGuide?id=1
+        // GET: /Seller/ViewSizeGuide/1
         [HttpGet]
         public async Task<IActionResult> ViewSizeGuide(int id)
         {
             var product = await _db.Products.FindAsync(id);
+            if (product == null)
+            {
+                TempData["ErrorMessage"] = "Product not found. Please select a valid product.";
+                return RedirectToAction("Index");
+            }
+
             var model = new MyAspNetApp.Models.ViewSizeGuideViewModel
             {
-                ProductId = id,
-                ProductTitle = product?.ProductName ?? "Product Size Guide",
+                ProductId = product.ProductId,
+                ProductTitle = product.ProductName,
+                ProductBrand = product.Brand ?? string.Empty,
+                ProductDetails = product.Details ?? string.Empty,
                 IsPhotoUpload = false,
                 MeasurementUnit = "in",
-                Category = product?.Category ?? "Tops",
-                TableTitle = "Size Chart",
-                FitTips = "If you're on the borderline between two sizes, order the smaller size for a tighter fit or the larger size for a looser fit.",
-                HowToMeasure = "Chest: Measure around the fullest part of your chest, keeping the measuring tape horizontal.",
-                TableData = new List<List<string>>
-                {
-                    new List<string> { "Size", "XXS", "XS", "S", "M", "L", "XL", "XXL" },
-                    new List<string> { "Chest (in.)", "28.5–30", "30–32", "32–33.5", "33.5–35", "35–37.5", "37.5–40", "40–42.5" },
-                    new List<string> { "Waist (in.)", "24.5–26", "26–27", "27–28", "28–29.5", "29.5–31.5", "31.5–33.5", "33.5–35.5" },
-                    new List<string> { "Hip (in.)", "33–34", "34–35", "35–36.5", "36.5–38", "38–40", "40–42", "42–44" }
-                }
+                PhotoMeasurementUnit = "in",
+                TableMeasurementUnit = "in",
+                Category = product.Category ?? string.Empty,
+                TableTitle = string.Empty,
+                FitTips = GetDefaultFitTips(product.Category),
+                HowToMeasure = GetDefaultHowToMeasure(product.Category),
+                TableData = new List<List<string>>(),
+                Tables = new List<SizeGuideTableItem>()
             };
+
+            var productImage = await _db.ProductVariants
+                .AsNoTracking()
+                .Where(v => v.ProductId == product.ProductId)
+                .Where(v => v.ImagePath != null && v.ImagePath != "")
+                .OrderBy(v => v.Id)
+                .Select(v => v.ImagePath)
+                .FirstOrDefaultAsync();
+            model.ProductImageUrl = productImage ?? string.Empty;
+
+            var existingGuide = await _db.SizeGuides
+                .Include(g => g.Images)
+                .FirstOrDefaultAsync(g => g.ProductId == product.ProductId);
+
+            if (existingGuide != null)
+            {
+                model.TableTitle = existingGuide.Title ?? model.TableTitle;
+                model.MeasurementUnit = existingGuide.MeasurementUnit ?? model.MeasurementUnit;
+                model.PhotoMeasurementUnit = model.MeasurementUnit;
+                model.TableMeasurementUnit = model.MeasurementUnit;
+                model.Category = existingGuide.Category ?? model.Category;
+                model.FitTips = string.IsNullOrWhiteSpace(existingGuide.FitTips) ? GetDefaultFitTips(model.Category) : existingGuide.FitTips;
+                model.HowToMeasure = string.IsNullOrWhiteSpace(existingGuide.HowToMeasure) ? GetDefaultHowToMeasure(model.Category) : existingGuide.HowToMeasure;
+                model.AdditionalNotes = existingGuide.AdditionalNotes ?? string.Empty;
+
+                var parsedPayload = ParseSizeGuidePayload(existingGuide.TableJson, existingGuide.Title);
+                model.PhotoMeasurementUnit = string.IsNullOrWhiteSpace(parsedPayload.PhotoMeasurementUnit) ? model.PhotoMeasurementUnit : parsedPayload.PhotoMeasurementUnit;
+                model.TableMeasurementUnit = string.IsNullOrWhiteSpace(parsedPayload.TableMeasurementUnit) ? model.TableMeasurementUnit : parsedPayload.TableMeasurementUnit;
+                model.PhotoGuideUnitsByUrl = parsedPayload.PhotoGuideUnitsByUrl;
+                model.Tables = parsedPayload.Tables;
+                if (model.Tables.Count > 0)
+                {
+                    model.TableTitle = model.Tables[0].Title;
+                    model.TableData = model.Tables[0].Data;
+                }
+
+                model.UploadedPhotoUrls = existingGuide.Images
+                    .OrderBy(i => i.SortOrder)
+                    .Select(i => i.ImagePath)
+                    .ToList();
+
+                foreach (var table in model.Tables)
+                {
+                    if (table.PhotoOrder <= 0 && !string.IsNullOrWhiteSpace(table.ImageUrl))
+                    {
+                        var idx = model.UploadedPhotoUrls.FindIndex(u => string.Equals(u, table.ImageUrl, StringComparison.OrdinalIgnoreCase));
+                        if (idx >= 0)
+                        {
+                            table.PhotoOrder = idx + 1;
+                        }
+                    }
+                }
+
+                model.IsPhotoUpload = model.UploadedPhotoUrls.Count > 0;
+            }
+
             return View(model);
+        }
+
+        private sealed class SizeGuidePayload
+        {
+            public string PhotoMeasurementUnit { get; set; } = string.Empty;
+            public string TableMeasurementUnit { get; set; } = string.Empty;
+            public Dictionary<string, string> PhotoGuideUnitsByUrl { get; set; } = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            public List<SizeGuideTableItem> Tables { get; set; } = new List<SizeGuideTableItem>();
+        }
+
+        private static SizeGuidePayload ParseSizeGuidePayload(string? rawJson, string? fallbackTitle)
+        {
+            var payload = new SizeGuidePayload();
+            if (string.IsNullOrWhiteSpace(rawJson))
+            {
+                return payload;
+            }
+
+            try
+            {
+                using var doc = JsonDocument.Parse(rawJson);
+                if (doc.RootElement.ValueKind == JsonValueKind.Object)
+                {
+                    if (doc.RootElement.TryGetProperty("photoMeasurementUnit", out var photoUnitEl) && photoUnitEl.ValueKind == JsonValueKind.String)
+                    {
+                        payload.PhotoMeasurementUnit = (photoUnitEl.GetString() ?? string.Empty).Trim();
+                    }
+                    if (doc.RootElement.TryGetProperty("tableMeasurementUnit", out var tableUnitEl) && tableUnitEl.ValueKind == JsonValueKind.String)
+                    {
+                        payload.TableMeasurementUnit = (tableUnitEl.GetString() ?? string.Empty).Trim();
+                    }
+                    if (doc.RootElement.TryGetProperty("photoGuideUnitsByUrl", out var photoMapEl) && photoMapEl.ValueKind == JsonValueKind.Object)
+                    {
+                        payload.PhotoGuideUnitsByUrl = ParsePhotoGuideUnitsMap(photoMapEl);
+                    }
+
+                    if (doc.RootElement.TryGetProperty("tables", out var tablesEl) && tablesEl.ValueKind == JsonValueKind.Array)
+                    {
+                        payload.Tables = ParseSizeGuideTablesArray(tablesEl, fallbackTitle);
+                    }
+                    return payload;
+                }
+
+                if (doc.RootElement.ValueKind != JsonValueKind.Array)
+                {
+                    return payload;
+                }
+
+                payload.Tables = ParseSizeGuideTablesArray(doc.RootElement, fallbackTitle);
+            }
+            catch
+            {
+                // Ignore malformed JSON and return empty.
+            }
+
+            return payload;
+        }
+
+        private static List<SizeGuideTableItem> ParseSizeGuideTables(string? rawJson, string? fallbackTitle)
+        {
+            return ParseSizeGuidePayload(rawJson, fallbackTitle).Tables;
+        }
+
+        private static List<SizeGuideTableItem> ParseSizeGuideTablesArray(JsonElement rootArray, string? fallbackTitle)
+        {
+            var tables = new List<SizeGuideTableItem>();
+            if (rootArray.ValueKind != JsonValueKind.Array)
+            {
+                return tables;
+            }
+
+            var items = rootArray.EnumerateArray().ToList();
+                if (items.Count == 0)
+                {
+                    return tables;
+                }
+
+                // Legacy format: [[...], [...]]
+                if (items[0].ValueKind == JsonValueKind.Array)
+                {
+                    var legacyData = ParseTableData(rootArray);
+                    if (HasAnyTableValue(legacyData))
+                    {
+                        tables.Add(new SizeGuideTableItem
+                        {
+                            Title = string.IsNullOrWhiteSpace(fallbackTitle) ? string.Empty : fallbackTitle.Trim(),
+                            Data = legacyData
+                        });
+                    }
+                    return tables;
+                }
+
+                // Multi-table format: [{ title: string, data: [[...], ...] }, ...]
+                foreach (var item in items)
+                {
+                    if (item.ValueKind != JsonValueKind.Object)
+                    {
+                        continue;
+                    }
+
+                    var title = item.TryGetProperty("title", out var titleEl) && titleEl.ValueKind == JsonValueKind.String
+                        ? (titleEl.GetString() ?? string.Empty).Trim()
+                        : string.Empty;
+
+                    List<List<string>> data = new();
+                    if (item.TryGetProperty("data", out var dataEl) && dataEl.ValueKind == JsonValueKind.Array)
+                    {
+                        data = ParseTableData(dataEl);
+                    }
+
+                    if (!HasAnyTableValue(data))
+                    {
+                        continue;
+                    }
+
+                    tables.Add(new SizeGuideTableItem
+                    {
+                        Title = title,
+                        MeasurementUnit = item.TryGetProperty("measurementUnit", out var unitEl) && unitEl.ValueKind == JsonValueKind.String
+                            ? (unitEl.GetString() ?? string.Empty).Trim()
+                            : string.Empty,
+                        PhotoOrder = item.TryGetProperty("photoOrder", out var orderEl) && orderEl.ValueKind == JsonValueKind.Number
+                            ? orderEl.GetInt32()
+                            : 0,
+                        Data = data,
+                        ImageUrl = item.TryGetProperty("imageUrl", out var imageEl) && imageEl.ValueKind == JsonValueKind.String
+                            ? (imageEl.GetString() ?? string.Empty).Trim()
+                            : string.Empty
+                    });
+                }
+
+            return tables;
+        }
+
+        private static string GetDefaultFitTips(string? category)
+        {
+            var key = (category ?? string.Empty).Trim().ToLowerInvariant();
+            return key switch
+            {
+                "footwear" => "If you are between sizes, choose the larger size for better comfort, especially for socks or long wear.",
+                "bottoms" => "If your waist and hips suggest different sizes, choose the size based on your hip measurement for better movement.",
+                "outerwear" => "If you plan to layer underneath, consider going one size up for comfort.",
+                "dresses & jumpsuits" => "If your bust and hips suggest different sizes, choose the size that fits your larger measurement.",
+                "activewear" => "For compression feel choose your exact size, for a relaxed feel choose one size up.",
+                _ => "If you are between two sizes, choose the smaller size for a tighter fit or the larger size for a looser fit."
+            };
+        }
+
+        private static string GetDefaultHowToMeasure(string? category)
+        {
+            var key = (category ?? string.Empty).Trim().ToLowerInvariant();
+            return key switch
+            {
+                "footwear" => "Foot Length: Stand on paper and mark heel to longest toe, then measure the distance.",
+                "bottoms" => "Waist: Measure around your natural waistline. Hips: Measure around the fullest part of your hips.",
+                "outerwear" => "Chest: Measure around the fullest part of your chest with the tape level and relaxed.",
+                "dresses & jumpsuits" => "Bust: Measure around fullest bust. Waist: Measure natural waistline. Hips: Measure fullest hip area.",
+                "activewear" => "Chest: Measure fullest chest. Waist: Measure natural waist. Keep tape snug but not tight.",
+                _ => "Chest: Measure around the fullest part of your chest, keeping the measuring tape horizontal."
+            };
+        }
+
+        private static List<List<string>> ParseTableData(JsonElement tableElement)
+        {
+            var data = new List<List<string>>();
+            if (tableElement.ValueKind != JsonValueKind.Array)
+            {
+                return data;
+            }
+
+            foreach (var rowEl in tableElement.EnumerateArray())
+            {
+                if (rowEl.ValueKind != JsonValueKind.Array)
+                {
+                    continue;
+                }
+
+                var row = new List<string>();
+                foreach (var cellEl in rowEl.EnumerateArray())
+                {
+                    row.Add((cellEl.ToString() ?? string.Empty).Trim());
+                }
+                data.Add(row);
+            }
+
+            return data;
+        }
+
+        private static Dictionary<string, string> ParsePhotoGuideUnitsMap(JsonElement mapElement)
+        {
+            var map = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            if (mapElement.ValueKind != JsonValueKind.Object)
+            {
+                return map;
+            }
+
+            foreach (var prop in mapElement.EnumerateObject())
+            {
+                var key = (prop.Name ?? string.Empty).Trim();
+                if (string.IsNullOrWhiteSpace(key))
+                {
+                    continue;
+                }
+
+                var unitRaw = prop.Value.ValueKind == JsonValueKind.String
+                    ? (prop.Value.GetString() ?? string.Empty).Trim().ToLowerInvariant()
+                    : string.Empty;
+                map[key] = unitRaw == "cm" ? "cm" : "in";
+            }
+
+            return map;
+        }
+
+        private static List<string> ParsePhotoGuideUnitList(string? rawJson)
+        {
+            if (string.IsNullOrWhiteSpace(rawJson))
+            {
+                return new List<string>();
+            }
+
+            try
+            {
+                var raw = JsonSerializer.Deserialize<List<string>>(rawJson) ?? new List<string>();
+                return raw
+                    .Select(v => string.Equals(v?.Trim(), "cm", StringComparison.OrdinalIgnoreCase) ? "cm" : "in")
+                    .ToList();
+            }
+            catch
+            {
+                return new List<string>();
+            }
+        }
+
+        private static bool HasAnyTableValue(List<List<string>> table)
+        {
+            return table.Any(row => row.Any(cell => !string.IsNullOrWhiteSpace(cell)));
+        }
+
+        // POST: /Seller/SaveSizeGuide
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> SaveSizeGuide(
+            int productId,
+            string? photoMeasurementUnit,
+            string? tableMeasurementUnit,
+            string? category,
+            string? tableTitle,
+            string? tableDataJson,
+            string? additionalNotes,
+            string? existingPhotoUrlsJson,
+            string? removedPhotoUrlsJson,
+            string? existingPhotoUnitsJson,
+            string? existingPhotoUnitsByOrderJson,
+            string? newPhotoUnitsJson)
+        {
+            var product = await _db.Products.FindAsync(productId);
+            if (product == null)
+            {
+                return NotFound();
+            }
+
+            // Determine which existing photos to keep
+            var existingUrls = new List<string>();
+            var removedUrls = new List<string>();
+            try
+            {
+                if (!string.IsNullOrWhiteSpace(existingPhotoUrlsJson))
+                    existingUrls = JsonSerializer.Deserialize<List<string>>(existingPhotoUrlsJson) ?? new List<string>();
+                if (!string.IsNullOrWhiteSpace(removedPhotoUrlsJson))
+                    removedUrls = JsonSerializer.Deserialize<List<string>>(removedPhotoUrlsJson) ?? new List<string>();
+            }
+            catch
+            {
+                // ignore invalid JSON
+            }
+
+            var keptUrls = existingUrls.Except(removedUrls, StringComparer.OrdinalIgnoreCase).ToList();
+            Dictionary<string, string> existingPhotoUnits;
+            try
+            {
+                existingPhotoUnits = string.IsNullOrWhiteSpace(existingPhotoUnitsJson)
+                    ? new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+                    : (JsonSerializer.Deserialize<Dictionary<string, string>>(existingPhotoUnitsJson) ?? new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase));
+            }
+            catch
+            {
+                existingPhotoUnits = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            }
+            var normalizedExistingPhotoUnits = existingPhotoUnits
+                .Where(kvp => !string.IsNullOrWhiteSpace(kvp.Key))
+                .ToDictionary(
+                    kvp => kvp.Key.Trim(),
+                    kvp => string.Equals(kvp.Value?.Trim(), "cm", StringComparison.OrdinalIgnoreCase) ? "cm" : "in",
+                    StringComparer.OrdinalIgnoreCase);
+            var existingPhotoUnitsByOrder = ParsePhotoGuideUnitList(existingPhotoUnitsByOrderJson);
+            var newPhotoUnits = ParsePhotoGuideUnitList(newPhotoUnitsJson);
+
+            // Save newly uploaded photos
+            var uploadedUrls = new List<string>();
+            var uploadsDir = Path.Combine(_env.WebRootPath, "uploads", "sizeguide");
+            Directory.CreateDirectory(uploadsDir);
+
+            foreach (var file in Request.Form.Files)
+            {
+                if (file.Length > 0)
+                {
+                    var fn = Guid.NewGuid().ToString("N") + Path.GetExtension(file.FileName);
+                    var fp = Path.Combine(uploadsDir, fn);
+                    using var fs = new FileStream(fp, FileMode.Create);
+                    await file.CopyToAsync(fs);
+                    uploadedUrls.Add("/uploads/sizeguide/" + fn);
+                }
+            }
+
+            var finalPhotoUrls = keptUrls.Concat(uploadedUrls).ToList();
+            var normalizedPhotoUnit = string.Equals(photoMeasurementUnit?.Trim(), "cm", StringComparison.OrdinalIgnoreCase) ? "cm" : "in";
+            var finalPhotoGuideUnitsByUrl = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            for (var i = 0; i < keptUrls.Count; i++)
+            {
+                var url = keptUrls[i];
+                if (string.IsNullOrWhiteSpace(url))
+                {
+                    continue;
+                }
+
+                var orderUnit = i < existingPhotoUnitsByOrder.Count ? existingPhotoUnitsByOrder[i] : normalizedPhotoUnit;
+                finalPhotoGuideUnitsByUrl[url] = normalizedExistingPhotoUnits.TryGetValue(url, out var unit) ? unit : orderUnit;
+            }
+
+            for (var i = 0; i < uploadedUrls.Count; i++)
+            {
+                var uploadedUrl = uploadedUrls[i];
+                if (string.IsNullOrWhiteSpace(uploadedUrl))
+                {
+                    continue;
+                }
+
+                finalPhotoGuideUnitsByUrl[uploadedUrl] = i < newPhotoUnits.Count ? newPhotoUnits[i] : normalizedPhotoUnit;
+            }
+
+            string? normalizedTableJson = null;
+            string? firstNonEmptyTableTitle = null;
+            var parsedPayload = new SizeGuidePayload
+            {
+                PhotoMeasurementUnit = string.IsNullOrWhiteSpace(photoMeasurementUnit) ? string.Empty : photoMeasurementUnit.Trim(),
+                TableMeasurementUnit = string.IsNullOrWhiteSpace(tableMeasurementUnit) ? string.Empty : tableMeasurementUnit.Trim()
+            };
+            if (!string.IsNullOrWhiteSpace(tableDataJson))
+            {
+                try
+                {
+                    parsedPayload = ParseSizeGuidePayload(tableDataJson, tableTitle);
+                    if (string.IsNullOrWhiteSpace(parsedPayload.PhotoMeasurementUnit))
+                    {
+                        parsedPayload.PhotoMeasurementUnit = string.IsNullOrWhiteSpace(photoMeasurementUnit) ? string.Empty : photoMeasurementUnit.Trim();
+                    }
+                    if (string.IsNullOrWhiteSpace(parsedPayload.TableMeasurementUnit))
+                    {
+                        parsedPayload.TableMeasurementUnit = string.IsNullOrWhiteSpace(tableMeasurementUnit) ? string.Empty : tableMeasurementUnit.Trim();
+                    }
+
+                    // Merge map coming from hidden fields and payload object, then ensure
+                    // every final photo has an explicit stored unit.
+                    var mergedPhotoUnitsByUrl = new Dictionary<string, string>(finalPhotoGuideUnitsByUrl, StringComparer.OrdinalIgnoreCase);
+                    foreach (var kvp in parsedPayload.PhotoGuideUnitsByUrl)
+                    {
+                        if (string.IsNullOrWhiteSpace(kvp.Key))
+                        {
+                            continue;
+                        }
+
+                        if (!finalPhotoUrls.Contains(kvp.Key, StringComparer.OrdinalIgnoreCase))
+                        {
+                            continue;
+                        }
+
+                        mergedPhotoUnitsByUrl[kvp.Key.Trim()] = string.Equals(kvp.Value?.Trim(), "cm", StringComparison.OrdinalIgnoreCase) ? "cm" : "in";
+                    }
+
+                    var fallbackPhotoUnit = string.Equals(parsedPayload.PhotoMeasurementUnit?.Trim(), "cm", StringComparison.OrdinalIgnoreCase) ? "cm" : "in";
+                    foreach (var url in finalPhotoUrls)
+                    {
+                        if (string.IsNullOrWhiteSpace(url))
+                        {
+                            continue;
+                        }
+
+                        if (!mergedPhotoUnitsByUrl.ContainsKey(url))
+                        {
+                            mergedPhotoUnitsByUrl[url] = fallbackPhotoUnit;
+                        }
+                    }
+                    finalPhotoGuideUnitsByUrl = mergedPhotoUnitsByUrl;
+
+                    if (finalPhotoGuideUnitsByUrl.Count > 0)
+                    {
+                        parsedPayload.PhotoGuideUnitsByUrl = finalPhotoGuideUnitsByUrl;
+                    }
+
+                    if (parsedPayload.Tables.Count > 0)
+                    {
+                        for (var i = 0; i < parsedPayload.Tables.Count; i++)
+                        {
+                            var table = parsedPayload.Tables[i];
+
+                            if (string.IsNullOrWhiteSpace(table.MeasurementUnit))
+                            {
+                                table.MeasurementUnit = string.IsNullOrWhiteSpace(parsedPayload.TableMeasurementUnit)
+                                    ? (string.IsNullOrWhiteSpace(tableMeasurementUnit) ? "in" : tableMeasurementUnit.Trim())
+                                    : parsedPayload.TableMeasurementUnit;
+                            }
+
+                            var preferredPhotoIndex = table.PhotoOrder > 0 ? table.PhotoOrder - 1 : i;
+                            if (string.IsNullOrWhiteSpace(table.ImageUrl) && preferredPhotoIndex >= 0 && preferredPhotoIndex < finalPhotoUrls.Count)
+                            {
+                                table.ImageUrl = finalPhotoUrls[preferredPhotoIndex];
+                            }
+
+                            if (table.PhotoOrder <= 0 && !string.IsNullOrWhiteSpace(table.ImageUrl))
+                            {
+                                var resolvedIndex = finalPhotoUrls.FindIndex(u => string.Equals(u, table.ImageUrl, StringComparison.OrdinalIgnoreCase));
+                                if (resolvedIndex >= 0)
+                                {
+                                    table.PhotoOrder = resolvedIndex + 1;
+                                }
+                            }
+                        }
+
+                        normalizedTableJson = JsonSerializer.Serialize(parsedPayload);
+                        firstNonEmptyTableTitle = parsedPayload.Tables.FirstOrDefault(t => !string.IsNullOrWhiteSpace(t.Title))?.Title;
+                    }
+                    else if (!string.IsNullOrWhiteSpace(parsedPayload.PhotoMeasurementUnit) || !string.IsNullOrWhiteSpace(parsedPayload.TableMeasurementUnit) || finalPhotoGuideUnitsByUrl.Count > 0)
+                    {
+                        parsedPayload.PhotoGuideUnitsByUrl = finalPhotoGuideUnitsByUrl;
+                        normalizedTableJson = JsonSerializer.Serialize(parsedPayload);
+                    }
+                }
+                catch
+                {
+                    if (finalPhotoGuideUnitsByUrl.Count > 0)
+                    {
+                        parsedPayload.PhotoGuideUnitsByUrl = finalPhotoGuideUnitsByUrl;
+                        normalizedTableJson = JsonSerializer.Serialize(parsedPayload);
+                    }
+                    else
+                    {
+                        normalizedTableJson = null;
+                    }
+                }
+            }
+            else if (finalPhotoGuideUnitsByUrl.Count > 0)
+            {
+                parsedPayload.PhotoGuideUnitsByUrl = finalPhotoGuideUnitsByUrl;
+                normalizedTableJson = JsonSerializer.Serialize(parsedPayload);
+            }
+
+            var sizeGuide = await _db.SizeGuides
+                .Include(g => g.Images)
+                .FirstOrDefaultAsync(g => g.ProductId == productId);
+
+            if (sizeGuide == null)
+            {
+                sizeGuide = new DbSizeGuide
+                {
+                    ProductId = productId,
+                    CreatedAt = DateTime.UtcNow
+                };
+                _db.SizeGuides.Add(sizeGuide);
+            }
+
+            var normalizedTitle = string.IsNullOrWhiteSpace(tableTitle) ? null : tableTitle.Trim();
+            sizeGuide.Title = normalizedTitle ?? firstNonEmptyTableTitle;
+            var normalizedTableUnitForPersist = string.Equals(parsedPayload.TableMeasurementUnit?.Trim(), "cm", StringComparison.OrdinalIgnoreCase) ? "cm" : "in";
+            var normalizedPhotoUnitForPersist = string.Equals(parsedPayload.PhotoMeasurementUnit?.Trim(), "cm", StringComparison.OrdinalIgnoreCase) ? "cm" : "in";
+            var hasPersistableTableData = parsedPayload.Tables.Any(t => HasAnyTableValue(t.Data));
+            var effectiveUnit = hasPersistableTableData ? normalizedTableUnitForPersist : normalizedPhotoUnitForPersist;
+            sizeGuide.MeasurementUnit = string.IsNullOrWhiteSpace(effectiveUnit) ? null : effectiveUnit;
+            sizeGuide.Category = string.IsNullOrWhiteSpace(category) ? null : category.Trim();
+            sizeGuide.FitTips = GetDefaultFitTips(sizeGuide.Category);
+            sizeGuide.HowToMeasure = GetDefaultHowToMeasure(sizeGuide.Category);
+            sizeGuide.AdditionalNotes = string.IsNullOrWhiteSpace(additionalNotes) ? null : additionalNotes.Trim();
+            sizeGuide.TableJson = normalizedTableJson;
+            sizeGuide.UpdatedAt = DateTime.UtcNow;
+
+            // Replace existing images
+            if (sizeGuide.Images.Any())
+            {
+                _db.SizeGuideImages.RemoveRange(sizeGuide.Images);
+            }
+
+            for (var i = 0; i < finalPhotoUrls.Count; i++)
+            {
+                sizeGuide.Images.Add(new DbSizeGuideImage
+                {
+                    ImagePath = finalPhotoUrls[i],
+                    SortOrder = i
+                });
+            }
+
+            await _db.SaveChangesAsync();
+
+            TempData["SuccessMessage"] = "Size guide saved successfully.";
+            return RedirectToAction("ViewSizeGuide", new { id = productId });
         }
 
         // GET: /Seller/ViewRatings?id=1
         [HttpGet]
         public async Task<IActionResult> ViewRatings(int id)
         {
-            var product = await _db.Products.FindAsync(id);
+            var product = await _db.Products
+                .AsNoTracking()
+                .FirstOrDefaultAsync(p => p.ProductId == id);
             if (product == null)
             {
                 return NotFound();
             }
 
+            var productVariants = await _db.ProductVariants
+                .AsNoTracking()
+                .Where(v => v.ProductId == id)
+                .OrderBy(v => v.Id)
+                .ToListAsync();
+
+            var firstImage = productVariants
+                .Select(v => v.ImagePath)
+                .FirstOrDefault(path => !string.IsNullOrWhiteSpace(path));
+            if (!string.IsNullOrWhiteSpace(firstImage))
+            {
+                product.ImagePath = firstImage;
+            }
+
+            var variantPrices = productVariants
+                .Where(v => v.Price.HasValue && v.Price.Value > 0)
+                .Select(v => v.Price!.Value)
+                .ToList();
+            if (variantPrices.Count > 0)
+            {
+                product.Price = variantPrices.Min();
+            }
+
             var reviews = await _db.Reviews
+                .AsNoTracking()
                 .Where(r => r.ProductId == id)
                 .OrderByDescending(r => r.Date)
                 .ToListAsync();
 
             var reviewIds = reviews.Select(r => r.Id).ToList();
-            var reviewImages = await _db.ReviewImages
-                .Where(i => reviewIds.Contains(i.ReviewId))
-                .ToListAsync();
+            var reviewImages = reviewIds.Count == 0
+                ? new List<DbReviewImage>()
+                : await _db.ReviewImages
+                    .AsNoTracking()
+                    .Where(i => reviewIds.Contains(i.ReviewId))
+                    .ToListAsync();
 
             var model = new SellerRatingsViewModel
             {

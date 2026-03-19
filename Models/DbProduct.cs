@@ -27,6 +27,12 @@ namespace MyAspNetApp.Models
 
         public string? Details { get; set; }
 
+        // Serialized size guide data for this product (JSON)
+        // Note: the database schema in some deployments may not include this column,
+        // so we do not map it to avoid runtime SQL errors.
+        [NotMapped]
+        public string? SizeGuideJson { get; set; }
+
         // images are now stored on variants; product table column has been removed
         [NotMapped]
         public string? ImagePath { get; set; }

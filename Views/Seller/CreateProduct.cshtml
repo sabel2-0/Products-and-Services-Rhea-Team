@@ -42,8 +42,8 @@
             font-family: 'DM Sans', sans-serif;
             background: var(--bg);
             color: var(--text-primary);
-            font-size: 14px;
-            line-height: 1.5;
+            font-size: 16px;
+            line-height: 1.6;
             min-height: 100vh;
             display: flex; /* allow sidebar and main content */
         }
@@ -186,7 +186,9 @@
 
         /* ─── LAYOUT ─── */
         .page-wrapper {
-            max-width: 1080px;
+            /* Allow form to span full available workspace (inside sidebar layout) */
+            width: 100%;
+            max-width: none;
             margin: 0 auto;
             padding: 32px 24px 80px;
         }
@@ -409,7 +411,7 @@
         }
 
         .field-label {
-            font-size: 11px;
+            font-size: 13px;
             font-weight: 600;
             letter-spacing: .05em;
             text-transform: uppercase;
@@ -429,6 +431,26 @@
             transition: border-color .15s, box-shadow .15s;
             -webkit-appearance: none;
             appearance: none;
+        }
+
+        .field-input.invalid {
+            border-color: #d9534f;
+            box-shadow: 0 0 0 3px rgba(217,83,79,.12);
+        }
+
+        .form-errors {
+            background: #FEE2E2;
+            border: 1px solid #F5C2C7;
+            border-radius: var(--radius-sm);
+            padding: 12px 14px;
+            margin-bottom: 18px;
+            color: #842029;
+            font-size: 13px;
+        }
+
+        .form-errors ul {
+            margin: 0;
+            padding-left: 18px;
         }
 
         .field-input:focus {
@@ -642,7 +664,7 @@
 
         /* Radio toggle */
         .radio-toggle {
-            display: flex;
+            display: inline-flex;
             background: var(--surface);
             border: 1px solid var(--border);
             border-radius: var(--radius-sm);
@@ -652,7 +674,7 @@
         .radio-toggle label {
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 0;
             padding: 5px 12px;
             cursor: pointer;
             font-size: 12px;
@@ -660,10 +682,13 @@
             color: var(--text-secondary);
             transition: all .15s;
             user-select: none;
+            border: none;
+            background: transparent;
         }
 
-        .radio-toggle label:not(:last-child) {
-            border-right: 1px solid var(--border);
+        .radio-toggle label:has(input:checked) {
+            background: var(--surface-2);
+            color: var(--text-primary);
         }
 
         .radio-toggle input[type="radio"] { display: none; }
@@ -679,11 +704,7 @@
         }
 
         .radio-dot {
-            width: 7px; height: 7px;
-            border: 1.5px solid currentColor;
-            border-radius: 50%;
-            flex-shrink: 0;
-            position: relative;
+            display: none;
         }
 
         .radio-toggle input:checked ~ .radio-dot::after {
@@ -997,9 +1018,18 @@
                 <h1 class="page-title" id="dynamic-page-title">Create Product Listing</h1>
             </div>
             <div class="page-header-actions">
-                <a href="/Product/sizeguide" class="btn btn-secondary">
-                    <i class="fa-solid fa-ruler-horizontal"></i> Size Guide
-                </a>
+                @if (Model.ProductId > 0)
+                {
+                    <a href="/Product/sizeguide?id=@Model.ProductId" class="btn btn-secondary">
+                        <i class="fa-solid fa-ruler-horizontal"></i> Size Guide
+                    </a>
+                }
+                else
+                {
+                    <a href="#" class="btn btn-secondary" onclick="alert('Please save the product first, then open the size guide.'); return false;">
+                        <i class="fa-solid fa-ruler-horizontal"></i> Size Guide
+                    </a>
+                }
             </div>
         </div>
 
@@ -1042,24 +1072,29 @@
                     </div>
                 </div>
 
-                <div class="field-group" style="margin-bottom: 10px;">
-                    <div class="field">
-                        <label class="field-label">Product Name</label>
-                        <input type="text" class="field-input" placeholder="e.g. Classic Oxford Button-Down Shirt" asp-for="ProductName" value="@Model.ProductName">
+<div id="formErrors" class="form-errors" style="display:none;">
+            <strong>Please fix the following issues before submitting:</strong>
+            <ul id="formErrorsList"></ul>
+        </div>
+
+        <div class="field-group" style="margin-bottom: 10px;">
+            <div class="field">
+                <label class="field-label">Product Name</label>
+                <input type="text" class="field-input" placeholder="e.g. Classic Oxford Button-Down Shirt" asp-for="ProductName" value="@Model.ProductName" required>
                     </div>
                 </div>
 
                 <div class="field-group cols-2" style="margin-bottom: 10px;">
                     <div class="field">
                         <label class="field-label">Brand</label>
-                        <input type="text" class="field-input" placeholder="e.g. Polo Ralph Lauren" asp-for="Brand" value="@Model.Brand">
+                        <input type="text" class="field-input" placeholder="e.g. Polo Ralph Lauren" asp-for="Brand" value="@Model.Brand" required>
                     </div>
                 </div>
 
                 <div class="field-group cols-2" style="margin-bottom: 10px;">
                     <div class="field">
                         <label class="field-label">Category</label>
-                        <input list="category-options" class="field-input" asp-for="Category" value="@Model.Category" placeholder="Select or type a category">
+                        <input list="category-options" class="field-input" asp-for="Category" value="@Model.Category" placeholder="Select or type a category" required>
                         <datalist id="category-options">
                             <option value="Tops"></option>
                             <option value="Bottoms"></option>
@@ -1324,27 +1359,27 @@
                     <div class="field">
                         <label class="field-label">SKU</label>
                         <div class="prefixed-input">
-                            <input type="text" class="sku-display" name="variantSkus">
+                            <input type="text" class="sku-display" name="variantSkus" required>
                         </div>
                     </div>
                     <div class="field">
                         <label class="field-label">Price</label>
                         <div class="prefixed-input">
-                            <span class="price-prefix">₱</span>
-                            <input type="number" class="field-input" name="variantPrices" placeholder="0.00" min="0" step="any">
+                            <span class="prefix">₱</span>
+                            <input type="number" class="field-input" name="variantPrices" placeholder="0.00" min="0" step="any" required>
                         </div>
                     </div>
                     <div class="field">
                         <label class="field-label">Size (one per variant)</label>
-                        <input type="text" class="field-input" name="colorSizes" placeholder="e.g. M">
+                        <input type="text" class="field-input" name="colorSizes" placeholder="e.g. M" required>
                     </div>
                     <div class="field">
                         <label class="field-label">Style / Color</label>
-                        <input type="text" class="field-input" name="colorNames" placeholder="e.g. Navy Blue">
+                        <input type="text" class="field-input" name="colorNames" placeholder="e.g. Navy Blue" required>
                     </div>
                     <div class="field">
                         <label class="field-label">Quantity</label>
-                        <input type="number" class="field-input qty-input" name="colorStocks" placeholder="0" min="0">
+                        <input type="number" class="field-input qty-input" name="colorStocks" placeholder="0" min="0" required>
                     </div>
                 </div>
 
@@ -1455,7 +1490,7 @@
                 if (availabilityHidden) {
                     availabilityHidden.value = variant.Availability ?? 'In Stock';
                 }
-                if ((variant.Availability ?? 'In Stock') === 'Pre-Order') {
+                if ((variant.Availability ?? '1') === 'Pre-Order') {
                     if (preOrderRadio) preOrderRadio.checked = true;
                 } else {
                     if (inStockRadio) inStockRadio.checked = true;
@@ -1477,30 +1512,81 @@
 
         btnAddVariant.addEventListener('click', addVariantRow);
 
-        function computeStockAndSizes() {
-            const totalStock = Array.from(variantsContainer.querySelectorAll('input[name="colorStocks"]'))
-                .reduce((sum, el) => sum + (parseInt(el.value || '0', 10) || 0), 0);
-            document.getElementById('stockHidden').value = totalStock;
-
-            const sizes = [];
-            variantsContainer.querySelectorAll('input[name="colorSizes"]').forEach(el => {
-                const sizeVal = (el.value || '').trim();
-                if (sizeVal && !sizes.includes(sizeVal)) sizes.push(sizeVal);
-            });
-            document.getElementById('sizesHidden').value = sizes.join(',');
-
-            const firstVariantSku = variantsContainer.querySelector('input[name="variantSkus"]');
-            if (firstVariantSku) {
-                skuHidden.value = firstVariantSku.value || '';
-                updateVariantBarcode('#liveBarcodePreview', skuHidden.value);
+        function showFormErrors(errors) {
+            const errorsEl = document.getElementById('formErrors');
+            const listEl = document.getElementById('formErrorsList');
+            if (!errorsEl || !listEl) return;
+            if (!errors.length) {
+                errorsEl.style.display = 'none';
+                listEl.innerHTML = '';
+                return;
             }
+            listEl.innerHTML = errors.map(err => `<li>${err}</li>`).join('');
+            errorsEl.style.display = 'block';
+        }
+
+        function clearFieldErrors() {
+            document.querySelectorAll('.field-input.invalid').forEach(el => el.classList.remove('invalid'));
+        }
+
+        function validateForm() {
+            clearFieldErrors();
+            const errors = [];
+
+            const requiredFields = Array.from(form.querySelectorAll('input[required], select[required], textarea[required]'));
+            requiredFields.forEach(field => {
+                const value = (field.value || '').toString().trim();
+                if (!value) {
+                    field.classList.add('invalid');
+                    const label = field.closest('.field')?.querySelector('.field-label');
+                    const labelText = label ? label.textContent.trim() : field.name;
+                    errors.push(`${labelText} is required.`);
+                }
+            });
+
+            // Validate variants
+            variantsContainer.querySelectorAll('.variant-card').forEach((card, index) => {
+                const variantIndex = index + 1;
+                const price = card.querySelector('input[name="variantPrices"]');
+                const size = card.querySelector('input[name="colorSizes"]');
+                const style = card.querySelector('input[name="colorNames"]');
+                const qty = card.querySelector('input[name="colorStocks"]');
+
+                if (price && !price.value.trim()) {
+                    price.classList.add('invalid');
+                    errors.push(`Variant ${variantIndex}: Price is required.`);
+                }
+                if (size && !size.value.trim()) {
+                    size.classList.add('invalid');
+                    errors.push(`Variant ${variantIndex}: Size is required.`);
+                }
+                if (style && !style.value.trim()) {
+                    style.classList.add('invalid');
+                    errors.push(`Variant ${variantIndex}: Style / Color is required.`);
+                }
+                if (qty && (!qty.value.trim() || Number(qty.value) < 0)) {
+                    qty.classList.add('invalid');
+                    errors.push(`Variant ${variantIndex}: Quantity is required and must be 0 or greater.`);
+                }
+            });
+
+            showFormErrors(errors);
+            return errors.length === 0;
+        }
+
+        function handleFormSubmit(e) {
+            if (!validateForm()) {
+                e.preventDefault();
+                return;
+            }
+            computeStockAndSizes();
         }
 
         variantsContainer.addEventListener('input', e => {
             if (e.target.matches('input[name="colorStocks"], input[name="colorSizes"]')) computeStockAndSizes();
         });
 
-        form.addEventListener('submit', computeStockAndSizes);
+        form.addEventListener('submit', handleFormSubmit);
     </script>
 </body>
 </html>
