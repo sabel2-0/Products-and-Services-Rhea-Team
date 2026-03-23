@@ -7,9 +7,18 @@ namespace MyAspNetApp.Data
     {
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
+        // Core Product Tables
         public DbSet<DbProduct> Products { get; set; }
         public DbSet<DbProductVariant> ProductVariants { get; set; }
+        
+        // Image Tables (Retained from AppDbContext (1).cs)
         public DbSet<DbProductColorImage> ProductColorImages { get; set; }
+        
+        // Size Guide Tables (Integrated from AppDbContext.cs)
+        public DbSet<DbSizeGuide> SizeGuides { get; set; }
+        public DbSet<DbSizeGuideImage> SizeGuideImages { get; set; }
+        
+        // Review Tables
         public DbSet<DbReview> Reviews { get; set; }
         public DbSet<DbReviewImage> ReviewImages { get; set; }
 

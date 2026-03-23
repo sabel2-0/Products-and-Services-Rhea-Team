@@ -453,3 +453,45 @@
                 color: #b0aba8;
                 cursor: not-allowed;
             }
+
+        .seller-toast {
+            position: fixed;
+            bottom: 32px;
+            right: 32px;
+            background: #111;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 14px 22px;
+            border-radius: 6px;
+            font-size: 0.88rem;
+            font-weight: 500;
+            letter-spacing: 0.01em;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.18);
+            z-index: 9999;
+            opacity: 0;
+            transform: translateY(12px);
+            animation: toastIn 0.3s ease forwards, toastOut 0.4s ease 3.2s forwards;
+        }
+        .seller-toast svg { flex-shrink: 0; }
+        
+        @keyframes toastIn  { to { opacity: 1; transform: translateY(0); } }
+        @keyframes toastOut { to { opacity: 0; transform: translateY(12px); } }
+
+        .sizeguide-prompt {
+            position: fixed;
+            bottom: 32px;
+            right: 32px;
+            background: #0b3e6f;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 20px;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.18);
+            z-index: 9999;
+        }

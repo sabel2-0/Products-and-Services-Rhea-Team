@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
 using MyAspNetApp.Data;
 using MyAspNetApp.Models;
+using System.Text.Json; // NEW: Added missing Using Directive
 
 namespace MyAspNetApp.Controllers
 {
@@ -169,10 +170,6 @@ namespace MyAspNetApp.Controllers
                 SKU = sku,
                 Gender = p.Gender ?? "Unisex",
                 Category = p.Category ?? "",
-                // the database currently doesn't have a separate subcategory column;
-                // we will leave this blank to avoid showing the same tag twice
-                // (gender is now displayed separately on the UI).
-                // TODO: add SubCategory column when needed and map appropriately.
                 SubCategory = "",
                 Brand = p.Brand ?? "",
                 Weight = weight,
@@ -380,7 +377,46 @@ namespace MyAspNetApp.Controllers
                         .GroupBy(r => r.ProductId)
                         .ToDictionary(g => g.Key, g => ((double)g.Average(x => x.Rating), g.Count()));
 
-                    return Ok(MapDbProduct(dbProduct, colorImgs, variants, reviewStats, mappedReviews));
+                    // We now store the mapped product in a variable so we can inject the size guide
+                    var mappedProduct = MapDbProduct(dbProduct, colorImgs, variants, reviewStats, mappedReviews);
+
+                    // NEW: Missing Size Guide Mapping
+                    var dbSizeGuide = await _db.SizeGuides
+                        .AsNoTracking()
+                        .Include(g => g.Images)
+                        .FirstOrDefaultAsync(g => g.ProductId == id);
+
+                    if (dbSizeGuide != null)
+                    {
+                        var payload = ParseProductSizeGuidePayload(dbSizeGuide.TableJson, dbSizeGuide.Title);
+                        var tables = payload.Tables;
+                        var firstTable = tables.FirstOrDefault();
+                        var effectiveCategory = dbSizeGuide.Category ?? dbProduct.Category ?? string.Empty;
+
+                        mappedProduct.SizeGuide = new ProductSizeGuide
+                        {
+                            Title = firstTable?.Title ?? dbSizeGuide.Title ?? string.Empty,
+                            MeasurementUnit = string.IsNullOrWhiteSpace(dbSizeGuide.MeasurementUnit) ? "in" : dbSizeGuide.MeasurementUnit!,
+                            PhotoMeasurementUnit = string.IsNullOrWhiteSpace(payload.PhotoMeasurementUnit) ? "in" : payload.PhotoMeasurementUnit,
+                            TableMeasurementUnit = string.IsNullOrWhiteSpace(payload.TableMeasurementUnit)
+                                ? (string.IsNullOrWhiteSpace(dbSizeGuide.MeasurementUnit) ? "in" : dbSizeGuide.MeasurementUnit!)
+                                : payload.TableMeasurementUnit,
+                            PhotoGuideUnitsByUrl = payload.PhotoGuideUnitsByUrl,
+                            Category = dbSizeGuide.Category ?? string.Empty,
+                            FitTips = string.IsNullOrWhiteSpace(dbSizeGuide.FitTips) ? GetDefaultFitTips(effectiveCategory) : dbSizeGuide.FitTips,
+                            HowToMeasure = string.IsNullOrWhiteSpace(dbSizeGuide.HowToMeasure) ? GetDefaultHowToMeasure(effectiveCategory) : dbSizeGuide.HowToMeasure,
+                            AdditionalNotes = dbSizeGuide.AdditionalNotes ?? string.Empty,
+                            TableData = firstTable?.Data ?? new List<List<string>>(),
+                            Tables = tables,
+                            ImageUrls = dbSizeGuide.Images
+                                .OrderBy(i => i.SortOrder)
+                                .Select(i => i.ImagePath)
+                                .Where(p => !string.IsNullOrWhiteSpace(p))
+                                .ToList()
+                        };
+                    }
+
+                    return Ok(mappedProduct);
                 }
                 return NotFound();
             }
@@ -445,6 +481,213 @@ namespace MyAspNetApp.Controllers
 
             return ex.InnerException is InvalidOperationException innerIoe &&
                    innerIoe.Message.Contains("connection from the pool", StringComparison.OrdinalIgnoreCase);
+        }
+
+        // NEW: Missing Size Guide Payload Class & Parsing Helpers
+        private sealed class ProductSizeGuidePayload
+        {
+            public string PhotoMeasurementUnit { get; set; } = string.Empty;
+            public string TableMeasurementUnit { get; set; } = string.Empty;
+            public Dictionary<string, string> PhotoGuideUnitsByUrl { get; set; } = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            public List<ProductSizeGuideTable> Tables { get; set; } = new List<ProductSizeGuideTable>();
+        }
+
+        private static ProductSizeGuidePayload ParseProductSizeGuidePayload(string? rawJson, string? fallbackTitle)
+        {
+            var payload = new ProductSizeGuidePayload();
+            if (string.IsNullOrWhiteSpace(rawJson))
+            {
+                return payload;
+            }
+
+            try
+            {
+                using var doc = JsonDocument.Parse(rawJson);
+                if (doc.RootElement.ValueKind == JsonValueKind.Object)
+                {
+                    if (doc.RootElement.TryGetProperty("photoMeasurementUnit", out var photoUnitEl) && photoUnitEl.ValueKind == JsonValueKind.String)
+                    {
+                        payload.PhotoMeasurementUnit = (photoUnitEl.GetString() ?? string.Empty).Trim();
+                    }
+                    if (doc.RootElement.TryGetProperty("tableMeasurementUnit", out var tableUnitEl) && tableUnitEl.ValueKind == JsonValueKind.String)
+                    {
+                        payload.TableMeasurementUnit = (tableUnitEl.GetString() ?? string.Empty).Trim();
+                    }
+                    if (doc.RootElement.TryGetProperty("photoGuideUnitsByUrl", out var photoMapEl) && photoMapEl.ValueKind == JsonValueKind.Object)
+                    {
+                        payload.PhotoGuideUnitsByUrl = ParsePhotoGuideUnitsMap(photoMapEl);
+                    }
+                    if (doc.RootElement.TryGetProperty("tables", out var tablesEl) && tablesEl.ValueKind == JsonValueKind.Array)
+                    {
+                        payload.Tables = ParseProductSizeGuideTablesArray(tablesEl, fallbackTitle);
+                    }
+                    return payload;
+                }
+
+                if (doc.RootElement.ValueKind == JsonValueKind.Array)
+                {
+                    payload.Tables = ParseProductSizeGuideTablesArray(doc.RootElement, fallbackTitle);
+                }
+            }
+            catch
+            {
+                // Ignore malformed JSON and return empty payload.
+            }
+
+            return payload;
+        }
+
+        private static List<ProductSizeGuideTable> ParseProductSizeGuideTables(string? rawJson, string? fallbackTitle)
+        {
+            return ParseProductSizeGuidePayload(rawJson, fallbackTitle).Tables;
+        }
+
+        private static List<ProductSizeGuideTable> ParseProductSizeGuideTablesArray(JsonElement rootArray, string? fallbackTitle)
+        {
+            var tables = new List<ProductSizeGuideTable>();
+            if (rootArray.ValueKind != JsonValueKind.Array)
+            {
+                return tables;
+            }
+
+            var items = rootArray.EnumerateArray().ToList();
+            if (items.Count == 0)
+            {
+                return tables;
+            }
+
+            if (items[0].ValueKind == JsonValueKind.Array)
+            {
+                var data = ParseTableData(rootArray);
+                if (data.Any(r => r.Any(c => !string.IsNullOrWhiteSpace(c))))
+                {
+                    tables.Add(new ProductSizeGuideTable
+                    {
+                        Title = string.IsNullOrWhiteSpace(fallbackTitle) ? string.Empty : fallbackTitle.Trim(),
+                        Data = data
+                    });
+                }
+                return tables;
+            }
+
+            foreach (var item in items)
+            {
+                if (item.ValueKind != JsonValueKind.Object)
+                {
+                    continue;
+                }
+
+                var title = item.TryGetProperty("title", out var titleEl) && titleEl.ValueKind == JsonValueKind.String
+                    ? (titleEl.GetString() ?? string.Empty).Trim()
+                    : string.Empty;
+
+                List<List<string>> data = new();
+                if (item.TryGetProperty("data", out var dataEl) && dataEl.ValueKind == JsonValueKind.Array)
+                {
+                    data = ParseTableData(dataEl);
+                }
+
+                if (!data.Any(r => r.Any(c => !string.IsNullOrWhiteSpace(c))))
+                {
+                    continue;
+                }
+
+                tables.Add(new ProductSizeGuideTable
+                {
+                    Title = title,
+                    MeasurementUnit = item.TryGetProperty("measurementUnit", out var unitEl) && unitEl.ValueKind == JsonValueKind.String
+                        ? (unitEl.GetString() ?? string.Empty).Trim()
+                        : string.Empty,
+                    PhotoOrder = item.TryGetProperty("photoOrder", out var orderEl) && orderEl.ValueKind == JsonValueKind.Number
+                        ? orderEl.GetInt32()
+                        : 0,
+                    Data = data,
+                    ImageUrl = item.TryGetProperty("imageUrl", out var imageEl) && imageEl.ValueKind == JsonValueKind.String
+                        ? (imageEl.GetString() ?? string.Empty).Trim()
+                        : string.Empty
+                });
+            }
+
+            return tables;
+        }
+
+        private static List<List<string>> ParseTableData(JsonElement tableElement)
+        {
+            var data = new List<List<string>>();
+            if (tableElement.ValueKind != JsonValueKind.Array)
+            {
+                return data;
+            }
+
+            foreach (var rowEl in tableElement.EnumerateArray())
+            {
+                if (rowEl.ValueKind != JsonValueKind.Array)
+                {
+                    continue;
+                }
+
+                var row = new List<string>();
+                foreach (var cellEl in rowEl.EnumerateArray())
+                {
+                    row.Add((cellEl.ToString() ?? string.Empty).Trim());
+                }
+                data.Add(row);
+            }
+
+            return data;
+        }
+
+        private static Dictionary<string, string> ParsePhotoGuideUnitsMap(JsonElement mapElement)
+        {
+            var map = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            if (mapElement.ValueKind != JsonValueKind.Object)
+            {
+                return map;
+            }
+
+            foreach (var prop in mapElement.EnumerateObject())
+            {
+                var key = (prop.Name ?? string.Empty).Trim();
+                if (string.IsNullOrWhiteSpace(key))
+                {
+                    continue;
+                }
+
+                var unitRaw = prop.Value.ValueKind == JsonValueKind.String
+                    ? (prop.Value.GetString() ?? string.Empty).Trim().ToLowerInvariant()
+                    : string.Empty;
+                map[key] = unitRaw == "cm" ? "cm" : "in";
+            }
+
+            return map;
+        }
+
+        private static string GetDefaultFitTips(string? category)
+        {
+            var key = (category ?? string.Empty).Trim().ToLowerInvariant();
+            return key switch
+            {
+                "footwear" => "If you are between sizes, choose the larger size for better comfort, especially for socks or long wear.",
+                "bottoms" => "If your waist and hips suggest different sizes, choose the size based on your hip measurement for better movement.",
+                "outerwear" => "If you plan to layer underneath, consider going one size up for comfort.",
+                "dresses & jumpsuits" => "If your bust and hips suggest different sizes, choose the size that fits your larger measurement.",
+                "activewear" => "For compression feel choose your exact size, for a relaxed feel choose one size up.",
+                _ => "If you are between two sizes, choose the smaller size for a tighter fit or the larger size for a looser fit."
+            };
+        }
+
+        private static string GetDefaultHowToMeasure(string? category)
+        {
+            var key = (category ?? string.Empty).Trim().ToLowerInvariant();
+            return key switch
+            {
+                "footwear" => "Foot Length: Stand on paper and mark heel to longest toe, then measure the distance.",
+                "bottoms" => "Waist: Measure around your natural waistline. Hips: Measure around the fullest part of your hips.",
+                "outerwear" => "Chest: Measure around the fullest part of your chest with the tape level and relaxed.",
+                "dresses & jumpsuits" => "Bust: Measure around fullest bust. Waist: Measure natural waistline. Hips: Measure fullest hip area.",
+                "activewear" => "Chest: Measure fullest chest. Waist: Measure natural waist. Keep tape snug but not tight.",
+                _ => "Chest: Measure around the fullest part of your chest, keeping the measuring tape horizontal."
+            };
         }
     }
 

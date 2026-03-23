@@ -5,16 +5,14 @@
     var activeProducts = Model.Where(p => p.Status == "active").ToList();
     var renewProducts = Model.Where(p => p.Status == "renew").ToList();
     var relistProducts = Model.Where(p => p.Status == "relist").ToList();
-    
     // NEW: Filter for pending/to-approve products
-    var pendingProducts = Model.Where(p => p.Status == "pending").ToList(); 
-    
+    var pendingProducts = Model.Where(p => p.Status == "pending").ToList();
+
     var activeCount = activeProducts.Count;
     var renewCount = renewProducts.Count;
     var relistCount = relistProducts.Count;
-    
     // NEW: Count for pending/to-approve products
-    var pendingCount = pendingProducts.Count; 
+    var pendingCount = pendingProducts.Count;
 }
 
 <!DOCTYPE html>
@@ -82,7 +80,7 @@
                 </div>
                 
                 <div class="overview-card" onclick="changeTab('pending', this)">
-                    <span>To Approve<br>Product</span>
+                    <span>Pending<br>Product</span>
                     <div class="badge" id="badge-pending" style="background: #3b82f6;">@pendingCount</div>
                 </div>
 
@@ -98,30 +96,30 @@
 
             <div class="product-box">
                 <div class="product-header">
-                    <h3 id="display-title" style="font-weight: 700; font-size: 1.1rem; margin: 0;">Active Product</h3>
+                     <h3 id="display-title" style="font-weight: 700; font-size: 1.1rem; margin: 0;">Active Product</h3>
                     <div class="header-actions">
                         <button class="btn-action-pill" onclick="window.location.href='/Promotion/Promotion'">Add Promotion</button>
                         <select class="filter-dropdown-select" id="categoryFilter" onchange="filterProducts()">
-                            <option value="All">All</option>
+                             <option value="All">All</option>
                         </select>
                     </div>
                 </div>
 
                 <div id="active-content" class="product-group visible">
-                    @foreach (var p in activeProducts)
+                     @foreach (var p in activeProducts)
                     {
                     <div class="product-row" data-category="@p.Category">
                         <div class="product-detail">
-                            <a href="/Seller/ViewProduct?id=@p.ProductId&state=active">
+                             <a href="/Seller/ViewProduct?id=@p.ProductId&state=active">
                                 <img src="@(string.IsNullOrEmpty(p.ImagePath) ? "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='90' height='90'%3E%3Crect width='90' height='90' fill='%23e0e0e0'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='Inter' font-size='11' fill='%23888'%3ENo Image%3C/text%3E%3C/svg%3E" : p.ImagePath)" class="product-img" alt="Product" onerror="this.onerror=null;this.src='data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2790%27 height=%2790%27%3E%3Crect width=%2790%27 height=%2790%27 fill=%27%23e0e0e0%27/%3E%3Ctext x=%2750%25%27 y=%2750%25%27 dominant-baseline=%27middle%27 text-anchor=%27middle%27 font-family=%27Inter%27 font-size=%2711%27 fill=%27%23888%27%3ENo Image%3C/text%3E%3C/svg%3E';">
-                            </a>
+                             </a>
                             <div class="product-info">
                                 <a href="/Seller/ViewProduct?id=@p.ProductId&state=active">
                                     <h4>@p.ProductName</h4>
                                 </a>
                                 <p>@p.Category</p>
                                 <div class="price-wrap">
-                                    <span class="price">₱@p.Price.ToString("N2")</span>
+                                     <span class="price">₱@p.Price.ToString("N2")</span>
                                     @if (p.Discount.HasValue && p.Discount.Value > 0)
                                     {
                                         <span class="old-price">- ₱@((p.Price + p.Discount.Value).ToString("N2"))</span>
@@ -133,29 +131,30 @@
                                     if (reviewCountActive == 0) { ratingActive = 5.0; }
                                 }
                                 <a href="/Seller/ViewRatings?id=@p.ProductId" class="rating-pill">
-                                    <span class="stars">
+                                     <span class="stars">
                                         @for (int i = 1; i <= 5; i++)
                                         {
-                                            if (i <= Math.Floor(ratingActive)) { <i class="fa-solid fa-star"></i> }
+                                             if (i <= Math.Floor(ratingActive)) { <i class="fa-solid fa-star"></i> }
                                             else if (i == Math.Ceiling(ratingActive) && ratingActive % 1 != 0) { <i class="fa-solid fa-star-half-stroke"></i> }
                                             else { <i class="fa-regular fa-star"></i> }
                                         }
-                                    </span>
+                                     </span>
                                     <span class="review-text">- @reviewCountActive Review@(reviewCountActive == 1 ? "" : "s")</span>
-                                </a>
+                                 </a>
                             </div>
                         </div>
                         <div class="action-menu-container">
-                            <button class="btn-ellipses" onclick="toggleMenu(event, this)">
+                             <button class="btn-ellipses" onclick="toggleMenu(event, this)">
                                 <i class="fa-solid fa-ellipsis"></i>
                             </button>
-                            <div class="dropdown-menu">
+                             <div class="dropdown-menu">
                                 <a href="/Seller/ViewProduct?id=@p.ProductId&state=active" class="dropdown-item">View Product</a>
+                                <a href="/Product/SizeGuide?id=@p.ProductId" class="dropdown-item">Size Guide</a>
                                 <a href="/Seller/CreateProduct?mode=edit&id=@p.ProductId" class="dropdown-item">Edit Product</a>
-                                <form asp-action="DeleteProduct" asp-controller="Seller" method="post" style="margin:0;">
+                                 <form asp-action="DeleteProduct" asp-controller="Seller" method="post" style="margin:0;">
                                     @Html.AntiForgeryToken()
                                     <input type="hidden" name="id" value="@p.ProductId" />
-                                    <button type="submit" class="dropdown-item" style="width:100%;background:none;border:none;cursor:pointer;text-align:left;color:#c5221f;" onclick="return confirm('Delete this product? It will be moved to Relist.')">Delete Product</button>
+                                     <button type="submit" class="dropdown-item" style="width:100%;background:none;border:none;cursor:pointer;text-align:left;color:#c5221f;" onclick="return confirm('Delete this product? It will be moved to Relist.')">Delete Product</button>
                                 </form>
                             </div>
                         </div>
@@ -173,42 +172,43 @@
                     <div class="product-row" data-category="@p.Category">
                         <div class="product-detail">
                             <a href="/Seller/ViewProduct?id=@p.ProductId&state=pending">
-                                <img src="@(string.IsNullOrEmpty(p.ImagePath) ? "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='90' height='90'%3E%3Crect width='90' height='90' fill='%23e0e0e0'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='Inter' font-size='11' fill='%23888'%3ENo Image%3C/text%3E%3C/svg%3E" : p.ImagePath)" class="product-img" alt="Product" onerror="this.onerror=null;this.src='data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2790%27 height=%2790%27%3E%3Crect width=%2790%27 height=%2790%27 fill=%27%23e0e0e0%27/%3E%3Ctext x=%2750%25%27 y=%2750%25%27 dominant-baseline=%27middle%27 text-anchor=%27middle%27 font-family=%27Inter%27 font-size=%2711%27 fill=%27%23888%27%3ENo Image%3C/text%3E%3C/svg%3E';">
+                                 <img src="@(string.IsNullOrEmpty(p.ImagePath) ? "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='90' height='90'%3E%3Crect width='90' height='90' fill='%23e0e0e0'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='Inter' font-size='11' fill='%23888'%3ENo Image%3C/text%3E%3C/svg%3E" : p.ImagePath)" class="product-img" alt="Product" onerror="this.onerror=null;this.src='data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2790%27 height=%2790%27%3E%3Crect width=%2790%27 height=%2790%27 fill=%27%23e0e0e0%27/%3E%3Ctext x=%2750%25%27 y=%2750%25%27 dominant-baseline=%27middle%27 text-anchor=%27middle%27 font-family=%27Inter%27 font-size=%2711%27 fill=%27%23888%27%3ENo Image%3C/text%3E%3C/svg%3E';">
                             </a>
                             <div class="product-info">
                                 <a href="/Seller/ViewProduct?id=@p.ProductId&state=pending">
                                     <h4>@p.ProductName</h4>
-                                </a>
+                                 </a>
                                 <p>@p.Category (Awaiting Approval)</p>
                                 <div class="price-wrap">
-                                    <span class="price">₱@p.Price.ToString("N2")</span>
+                                     <span class="price">₱@p.Price.ToString("N2")</span>
                                 </div>
                                 @{
-                                    int reviewCountPending = p.ReviewCount ?? 0;
+                                     int reviewCountPending = p.ReviewCount ?? 0;
                                     double ratingPending = p.AverageRating ?? 5.0;
                                     if (reviewCountPending == 0) { ratingPending = 5.0; }
                                 }
                                 <a href="/Seller/ViewRatings?id=@p.ProductId" class="rating-pill">
-                                    <span class="stars">
+                                     <span class="stars">
                                         @for (int i = 1; i <= 5; i++)
                                         {
-                                            if (i <= Math.Floor(ratingPending)) { <i class="fa-solid fa-star"></i> }
+                                             if (i <= Math.Floor(ratingPending)) { <i class="fa-solid fa-star"></i> }
                                             else if (i == Math.Ceiling(ratingPending) && ratingPending % 1 != 0) { <i class="fa-solid fa-star-half-stroke"></i> }
                                             else { <i class="fa-regular fa-star"></i> }
                                         }
-                                    </span>
+                                     </span>
                                     <span class="review-text">- @reviewCountPending Review@(reviewCountPending == 1 ? "" : "s")</span>
-                                </a>
+                                 </a>
                             </div>
                         </div>
                         <div class="action-menu-container">
-                            <button class="btn-ellipses" onclick="toggleMenu(event, this)">
+                             <button class="btn-ellipses" onclick="toggleMenu(event, this)">
                                 <i class="fa-solid fa-ellipsis"></i>
                             </button>
-                            <div class="dropdown-menu">
+                             <div class="dropdown-menu">
                                 <a href="/Seller/ViewProduct?id=@p.ProductId&state=pending" class="dropdown-item">View Product</a>
+                                <a href="/Product/SizeGuide?id=@p.ProductId" class="dropdown-item">Size Guide</a>
                                 <a href="/Seller/CreateProduct?mode=edit&id=@p.ProductId" class="dropdown-item">Edit Product</a>
-                            </div>
+                             </div>
                         </div>
                     </div>
                     }
@@ -224,42 +224,43 @@
                     <div class="product-row" data-category="@p.Category">
                         <div class="product-detail">
                             <a href="/Seller/ViewProduct?id=@p.ProductId&state=renew">
-                                <img src="@(string.IsNullOrEmpty(p.ImagePath) ? "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='90' height='90'%3E%3Crect width='90' height='90' fill='%23e0e0e0'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='Inter' font-size='11' fill='%23888'%3ENo Image%3C/text%3E%3C/svg%3E" : p.ImagePath)" class="product-img" onerror="this.onerror=null;this.src='data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2790%27 height=%2790%27%3E%3Crect width=%2790%27 height=%2790%27 fill=%27%23e0e0e0%27/%3E%3Ctext x=%2750%25%27 y=%2750%25%27 dominant-baseline=%27middle%27 text-anchor=%27middle%27 font-family=%27Inter%27 font-size=%2711%27 fill=%27%23888%27%3ENo Image%3C/text%3E%3C/svg%3E';">
+                                 <img src="@(string.IsNullOrEmpty(p.ImagePath) ? "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='90' height='90'%3E%3Crect width='90' height='90' fill='%23e0e0e0'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='Inter' font-size='11' fill='%23888'%3ENo Image%3C/text%3E%3C/svg%3E" : p.ImagePath)" class="product-img" onerror="this.onerror=null;this.src='data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2790%27 height=%2790%27%3E%3Crect width=%2790%27 height=%2790%27 fill=%27%23e0e0e0%27/%3E%3Ctext x=%2750%25%27 y=%2750%25%27 dominant-baseline=%27middle%27 text-anchor=%27middle%27 font-family=%27Inter%27 font-size=%2711%27 fill=%27%23888%27%3ENo Image%3C/text%3E%3C/svg%3E';">
                             </a>
                             <div class="product-info">
                                 <a href="/Seller/ViewProduct?id=@p.ProductId&state=renew">
                                     <h4>@p.ProductName</h4>
-                                </a>
+                                 </a>
                                 <p>@p.Category</p>
                                 <div class="price-wrap">
-                                    <span class="price">₱@p.Price.ToString("N2")</span>
+                                     <span class="price">₱@p.Price.ToString("N2")</span>
                                 </div>
                                 @{
-                                    int reviewCountRenew = p.ReviewCount ?? 0;
+                                     int reviewCountRenew = p.ReviewCount ?? 0;
                                     double ratingRenew = p.AverageRating ?? 5.0;
                                     if (reviewCountRenew == 0) { ratingRenew = 5.0; }
                                 }
                                 <a href="/Seller/ViewRatings?id=@p.ProductId" class="rating-pill">
-                                    <span class="stars">
+                                     <span class="stars">
                                         @for (int i = 1; i <= 5; i++)
                                         {
-                                            if (i <= Math.Floor(ratingRenew)) { <i class="fa-solid fa-star"></i> }
+                                             if (i <= Math.Floor(ratingRenew)) { <i class="fa-solid fa-star"></i> }
                                             else if (i == Math.Ceiling(ratingRenew) && ratingRenew % 1 != 0) { <i class="fa-solid fa-star-half-stroke"></i> }
                                             else { <i class="fa-regular fa-star"></i> }
                                         }
-                                    </span>
+                                     </span>
                                     <span class="review-text">- @reviewCountRenew Review@(reviewCountRenew == 1 ? "" : "s")</span>
-                                </a>
+                                 </a>
                             </div>
                         </div>
                         <div class="action-menu-container">
-                            <button class="btn-ellipses" onclick="toggleMenu(event, this)">
+                             <button class="btn-ellipses" onclick="toggleMenu(event, this)">
                                 <i class="fa-solid fa-ellipsis"></i>
                             </button>
-                            <div class="dropdown-menu">
+                             <div class="dropdown-menu">
                                 <a href="/Seller/ViewProduct?id=@p.ProductId&state=renew" class="dropdown-item">View Product</a>
+                                <a href="/Product/SizeGuide?id=@p.ProductId" class="dropdown-item">Size Guide</a>
                                 <a href="/Seller/CreateProduct?mode=renew&id=@p.ProductId" class="dropdown-item">Renew Product</a>
-                            </div>
+                             </div>
                         </div>
                     </div>
                     }
@@ -275,42 +276,43 @@
                     <div class="product-row" data-category="@p.Category">
                         <div class="product-detail">
                             <a href="/Seller/ViewProduct?id=@p.ProductId&state=relist">
-                                <img src="@(string.IsNullOrEmpty(p.ImagePath) ? "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='90' height='90'%3E%3Crect width='90' height='90' fill='%23e0e0e0'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='Inter' font-size='11' fill='%23888'%3ENo Image%3C/text%3E%3C/svg%3E" : p.ImagePath)" class="product-img" style="filter:grayscale(1)" onerror="this.onerror=null;this.src='data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2790%27 height=%2790%27%3E%3Crect width=%2790%27 height=%2790%27 fill=%27%23e0e0e0%27/%3E%3Ctext x=%2750%25%27 y=%2750%25%27 dominant-baseline=%27middle%27 text-anchor=%27middle%27 font-family=%27Inter%27 font-size=%2711%27 fill=%27%23888%27%3ENo Image%3C/text%3E%3C/svg%3E';">
+                                 <img src="@(string.IsNullOrEmpty(p.ImagePath) ? "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='90' height='90'%3E%3Crect width='90' height='90' fill='%23e0e0e0'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='Inter' font-size='11' fill='%23888'%3ENo Image%3C/text%3E%3C/svg%3E" : p.ImagePath)" class="product-img" style="filter:grayscale(1)" onerror="this.onerror=null;this.src='data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 width=%2790%27 height=%2790%27%3E%3Crect width=%2790%27 height=%2790%27 fill=%27%23e0e0e0%27/%3E%3Ctext x=%2750%25%27 y=%2750%25%27 dominant-baseline=%27middle%27 text-anchor=%27middle%27 font-family=%27Inter%27 font-size=%2711%27 fill=%27%23888%27%3ENo Image%3C/text%3E%3C/svg%3E';">
                             </a>
-                            <div class="product-info">
+                             <div class="product-info">
                                 <a href="/Seller/ViewProduct?id=@p.ProductId&state=relist">
                                     <h4>@p.ProductName</h4>
-                                </a>
+                                 </a>
                                 <p>@p.Category (Deleted)</p>
                                 <div class="price-wrap">
-                                    <span class="price">₱@p.Price.ToString("N2")</span>
+                                     <span class="price">₱@p.Price.ToString("N2")</span>
                                 </div>
                                 @{
-                                    int reviewCountRelist = p.ReviewCount ?? 0;
+                                     int reviewCountRelist = p.ReviewCount ?? 0;
                                     double ratingRelist = p.AverageRating ?? 5.0;
                                     if (reviewCountRelist == 0) { ratingRelist = 5.0; }
                                 }
                                 <a href="/Seller/ViewRatings?id=@p.ProductId" class="rating-pill">
-                                    <span class="stars">
+                                     <span class="stars">
                                         @for (int i = 1; i <= 5; i++)
                                         {
-                                            if (i <= Math.Floor(ratingRelist)) { <i class="fa-solid fa-star"></i> }
+                                             if (i <= Math.Floor(ratingRelist)) { <i class="fa-solid fa-star"></i> }
                                             else if (i == Math.Ceiling(ratingRelist) && ratingRelist % 1 != 0) { <i class="fa-solid fa-star-half-stroke"></i> }
                                             else { <i class="fa-regular fa-star"></i> }
                                         }
-                                    </span>
+                                     </span>
                                     <span class="review-text">- @reviewCountRelist Review@(reviewCountRelist == 1 ? "" : "s")</span>
-                                </a>
+                                 </a>
                             </div>
                         </div>
                         <div class="action-menu-container">
-                            <button class="btn-ellipses" onclick="toggleMenu(event, this)">
+                             <button class="btn-ellipses" onclick="toggleMenu(event, this)">
                                 <i class="fa-solid fa-ellipsis"></i>
                             </button>
-                            <div class="dropdown-menu">
+                             <div class="dropdown-menu">
                                 <a href="/Seller/ViewProduct?id=@p.ProductId&state=relist" class="dropdown-item">View Product</a>
+                                <a href="/Product/SizeGuide?id=@p.ProductId" class="dropdown-item">Size Guide</a>
                                 <a href="/Seller/CreateProduct?mode=relist&id=@p.ProductId" class="dropdown-item">Relist Product</a>
-                            </div>
+                             </div>
                         </div>
                     </div>
                     }
@@ -322,7 +324,7 @@
 
                 <div class="pagination">
                     <i class="fa-solid fa-chevron-left nav-arrow disabled"></i>
-                    <span class="page-active">1</span>
+                     <span class="page-active">1</span>
                     <i class="fa-solid fa-chevron-right nav-arrow disabled"></i>
                 </div>
             </div>
@@ -430,6 +432,7 @@
             var activeTab = getActiveTabId();
             var rows = document.querySelectorAll('#' + activeTab + '-content .product-row');
             var categories = ['All'];
+            
             rows.forEach(function(row) {
                 var category = (row.getAttribute('data-category') || '').trim();
                 if (!category) {
@@ -440,6 +443,7 @@
                     categories.push(category);
                 }
             });
+
             select.innerHTML = categories.map(function(category) {
                 return '<option value="' + category.replace(/"/g, '&quot;') + '">' + category + '</option>';
             }).join('');
@@ -447,7 +451,7 @@
             if (categories.indexOf(currentValue) >= 0) {
                 select.value = currentValue;
             } else {
-                 select.value = 'All';
+                select.value = 'All';
             }
         }
 
@@ -473,35 +477,34 @@
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
             <span>@TempData["SuccessMessage"]</span>
         </div>
-        <style>
-            .seller-toast {
-                position: fixed;
-                bottom: 32px;
-                right: 32px;
-                background: #111;
-                color: #fff;
-                display: flex;
-                align-items: center;
-                gap: 10px;
-                padding: 14px 22px;
-                border-radius: 6px;
-                font-size: 0.88rem;
-                font-weight: 500;
-                letter-spacing: 0.01em;
-                box-shadow: 0 4px 24px rgba(0,0,0,0.18);
-                z-index: 9999;
-                opacity: 0;
-                transform: translateY(12px);
-                animation: toastIn 0.3s ease forwards, toastOut 0.4s ease 3.2s forwards;
-            }
-            .seller-toast svg { flex-shrink: 0; }
-            @@keyframes toastIn  { to { opacity: 1; transform: translateY(0); } }
-            @@keyframes toastOut { to { opacity: 0; transform: translateY(12px); } }
-        </style>
-        <script>
-            setTimeout(() => { const t = document.getElementById('seller-toast'); if (t) t.remove(); }, 3800);
-        </script>
     }
 
+    @{
+        var sizeGuideProductId = Context.Request.Query["sizeGuideProductId"].FirstOrDefault();
+        if (!string.IsNullOrEmpty(sizeGuideProductId))
+        {
+            <div id="sizeguide-prompt" class="sizeguide-prompt">
+                <span>Product saved. Would you like to add a size guide?</span>
+                <div style="margin-left: 12px; display:flex; gap:10px;">
+                    <a href="/Product/sizeguide?id=@sizeGuideProductId" class="btn" style="background:#fff;color:#0b3e6f;padding:6px 12px;border-radius:6px;font-weight:600;text-decoration:none;">Yes</a>
+                    <button id="sizeguide-prompt-dismiss" class="btn" style="background:rgba(255,255,255,0.15);color:#fff;padding:6px 12px;border-radius:6px;border:none;font-weight:600;cursor:pointer;">No thanks</button>
+                </div>
+            </div>
+        }
+    }
+
+    <script>
+        // Dismiss the Success Toast after 3.8 seconds
+        setTimeout(() => { const t = document.getElementById('seller-toast'); if (t) t.remove(); }, 3800);
+
+        // Dismiss the Size Guide Prompt
+        const dismiss = document.getElementById('sizeguide-prompt-dismiss');
+        if (dismiss) {
+            dismiss.addEventListener('click', () => {
+                const p = document.getElementById('sizeguide-prompt');
+                if (p) p.remove();
+            });
+        }
+    </script>
 </body>
 </html>
