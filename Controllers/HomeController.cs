@@ -16,6 +16,21 @@ namespace MyAspNetApp.Controllers
         // GET: /Shop
         public IActionResult Shop()
         {
+            var q = Request.Query["q"].ToString();
+            var label = Request.Query["label"].ToString();
+
+            if (string.Equals(q, "challenge", StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(label, "challenges", StringComparison.OrdinalIgnoreCase))
+            {
+                return RedirectToAction(nameof(Challenges));
+            }
+
+            return View();
+        }
+
+        // GET: /Home/Challenges
+        public IActionResult Challenges()
+        {
             return View();
         }
 

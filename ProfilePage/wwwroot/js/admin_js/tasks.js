@@ -24,7 +24,10 @@ function switchChallengeTab(viewName) {
  * Filter and Search Logic
  */
 function filterLeaderboard() {
-    const selectedCategory = document.getElementById('categoryFilter').value;
+    const filterEl = document.getElementById('categoryFilter');
+    if (!filterEl) return; // No category filter present on this page — nothing to do
+
+    const selectedCategory = filterEl.value;
     const rows = document.querySelectorAll('#leaderboardTable tbody tr');
 
     rows.forEach(row => {

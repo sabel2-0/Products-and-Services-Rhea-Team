@@ -607,6 +607,134 @@
 }
 .shop-empty-reset:hover { background: #333; }
 
+.challenge-empty-ui {
+    grid-column: 1 / -1;
+    background: linear-gradient(135deg, #f9fafb 0%, #f3f5f7 55%, #eef1f4 100%);
+    border: 1px solid #e8ecef;
+    border-radius: 14px;
+    overflow: hidden;
+}
+
+.challenge-empty-hero {
+    padding: 36px 34px 30px;
+    border-bottom: 1px solid #e4e9ed;
+    background: radial-gradient(circle at top right, rgba(17, 17, 17, 0.05), transparent 44%);
+}
+
+.challenge-kicker {
+    margin: 0 0 8px;
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #5a6169;
+    font-weight: 700;
+}
+
+.challenge-empty-hero h2 {
+    margin: 0 0 10px;
+    font-family: var(--font-display);
+    font-size: clamp(25px, 4vw, 36px);
+    line-height: 1.06;
+    letter-spacing: -0.02em;
+    color: #13171b;
+}
+
+.challenge-empty-hero > p {
+    margin: 0;
+    color: #616872;
+    max-width: 650px;
+    font-size: 14px;
+}
+
+.challenge-empty-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 18px;
+    flex-wrap: wrap;
+}
+
+.challenge-empty-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 40px;
+    padding: 0 18px;
+    border-radius: 999px;
+    border: 1px solid #111;
+    background: #111;
+    color: #fff;
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    transition: transform .2s ease, background .2s ease, color .2s ease;
+}
+
+.challenge-empty-btn:hover {
+    transform: translateY(-1px);
+    background: #2a2a2a;
+    color: #fff;
+}
+
+.challenge-empty-btn--ghost {
+    background: transparent;
+    color: #111;
+}
+
+.challenge-empty-btn--ghost:hover {
+    background: #111;
+    color: #fff;
+}
+
+.challenge-empty-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+    padding: 16px;
+}
+
+.challenge-teaser-card {
+    border-radius: 12px;
+    background: #fff;
+    border: 1px solid #e7ebef;
+    padding: 18px;
+    min-height: 170px;
+    box-shadow: 0 12px 30px rgba(15, 23, 42, 0.06);
+}
+
+.challenge-teaser-meta {
+    margin: 0 0 8px;
+    font-size: 11px;
+    font-weight: 700;
+    color: #6b7280;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+}
+
+.challenge-teaser-card h3 {
+    margin: 0 0 9px;
+    font-family: var(--font-display);
+    font-size: 21px;
+    color: #14181d;
+}
+
+.challenge-teaser-card p {
+    margin: 0;
+    font-size: 14px;
+    color: #606874;
+    line-height: 1.5;
+}
+
+@media (max-width: 900px) {
+    .challenge-empty-grid {
+        grid-template-columns: 1fr;
+    }
+    .challenge-empty-hero {
+        padding: 28px 20px 24px;
+    }
+}
+
 #products-grid { margin-top: 0; }
 
 /* =====================================================
