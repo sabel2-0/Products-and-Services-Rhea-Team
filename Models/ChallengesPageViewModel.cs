@@ -30,5 +30,6 @@ namespace MyAspNetApp.Models
         public int DurationDays { get; set; }
         public string DifficultyLabel { get; set; } = string.Empty;
         public string DifficultyCssClass { get; set; } = string.Empty;
+        public bool HasBannerImage { get; set; }
     }
 }

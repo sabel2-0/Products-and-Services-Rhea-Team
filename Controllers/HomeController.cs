@@ -87,6 +87,32 @@ namespace MyAspNetApp.Controllers
             return View(vm);
         }
 
+        // GET: /Home/ChallengeBanner/5
+        [HttpGet]
+        public async Task<IActionResult> ChallengeBanner(int id)
+        {
+            var challenge = await _db.Challenges
+                .AsNoTracking()
+                .Where(c => c.ChallengeId == id)
+                .Select(c => new
+                {
+                    c.BannerImage,
+                    c.BannerImageContentType
+                })
+                .FirstOrDefaultAsync();
+
+            if (challenge?.BannerImage == null || challenge.BannerImage.Length == 0)
+            {
+                return NotFound();
+            }
+
+            var contentType = string.IsNullOrWhiteSpace(challenge.BannerImageContentType)
+                ? "application/octet-stream"
+                : challenge.BannerImageContentType;
+
+            return File(challenge.BannerImage, contentType);
+        }
+
         // GET: /Home/About
         public IActionResult About()
         {
@@ -315,7 +341,8 @@ namespace MyAspNetApp.Controllers
                 CompletionPercent = completionPercent,
                 DurationDays = durationDays,
                 DifficultyLabel = difficultyLabel,
-                DifficultyCssClass = difficultyCssClass
+                DifficultyCssClass = difficultyCssClass,
+                HasBannerImage = challenge.BannerImage != null && challenge.BannerImage.Length > 0
             };
         }
     }
