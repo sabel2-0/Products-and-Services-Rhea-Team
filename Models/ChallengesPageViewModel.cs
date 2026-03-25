@@ -10,6 +10,9 @@ namespace MyAspNetApp.Models
         public ChallengeCardViewModel? FeaturedChallenge { get; set; }
         public List<ChallengeCardViewModel> UpcomingChallenges { get; set; } = new();
         public List<ChallengeCardViewModel> TopChallenges { get; set; } = new();
+        // Optional voucher data used by voucher tab views
+        public List<VoucherViewModel>? Vouchers { get; set; }
+        public string? TotalSavedDisplay { get; set; }
     }
 
     public class ChallengeCardViewModel
