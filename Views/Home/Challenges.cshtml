@@ -1,4 +1,10 @@
 
+@model MyAspNetApp.Models.ChallengesPageViewModel
+@{
+  var featured = Model.FeaturedChallenge;
+  var hasFeatured = featured is not null;
+}
+
 <style>
 @@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap');
 .pg,.pg *{box-sizing:border-box;margin:0;padding:0}
@@ -81,28 +87,29 @@
 .pg .lb-header:hover{background:#fafafa}
 .pg .lb-avatar{width:30px;height:30px;border-radius:50%;background:#000;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;color:#fff;margin-right:10px;flex-shrink:0}
 .pg .lb-name-wrap{display:flex;align-items:center}
+.pg .empty-state{border:1px solid #e8e8e8;padding:1.5rem;color:#777;font-size:14px;background:#fff}
 </style>
 
 <div class="pg">
 
   <div class="pg-header">
     <h1>Challenges</h1>
-    <span class="pg-header-sub">2026 Season &nbsp;·&nbsp; 3 Active</span>
+    <span class="pg-header-sub">@Model.SeasonLabel &nbsp;·&nbsp; @Model.ActiveCount Active</span>
   </div>
 
   <div class="hero">
     <div class="hero-stat">
-      <div class="hero-stat-num">1,204</div>
+      <div class="hero-stat-num">@Model.TotalParticipants.ToString("N0")</div>
       <div class="hero-stat-label">Runners Competing</div>
     </div>
     <div class="hero-divider"></div>
     <div class="hero-stat">
-      <div class="hero-stat-num">48,310</div>
-      <div class="hero-stat-label">Total KM Logged</div>
+      <div class="hero-stat-num">@Model.TotalGoalKm.ToString("N1")</div>
+      <div class="hero-stat-label">Total Goal KM</div>
     </div>
     <div class="hero-divider"></div>
     <div class="hero-stat">
-      <div class="hero-stat-num">9</div>
+      <div class="hero-stat-num">@Model.DaysUntilNextDrop</div>
       <div class="hero-stat-label">Days Until Next Drop</div>
     </div>
   </div>
@@ -112,23 +119,25 @@
     <span class="section-tag">Live now</span>
   </div>
 
+  @if (hasFeatured)
+  {
   <div class="featured" style="margin-bottom:3rem">
     <div class="feat-main">
       <div class="feat-main-ghost">RUN</div>
       <span class="feat-badge">&#9679; Live</span>
-      <h2>Urban Marathon<br>Month Challenge</h2>
-      <p>Log 42.2km across any 30 days. Every verified runner who completes it unlocks access to an exclusive drop before it goes public.</p>
+      <h2>@featured!.Title</h2>
+      <p>@featured.Description</p>
       <div class="feat-meta">
         <div class="feat-meta-item">
-          <span class="feat-meta-val">30 days</span>
+          <span class="feat-meta-val">@featured.DurationDays days</span>
           <span class="feat-meta-key">Duration</span>
         </div>
         <div class="feat-meta-item">
-          <span class="feat-meta-val">42.2 km</span>
+          <span class="feat-meta-val">@featured.GoalKm.ToString("N1") km</span>
           <span class="feat-meta-key">Goal</span>
         </div>
         <div class="feat-meta-item">
-          <span class="feat-meta-val">847</span>
+          <span class="feat-meta-val">@featured.TotalParticipants.ToString("N0")</span>
           <span class="feat-meta-key">Joined</span>
         </div>
       </div>
@@ -137,126 +146,103 @@
     <div class="feat-side">
       <div class="feat-side-top">
         <p class="card-badge" style="margin-bottom:8px">Reward</p>
-        <h3>Exclusive Gear Drop</h3>
-        <p>Early access to the limited Edition No.7 running kit — available to challenge finishers 48 hours before public release.</p>
+        <h3>@featured.ActivityType</h3>
+        <p>@featured.Prizes</p>
       </div>
       <div class="feat-side-stat">
         <div class="feat-side-stat-row">
-          <span>Community avg pace</span>
-          <span>5:42 /km</span>
+          <span>Completion rate</span>
+          <span>@featured.CompletionPercent.ToString("N0")%</span>
         </div>
       </div>
       <div class="feat-side-stat" style="border-bottom:none">
         <div class="feat-side-stat-row">
-          <span>Top runner</span>
-          <span>38.6 km logged</span>
+          <span>Completed</span>
+          <span>@featured.TotalCompleted.ToString("N0")</span>
         </div>
       </div>
       <div class="feat-progress">
         <div class="feat-progress-label">
           <span>Community progress</span>
-          <span>38% avg completion</span>
+          <span>@featured.CompletionPercent.ToString("N0")% avg completion</span>
         </div>
-        <div class="feat-progress-bar"><div class="feat-progress-fill"></div></div>
+        <div class="feat-progress-bar"><div class="feat-progress-fill" style="width:@featured.CompletionPercent%"></div></div>
       </div>
     </div>
   </div>
+  }
+  else
+  {
+  <div class="empty-state" style="margin-bottom:3rem">No challenges found in database yet.</div>
+  }
 
   <div class="section-row upcoming-head">
-    <span class="section-label">Upcoming drops</span>
-    <span class="section-tag">Opens soon</span>
+    <span class="section-label">More challenges</span>
+    <span class="section-tag">From database</span>
   </div>
 
+  @if (Model.UpcomingChallenges.Any())
+  {
   <div class="grid3 upcoming-grid">
+    @for (var i = 0; i < Model.UpcomingChallenges.Count; i++)
+    {
+      var item = Model.UpcomingChallenges[i];
+      var isLive =
+        (item.StartDate <= DateTime.Now && item.EndDate >= DateTime.Now) ||
+        string.Equals(item.Status, "live", StringComparison.OrdinalIgnoreCase) ||
+        string.Equals(item.Status, "active", StringComparison.OrdinalIgnoreCase);
     <article class="card">
       <div class="card-accent"></div>
       <div class="card-meta-row">
-        <span class="card-badge">Coming Apr 1</span>
-        <span class="card-diff diff-easy">Easy</span>
+        <span class="card-badge">@(isLive ? "Live now" : $"Coming {item.StartDate:MMM d}")</span>
+        <span class="card-diff @item.DifficultyCssClass">@item.DifficultyLabel</span>
       </div>
-      <h3>5K Sunrise Sprint</h3>
-      <p>Run 5 days in a row before 8am. Streak finishers unlock limited colorways for the Speed Series top.</p>
+      <h3>@item.Title</h3>
+      <p>@item.Description</p>
       <div class="card-footer">
-        <span class="card-footer-stat">Duration <strong>7 days</strong></span>
-        <span class="card-num">01</span>
+        <span class="card-footer-stat">Duration <strong>@item.DurationDays days</strong></span>
+        <span class="card-num">@((i + 1).ToString("D2"))</span>
       </div>
     </article>
-    <article class="card">
-      <div class="card-accent"></div>
-      <div class="card-meta-row">
-        <span class="card-badge">Coming Apr 8</span>
-        <span class="card-diff diff-med">Medium</span>
-      </div>
-      <h3>Hill Repeat Grind</h3>
-      <p>Complete 10 hill repeats across 2 weeks. Finishers get priority access to the Trail Pack launch.</p>
-      <div class="card-footer">
-        <span class="card-footer-stat">Duration <strong>14 days</strong></span>
-        <span class="card-num">02</span>
-      </div>
-    </article>
-    <article class="card">
-      <div class="card-accent"></div>
-      <div class="card-meta-row">
-        <span class="card-badge">Coming Apr 15</span>
-        <span class="card-diff diff-hard">Hard</span>
-      </div>
-      <h3>Team Steps Clash</h3>
-      <p>Form a crew of 4 and race the leaderboard. Top 3 teams each win an exclusive challenge badge and kit bundle.</p>
-      <div class="card-footer">
-        <span class="card-footer-stat">Duration <strong>21 days</strong></span>
-        <span class="card-num">03</span>
-      </div>
-    </article>
+    }
   </div>
+  }
+  else
+  {
+  <div class="empty-state" style="margin-bottom:3rem">No additional challenges available.</div>
+  }
 
   <div class="section-row leaderboard-head">
-    <span class="section-label">Leaderboard</span>
-    <span class="section-tag">Urban Marathon</span>
+    <span class="section-label">Challenge Performance</span>
+    <span class="section-tag">From Database</span>
   </div>
 
+  @if (Model.TopChallenges.Any())
+  {
   <div class="leaderboard">
     <div class="lb-row lb-header">
       <span class="lb-rank">#</span>
-      <span class="lb-name">Runner</span>
-      <span class="lb-val">KM Logged</span>
-      <span class="lb-val">Pace</span>
-      <span class="lb-val">Runs</span>
+      <span class="lb-name">Challenge</span>
+      <span class="lb-val">Goal KM</span>
+      <span class="lb-val">Completed</span>
+      <span class="lb-val">Participants</span>
     </div>
+    @for (var i = 0; i < Model.TopChallenges.Count; i++)
+    {
+      var row = Model.TopChallenges[i];
     <div class="lb-row">
-      <span class="lb-rank top">1</span>
-      <div class="lb-name-wrap"><span class="lb-avatar">KL</span><div><div class="lb-name">Kai Landers</div><div class="lb-handle">@@kailanders</div></div></div>
-      <span class="lb-val bold">38.6 km</span>
-      <span class="lb-val">4:58 /km</span>
-      <span class="lb-val">14</span>
+      <span class="lb-rank @(i < 3 ? "top" : string.Empty)">@(i + 1)</span>
+      <div class="lb-name-wrap"><span class="lb-avatar">@row.ActivityType[..Math.Min(2, row.ActivityType.Length)].ToUpperInvariant()</span><div><div class="lb-name">@row.Title</div><div class="lb-handle">@row.Status</div></div></div>
+      <span class="lb-val bold">@row.GoalKm.ToString("N1") km</span>
+      <span class="lb-val">@row.TotalCompleted.ToString("N0")</span>
+      <span class="lb-val">@row.TotalParticipants.ToString("N0")</span>
     </div>
-    <div class="lb-row">
-      <span class="lb-rank top">2</span>
-      <div class="lb-name-wrap"><span class="lb-avatar" style="background:#444">MR</span><div><div class="lb-name">Maya Reyes</div><div class="lb-handle">@@m.reyes</div></div></div>
-      <span class="lb-val bold">35.1 km</span>
-      <span class="lb-val">5:12 /km</span>
-      <span class="lb-val">12</span>
-    </div>
-    <div class="lb-row">
-      <span class="lb-rank top">3</span>
-      <div class="lb-name-wrap"><span class="lb-avatar" style="background:#777">JT</span><div><div class="lb-name">James Toh</div><div class="lb-handle">@@jamestoh_runs</div></div></div>
-      <span class="lb-val bold">33.8 km</span>
-      <span class="lb-val">5:24 /km</span>
-      <span class="lb-val">11</span>
-    </div>
-    <div class="lb-row">
-      <span class="lb-rank">4</span>
-      <div class="lb-name-wrap"><span class="lb-avatar" style="background:#bbb">SA</span><div><div class="lb-name">Sofia Adler</div><div class="lb-handle">@@sofiaadler</div></div></div>
-      <span class="lb-val">29.4 km</span>
-      <span class="lb-val">5:38 /km</span>
-      <span class="lb-val">10</span>
-    </div>
-    <div class="lb-row">
-      <span class="lb-rank">5</span>
-      <div class="lb-name-wrap"><span class="lb-avatar" style="background:#ccc">DN</span><div><div class="lb-name">Diego Nunes</div><div class="lb-handle">@@diegonunes</div></div></div>
-      <span class="lb-val">27.0 km</span>
-      <span class="lb-val">5:51 /km</span>
-      <span class="lb-val">9</span>
-    </div>
+    }
   </div>
+  }
+  else
+  {
+  <div class="empty-state">No challenge performance data available.</div>
+  }
 
 </div>

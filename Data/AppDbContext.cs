@@ -13,6 +13,7 @@ namespace MyAspNetApp.Data
         public DbSet<DbSizeGuideImage> SizeGuideImages { get; set; }
         public DbSet<DbReview> Reviews { get; set; }
         public DbSet<DbReviewImage> ReviewImages { get; set; }
+        public DbSet<DbChallenge> Challenges { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

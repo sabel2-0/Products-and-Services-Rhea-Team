@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using MyAspNetApp.Data;
 using MyAspNetApp.Models;
 using System.Text.Json;
@@ -7,6 +8,13 @@ namespace MyAspNetApp.Controllers
 {
     public class HomeController : Controller
     {
+        private readonly AppDbContext _db;
+
+        public HomeController(AppDbContext db)
+        {
+            _db = db;
+        }
+
         // GET: /
         public IActionResult Index()
         {
@@ -29,9 +37,54 @@ namespace MyAspNetApp.Controllers
         }
 
         // GET: /Home/Challenges
-        public IActionResult Challenges()
+        public async Task<IActionResult> Challenges()
         {
-            return View();
+            var now = DateTime.Now;
+
+            var rawChallenges = await _db.Challenges
+                .AsNoTracking()
+                .OrderBy(c => c.StartDate)
+                .ToListAsync();
+
+            var allCards = rawChallenges.Select(ToChallengeCard).ToList();
+
+            var active = allCards
+                .Where(c =>
+                    string.Equals(c.Status, "active", StringComparison.OrdinalIgnoreCase) ||
+                    (c.StartDate <= now && c.EndDate >= now))
+                .OrderBy(c => c.EndDate)
+                .ToList();
+
+            var upcoming = allCards
+                .Where(c => c.StartDate > now || string.Equals(c.Status, "upcoming", StringComparison.OrdinalIgnoreCase))
+                .OrderBy(c => c.StartDate)
+                .ToList();
+
+            var featured = active.FirstOrDefault() ?? upcoming.FirstOrDefault();
+            var nextDropDate = upcoming.FirstOrDefault()?.StartDate;
+            var fallbackChallenges = allCards
+                .Where(c => featured == null || c.ChallengeId != featured.ChallengeId)
+                .OrderBy(c => c.StartDate)
+                .Take(3)
+                .ToList();
+
+            var vm = new ChallengesPageViewModel
+            {
+                SeasonLabel = $"{now.Year} Season",
+                ActiveCount = active.Count,
+                TotalParticipants = active.Sum(c => c.TotalParticipants),
+                TotalGoalKm = active.Sum(c => c.GoalKm),
+                DaysUntilNextDrop = nextDropDate.HasValue ? Math.Max(0, (nextDropDate.Value.Date - now.Date).Days) : 0,
+                FeaturedChallenge = featured,
+                UpcomingChallenges = upcoming.Any() ? upcoming.Take(3).ToList() : fallbackChallenges,
+                TopChallenges = allCards
+                    .OrderByDescending(c => c.CompletionPercent)
+                    .ThenByDescending(c => c.TotalParticipants)
+                    .Take(5)
+                    .ToList()
+            };
+
+            return View(vm);
         }
 
         // GET: /Home/About
@@ -227,6 +280,43 @@ namespace MyAspNetApp.Controllers
         {
             var feature = HttpContext.Features.Get<Microsoft.AspNetCore.Diagnostics.IExceptionHandlerFeature>();
             return View(feature?.Error);
+        }
+
+        private static ChallengeCardViewModel ToChallengeCard(DbChallenge challenge)
+        {
+            var totalParticipants = challenge.TotalParticipants ?? 0;
+            var totalCompleted = challenge.TotalCompleted ?? 0;
+            var completionPercent = totalParticipants > 0
+                ? Math.Round((double)totalCompleted / totalParticipants * 100, 0)
+                : 0;
+            var durationDays = Math.Max(1, (challenge.EndDate.Date - challenge.StartDate.Date).Days + 1);
+
+            var (difficultyLabel, difficultyCssClass) = challenge.GoalKm switch
+            {
+                <= 10m => ("Easy", "diff-easy"),
+                <= 30m => ("Medium", "diff-med"),
+                _ => ("Hard", "diff-hard")
+            };
+
+            return new ChallengeCardViewModel
+            {
+                ChallengeId = challenge.ChallengeId,
+                Title = challenge.Title,
+                Description = challenge.Description,
+                Rules = challenge.Rules,
+                Prizes = challenge.Prizes,
+                GoalKm = challenge.GoalKm,
+                ActivityType = challenge.ActivityType,
+                StartDate = challenge.StartDate,
+                EndDate = challenge.EndDate,
+                Status = challenge.Status ?? string.Empty,
+                TotalParticipants = totalParticipants,
+                TotalCompleted = totalCompleted,
+                CompletionPercent = completionPercent,
+                DurationDays = durationDays,
+                DifficultyLabel = difficultyLabel,
+                DifficultyCssClass = difficultyCssClass
+            };
         }
     }
 }
